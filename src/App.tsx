@@ -1,6 +1,6 @@
 import './App.scss';
 import Accordion from './components/Accordion/Accordion';
-import data from "./data";
+import data from "./data.json";
 
 function App() {
   return (
