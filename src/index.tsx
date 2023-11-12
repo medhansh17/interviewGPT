@@ -1,14 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
 import reportWebVitals from './reportWebVitals';
 import { RouterProvider } from '@tanstack/react-router';
 import { router } from './router/router';
+import { Button } from '@/components/ui/button';
+import './styles/globals.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 root.render(
 	<React.StrictMode>
-		<RouterProvider router={router} />
+		<Button className='bg-yellow-400'>hi</Button>
 	</React.StrictMode>
 );
 

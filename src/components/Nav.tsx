@@ -5,7 +5,7 @@ export function Nav() {
 	return (
 		<>
 			<h1>hi</h1>
-			<Button>hi</Button>
+			<Button>Hi</Button>
 		</>
 	);
 }
