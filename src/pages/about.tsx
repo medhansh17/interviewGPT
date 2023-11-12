@@ -1,3 +1,5 @@
+import React from "react";
+
 export function About() {
-	return <div>Hello from About!</div>
+  return <div>About page</div>;
 }

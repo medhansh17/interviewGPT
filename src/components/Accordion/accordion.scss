@@ -20,7 +20,7 @@
   outline: none;
   transition: background-color 0.6s ease;
   @media only screen and (max-width: 1070px) {
-   flex-direction: column;
+    flex-direction: column;
   }
 }
 
@@ -84,40 +84,37 @@
 
       &-green {
         // border-color: green;
-        &:hover{
+        &:hover {
           fill: rgb(10, 192, 10);
-         
         }
-        &-active{
-          fill:rgb(10, 192, 10);
+        &-active {
+          fill: rgb(10, 192, 10);
         }
       }
       &-orange {
         // border-color: rgb(224, 148, 8);
-        &:hover{
+        &:hover {
           fill: rgb(224, 148, 8);
           // color: #eee;
         }
-        &-active{
+        &-active {
           fill: rgb(224, 148, 8);
         }
       }
       &-red {
-        &:hover{
-         fill: red;
-         
+        &:hover {
+          fill: red;
         }
-        &-active{
-          fill: red
+        &-active {
+          fill: red;
         }
       }
       &-gray {
-        &:hover{
-         fill: rgb(239, 232, 18);
-         
+        &:hover {
+          fill: rgb(239, 232, 18);
         }
-        &-active{
-          fill: rgb(239, 232, 18)
+        &-active {
+          fill: rgb(239, 232, 18);
         }
       }
     }

@@ -1,11 +1,11 @@
 import { Outlet } from "@tanstack/react-router";
-import { Nav } from "./Nav";
+import React from "react";
+import { NavigationMenuComponent } from "./Nav";
 
 export function Root() {
-	return (
-		<>
-			<Nav />
-			<Outlet />
-		</>
-	);
+  return (
+    <>
+      <Outlet />
+    </>
+  );
 }

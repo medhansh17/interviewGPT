@@ -1,16 +1,15 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import reportWebVitals from './reportWebVitals';
-import { RouterProvider } from '@tanstack/react-router';
-import { router } from './router/router';
-import { Button } from '@/components/ui/button';
-import './styles/globals.css';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import reportWebVitals from "./reportWebVitals";
+import { RouterProvider } from "@tanstack/react-router";
+import { router } from "./router/router";
+import "./styles/globals.css";
 
-const root = ReactDOM.createRoot(document.getElementById('root')!);
+const root = ReactDOM.createRoot(document.getElementById("root")!);
 root.render(
-	<React.StrictMode>
-		<Button className='bg-yellow-400'>hi</Button>
-	</React.StrictMode>
+  <React.StrictMode>
+    <RouterProvider router={router} />
+  </React.StrictMode>,
 );
 
 // If you want to start measuring performance in your app, pass a function
