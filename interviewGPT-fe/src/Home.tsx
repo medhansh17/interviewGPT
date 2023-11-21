@@ -278,7 +278,7 @@ const Home = () => {
 
 
         {/* footer */}
-        <div className="relative mt-16 bg-deep-purple-accent-400 bg-[#0a59a2]">
+        <div className="relative bg-deep-purple-accent-400 bg-[#0a59a2]">
           <svg
             className="absolute top-0 w-full h-6 -mt-5 sm:-mt-10 sm:h-16 text-deep-purple-accent-400"
             preserveAspectRatio="none"
