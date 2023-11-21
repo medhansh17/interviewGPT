@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import { useRef } from 'react'
 import styles from './altTimeline.module.css';
 import './app.css';
 import { Link } from 'react-router-dom';
@@ -18,11 +18,11 @@ const Home = () => {
     }
   };
 
-  const [isOpen, setIsOpen] = useState(false);
+  // const [isOpen, setIsOpen] = useState(false);
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
-  };
+  // const toggleMenu = () => {
+  //   setIsOpen(!isOpen);
+  // };
 
   return (
     <div>
@@ -120,7 +120,7 @@ const Home = () => {
                   <img width="70" height="70" src="https://img.icons8.com/bubbles/50/heart-border.png" alt="heart-border" />
 
                   <div className="timeline__event__date">
-                    Candidate  Evaluation  Tool   
+                    Candidate  Evaluation  Tool
                   </div>
                 </div>
                 <div className="timeline__event__content">
@@ -278,7 +278,7 @@ const Home = () => {
 
 
         {/* footer */}
-        <div className="relative mt-16 bg-deep-purple-accent-400 bg-[#0a59a2]">
+        <div className="relative bg-deep-purple-accent-400 bg-[#0a59a2]">
           <svg
             className="absolute top-0 w-full h-6 -mt-5 sm:-mt-10 sm:h-16 text-deep-purple-accent-400"
             preserveAspectRatio="none"
@@ -307,7 +307,7 @@ const Home = () => {
                   </div> */}
                 </div>
                 <div className="grid grid-cols-2 gap-5 row-gap-8 lg:col-span-4 md:grid-cols-4">
-                  
+
                 </div>
               </div>
               <div className="flex flex-col justify-between pt-5 pb-10 border-t border-deep-purple-accent-200 sm:flex-row">
@@ -341,15 +341,15 @@ const Home = () => {
                     </svg>
                   </a>
 
-                <a href='https://www.linkedin.com/company/bluetick-consultants/'>
-                  <img width="25" height="50" src="https://img.icons8.com/ios-filled/50/linkedin.png" alt="linkedin" />
-                </a>
-                <a href='https://www.threads.net/@bluetickconsultants'>
-                  <img width="25" height="48" src="https://img.icons8.com/pulsar-line/48/threads.png" alt="threads" />
-                </a>
-                <a href='https://www.quora.com/profile/Bluetick-Consultants'>
-                  <img width="25" height="32" src="https://img.icons8.com/windows/32/quora.png" alt="quora" />
-                </a>
+                  <a href='https://www.linkedin.com/company/bluetick-consultants/'>
+                    <img width="25" height="50" src="https://img.icons8.com/ios-filled/50/linkedin.png" alt="linkedin" />
+                  </a>
+                  <a href='https://www.threads.net/@bluetickconsultants'>
+                    <img width="25" height="48" src="https://img.icons8.com/pulsar-line/48/threads.png" alt="threads" />
+                  </a>
+                  <a href='https://www.quora.com/profile/Bluetick-Consultants'>
+                    <img width="25" height="32" src="https://img.icons8.com/windows/32/quora.png" alt="quora" />
+                  </a>
 
 
 

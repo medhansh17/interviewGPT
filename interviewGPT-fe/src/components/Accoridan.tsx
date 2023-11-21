@@ -1,4 +1,4 @@
-import React, { useState, FC, ReactNode } from "react";
+import { useState, FC } from "react";
 
 interface AccordionProps {
     title: string;
@@ -7,7 +7,7 @@ interface AccordionProps {
     setsoftSkillPercentage: any;
 }
 
-const Accordion: FC<AccordionProps> = ({ title, softSkill, updatePercentage, setsoftSkillPercentage }) => {
+const Accordion: FC<AccordionProps> = ({ title, softSkill, updatePercentage }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
     console.log("selectedOption", selectedOption)
@@ -59,13 +59,13 @@ const Accordion: FC<AccordionProps> = ({ title, softSkill, updatePercentage, set
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => handleOptionClick("Correct")}
-                        className={` ${selectedOption === "Correct" ? 'bg-[green]' : 'hover:bg-green-500 text-green-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "Correct" ? 'border-green-500' : 'border-green-500 hover:border-transparent'} rounded font-medium`}
+                        className={` ${selectedOption === "Correct" ? 'bg-[green] text-white' : 'hover:bg-green-500 text-green-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "Correct" ? 'border-green-500' : 'border-green-500 hover:border-transparent'} rounded font-medium`}
                     >
                         Correct
                     </button>
                     <button
                         onClick={() => handleOptionClick("PartiallyCorrect")}
-                        className={`w-[10rem]  ${selectedOption === "PartiallyCorrect" ? 'bg-yellow-500 text-white' : 'hover:bg-yellow-500 text-yellow-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "PartiallyCorrect" ? 'border-yellow-500' : 'border-yellow-500 hover:border-transparent'} rounded font-medium`}
+                        className={`md:w-[10rem] h-[4rem] md:h-[2rem]  ${selectedOption === "PartiallyCorrect" ? 'bg-yellow-500 text-white' : 'hover:bg-yellow-500 text-yellow-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "PartiallyCorrect" ? 'border-yellow-500' : 'border-yellow-500 hover:border-transparent'} rounded font-medium`}
                     >
                         Partially Correct
                     </button>

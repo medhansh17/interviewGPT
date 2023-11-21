@@ -79,7 +79,7 @@ function Application() {
                 {
                     name: mainData?.role,
                     experience: mainSkill?.skills?.experience,
-                    technical_skills: mainSkill?.skills?.soft_skills.join(','),  // Ensure soft_skills is an array
+                    technical_skills: mainSkill?.skills?.soft_skills.join(','),
                 }
             );
 

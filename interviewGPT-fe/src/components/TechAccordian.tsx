@@ -1,15 +1,16 @@
-import React, { useState, FC, useEffect } from "react";
+import { useState, FC, useEffect } from "react";
 
-interface QuestionProps {
+interface QuestionAccordionProps {
     question: string;
     type: string;
     answer: string;
-    updatePercentage: (title: string, percentage: number) => void;
     keywords: any;
+    updatePercentage: (title: string, percentage: number) => void;
 }
 
-const QuestionAccordion: FC<QuestionProps> = ({ question, type, answer, keywords, updatePercentage }) => {
+const QuestionAccordion: FC<QuestionAccordionProps> = ({ question, type, answer, keywords, updatePercentage }) => {
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
+    const [showAnswer, setShowAnswer] = useState(false);
 
     const handleOptionClick = (option: string) => {
         setSelectedOption(option);
@@ -32,20 +33,24 @@ const QuestionAccordion: FC<QuestionProps> = ({ question, type, answer, keywords
         }
     };
 
+    const toggleAnswer = () => {
+        setShowAnswer((prevShowAnswer) => !prevShowAnswer);
+    };
+
     return (
         <div className="border rounded shadow-sm p-4 mt-4">
-            <div className="md:flex gap-4">
-                <p className="text-lg font-medium">{question}</p>
+            <div className="md:flex md:justify-between gap-4">
+                <p className="text-lg font-medium cursor-pointer" onClick={toggleAnswer} >{question}</p>
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => handleOptionClick("Correct")}
-                        className={` ${selectedOption === "Correct" ? 'bg-[green]' : 'hover:bg-green-500 text-green-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "Correct" ? 'border-green-500' : 'border-green-500 hover:border-transparent'} rounded font-medium`}
+                        className={` ${selectedOption === "Correct" ? 'bg-[green] text-white' : 'hover:bg-green-500 text-green-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "Correct" ? 'border-green-500' : 'border-green-500 hover:border-transparent'} rounded font-medium`}
                     >
                         Correct
                     </button>
                     <button
                         onClick={() => handleOptionClick("PartiallyCorrect")}
-                        className={`w-[10rem]  ${selectedOption === "PartiallyCorrect" ? 'bg-yellow-500 text-white' : 'hover:bg-yellow-500 text-yellow-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "PartiallyCorrect" ? 'border-yellow-500' : 'border-yellow-500 hover:border-transparent'} rounded font-medium`}
+                        className={`md:w-[10rem] h-[4rem] md:h-[2rem]  ${selectedOption === "PartiallyCorrect" ? 'bg-yellow-500 text-white' : 'hover:bg-yellow-500 text-yellow-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "PartiallyCorrect" ? 'border-yellow-500' : 'border-yellow-500 hover:border-transparent'} rounded font-medium`}
                     >
                         Partially Correct
                     </button>
@@ -64,17 +69,33 @@ const QuestionAccordion: FC<QuestionProps> = ({ question, type, answer, keywords
                 </div>
             </div>
 
-            <div className="inline-block px-3 py-px mb-4 text-xs font-semibold tracking-wider text-[#fff] uppercase rounded-full bg-[green]">
-                {type}
-            </div>
-            <p className="text-gray-700">Technical Skill: {answer}</p>
-            <p className="text-gray-700 mt-[0.5rem] font-bold">Keywords: {keywords}</p>
 
+            {/* <p className="text-gray-700">Technical Skill: {answer}</p> */}
+
+
+            {/* Answer Accordion */}
+            <div className="mt-4">
+                {/* <button
+                    onClick={toggleAnswer}
+                    className="text-blue-500 hover:underline focus:outline-none"
+                >
+                    {showAnswer ? "Hide Answer" : "Show Answer"}
+                </button> */}
+                {showAnswer && (
+                    <div className="mt-2 text-gray-700">
+                        <div className="inline-block px-3 py-px mb-4 text-xs font-semibold tracking-wider text-[#fff] uppercase rounded-full bg-[green]">
+                            {type}
+                        </div>
+                        <p className="text-gray-700">Technical Skill: {answer}</p>
+                        <p className="text-gray-700 mt-[0.5rem] font-bold">Keywords: {keywords}</p>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
 
-interface AccordionProps {
+interface TechAccordionProps {
     title: string;
     techSkill: any;
     updateTechSkillPercentage: (title: string, percentage: string) => void;
@@ -82,18 +103,16 @@ interface AccordionProps {
 
 const calc = (part: number, whole: number) => isNaN(part) || isNaN(whole) || whole === 0 ? 0 : (part / whole) * 100;
 
-
-const TechAccordion: FC<AccordionProps> = ({ title, techSkill, updateTechSkillPercentage }) => {
+const TechAccordion: FC<TechAccordionProps> = ({ title, techSkill, updateTechSkillPercentage }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [percentages, setPercentages] = useState<any>({});
-    console.log("perc", percentages)
 
     const toggleAccordion = () => {
         setIsOpen((prevIsOpen) => !prevIsOpen);
     };
 
     const updatePercentage = (question: string, percentage: number) => {
-        setPercentages((prevPercentages: String) => ({
+        setPercentages((prevPercentages: any) => ({
             ...prevPercentages,
             [question]: percentage,
         }));
@@ -103,10 +122,9 @@ const TechAccordion: FC<AccordionProps> = ({ title, techSkill, updateTechSkillPe
     const calculateTotalPercentage = () => {
         let keys = Object.keys(percentages);
         let totalRightWrongSum = 0;
-        keys?.map(itm => {
-            console.log('addnibg -> ', percentages[itm])
-            totalRightWrongSum += percentages[itm]
-        })
+        keys?.map((itm) => {
+            totalRightWrongSum += percentages[itm];
+        });
         let percentage = calc(totalRightWrongSum, keys?.length);
         return percentage.toFixed(2) + "%";
     };
@@ -119,25 +137,24 @@ const TechAccordion: FC<AccordionProps> = ({ title, techSkill, updateTechSkillPe
                 title="Open item"
                 className="flex items-center justify-between w-full p-4 focus:outline-none"
             >
-                <p onClick={toggleAccordion} className={`font-semibold	`}>
+                <p onClick={toggleAccordion} className={`font-semibold`}>
                     {title}
                 </p>
             </button>
             {isOpen && (
                 <div className="p-4 pt-0">
-                    {techSkill?.technical_skills?.technical_skills?.find(
-                        (item: { name: string }) => item.name === title
-                    )?.questions?.map((question: any, index: number) => (
-                        <QuestionAccordion
-                            key={index}
-                            question={question.question}
-                            type={question.type}
-                            answer={question.answer}
-                            updatePercentage={updatePercentage}
-                            keywords={question.keywords}
-                        />
-                    ))}
-                    {/* <p>Total Percentage: {calculateTotalPercentage()}%</p> */}
+                    {techSkill?.technical_skills?.technical_skills
+                        ?.find((item: { name: string }) => item.name === title)
+                        ?.questions?.map((question: any, index: number) => (
+                            <QuestionAccordion
+                                key={index}
+                                question={question.question}
+                                type={question.type}
+                                answer={question.answer}
+                                updatePercentage={updatePercentage}
+                                keywords={question.keywords}
+                            />
+                        ))}
                 </div>
             )}
         </div>
@@ -151,8 +168,8 @@ interface FaqProps {
 
 const Faq: FC<FaqProps> = ({ techSkill, setTechSkillOne }) => {
     const [techSkillPercentages, setTechSkillPercentages] = useState<{ [key: string]: number }>({});
-    setTechSkillOne(techSkillPercentages)
-    console.log("texhskill", techSkillPercentages)
+    setTechSkillOne(techSkillPercentages);
+
     useEffect(() => {
         // Load data from local storage when component mounts
         const storedData = localStorage.getItem("techSkillPercentages");
@@ -180,16 +197,14 @@ const Faq: FC<FaqProps> = ({ techSkill, setTechSkillOne }) => {
                     {techSkill && <h1 className="text-[2.5rem] ">Technical Skills</h1>}
                 </div>
                 <div className="space-y-4">
-                    {techSkill?.technical_skills?.technical_skills?.map(
-                        (item: { name: string }, index: number) => (
-                            <TechAccordion
-                                key={index}
-                                title={item?.name}
-                                techSkill={techSkill}
-                                updateTechSkillPercentage={updateTechSkillPercentage}
-                            />
-                        )
-                    )}
+                    {techSkill?.technical_skills?.technical_skills?.map((item: { name: string }, index: number) => (
+                        <TechAccordion
+                            key={index}
+                            title={item?.name}
+                            techSkill={techSkill}
+                            updateTechSkillPercentage={updateTechSkillPercentage}
+                        />
+                    ))}
                 </div>
             </div>
         </div>

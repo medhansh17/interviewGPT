@@ -1,4 +1,4 @@
-import React from 'react'
+
 
 const ReportTable = ({ softSkillPercentage, numericValues, data }: any) => {
     console.log("nummervalues", numericValues)
