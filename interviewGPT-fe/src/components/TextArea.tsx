@@ -13,7 +13,7 @@ const TextArea: React.FC<TextAreaProps> = ({ mainData }) => {
 
     return (
         <div>
-            <div className="md:w-[30rem] lg:w-[35rem]  mt-6 2xl:w-[50rem] md:h-[16.5rem] mb-[4rem] ">
+            <div className="md:w-[20rem] lg:w-[25rem] xl:w-[30rem]  mt-6 2xl:w-[50rem] md:h-[16.5rem] mb-[4rem] ">
                 <textarea
                     id="message"
                     rows={15}
