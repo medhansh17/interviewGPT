@@ -28,7 +28,7 @@ const Home = () => {
     <div>
       <main className="flex flex-col">
         {/* nav */}
-        <div className="flex justify-between items-center mx-[3rem]">
+        <div className="flex justify-between items-center md:mx-[8rem]">
           <div className="flex justify-center items-center">
             <img src="https://media.licdn.com/dms/image/C510BAQEzP4y4oeD4IA/company-logo_200_200/0/1631369563060?e=1707955200&v=beta&t=eRPP7vUWz6dSrImFSLR7JH7LetvvyacUgnP9OlHOeHU" className="md:w-[10rem] w-[6rem]" />
             {/* <h1>Blue Consultants</h1> */}
@@ -48,7 +48,7 @@ const Home = () => {
         </div>
 
         {/* middle section */}
-        <div className='overflow-x-hidden'>
+        <div className='overflow-x-hidden  md:mx-[5.2rem]'>
           <div className="flex md:flex-row flex-col md:gap-[8rem] gap-[4rem] items-center justify-between mx-[3rem] md:mt-[1rem]">
             <div className="flex flex-col gap-[2rem] md:w-[28rem]">
               <div>
@@ -84,7 +84,7 @@ const Home = () => {
               <h1 className="text-[3.5rem] text-[#3388CC] font-semibold  font-roboto flex justify-center mb-4">Features</h1>
               <div className="timeline__event animated fadeInUp delay-3s timeline__event--type1">
                 <div className="timeline__event__icon ">
-                  <img width="70" height="70" src="https://img.icons8.com/bubbles/50/heart-border.png" alt="heart-border" />
+                  <img width="70" height="70" src="https://img.icons8.com/hands/100/experimental-question-mark-hands.png" alt="experimental-question-mark-hands" />
                   <div className="timeline__event__date">
                     Custom Question Generation
                   </div>
@@ -100,7 +100,7 @@ const Home = () => {
               </div>
               <div className="timeline__event animated fadeInUp delay-2s timeline__event--type2">
                 <div className="timeline__event__icon">
-                  <img width="70" height="70" src="https://img.icons8.com/bubbles/50/heart-border.png" alt="heart-border" />
+                  <img width="60" height="60" src="https://img.icons8.com/dusk/64/faq.png" alt="faq" />
 
                   <div className="timeline__event__date">
                     Comprehensive Answer Guide
@@ -117,7 +117,7 @@ const Home = () => {
               </div>
               <div className="timeline__event animated fadeInUp delay-1s timeline__event--type3">
                 <div className="timeline__event__icon">
-                  <img width="70" height="70" src="https://img.icons8.com/bubbles/50/heart-border.png" alt="heart-border" />
+                  <img width="70" height="70" src="https://img.icons8.com/clouds/100/level-tool.png" alt="level-tool" />
 
                   <div className="timeline__event__date">
                     Candidate  Evaluation  Tool
@@ -135,7 +135,7 @@ const Home = () => {
               </div>
               <div className="timeline__event animated fadeInUp timeline__event--type1">
                 <div className="timeline__event__icon">
-                  <img width="70" height="70" src="https://img.icons8.com/bubbles/50/heart-border.png" alt="heart-border" />
+                  <img width="60" height="60" src="https://img.icons8.com/dusk/64/communication-skill.png" alt="communication-skill" />
                   <div className="timeline__event__date">
                     Skill-Based Scoring System
                   </div>
@@ -153,7 +153,7 @@ const Home = () => {
 
               <div className="timeline__event animated fadeInUp delay-2s timeline__event--type2">
                 <div className="timeline__event__icon">
-                  <img width="70" height="70" src="https://img.icons8.com/bubbles/50/heart-border.png" alt="heart-border" />
+                  <img width="60" height="60" src="https://img.icons8.com/fluency/48/business-report.png" alt="business-report" />
 
                   <div className="timeline__event__date">
                     Downloadable Reports
