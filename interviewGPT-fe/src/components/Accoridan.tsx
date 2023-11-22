@@ -50,8 +50,9 @@ const Accordion: FC<AccordionProps> = ({ title, softSkill, updatePercentage }) =
                     aria-label="Open item"
                     title="Open item"
                     className="flex items-center justify-between w-full p-4 focus:outline-none"
+                    onClick={toggleAccordion}
                 >
-                    <p onClick={toggleAccordion} className="text-lg font-medium">
+                    <p  className="text-lg font-medium">
                         {title}
                     </p>
 

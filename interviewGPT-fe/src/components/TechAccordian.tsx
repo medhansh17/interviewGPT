@@ -39,8 +39,8 @@ const QuestionAccordion: FC<QuestionAccordionProps> = ({ question, type, answer,
 
     return (
         <div className="border rounded shadow-sm p-4 mt-4">
-            <div className="md:flex md:justify-between gap-4">
-                <p className="text-lg font-medium cursor-pointer" onClick={toggleAnswer} >{question}</p>
+            <div className="md:flex md:justify-between gap-4 cursor-pointer"onClick={toggleAnswer}>
+                <p className="text-lg font-medium cursor-pointer"  >{question}</p>
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => handleOptionClick("Correct")}
@@ -136,8 +136,9 @@ const TechAccordion: FC<TechAccordionProps> = ({ title, techSkill, updateTechSki
                 aria-label="Open item"
                 title="Open item"
                 className="flex items-center justify-between w-full p-4 focus:outline-none"
+                onClick={toggleAccordion}
             >
-                <p onClick={toggleAccordion} className={`font-semibold`}>
+                <p className={`font-semibold`}>
                     {title}
                 </p>
             </button>
