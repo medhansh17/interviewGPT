@@ -4,10 +4,12 @@ interface TextAreaProps {
     mainData: {
         jd: string;
     } | null;
+    setMainTextArea:any
 }
 
-const TextArea: React.FC<TextAreaProps> = ({ mainData }) => {
+const TextArea: React.FC<TextAreaProps> = ({ mainData,setMainTextArea }) => {
     const [text, useText] = useState("")
+    setMainTextArea(text)
     const initialJdValue = mainData?.jd || '';
     console.log("datamain", initialJdValue)
 

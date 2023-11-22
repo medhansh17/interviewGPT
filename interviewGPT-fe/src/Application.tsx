@@ -14,6 +14,9 @@ import Loader from "../src/components/Loader";
 
 function Application() {
   const [mainData, setMainData] = useState<any | null>(null)
+  const [mainTextArea, setMainTextArea] = useState<any | null>("sdawdawd")
+
+
   const [mainSkill, setMainSkill] = useState<any | null>(null)
   const [softSkill, setSoftSkill] = useState<any | null>(null)
   const [techSkill, setTechSkill] = useState<any | null>(null)
@@ -24,7 +27,7 @@ function Application() {
   const [isLoading, setIsLoading] = useState(false);
   console.log(softSkillPercentage, "softSkillPercentagesoftSkillPercentage")
 
-  console.log("softSkillPercentage", techSkillOne)
+  console.log("softSkillPercentagesss", mainTextArea)
 
 
   // console.log("mainDatamain", mainSkill?.skills?.soft_skills.join(','))
@@ -35,15 +38,15 @@ function Application() {
       const response = await axios.post(
         "https://coops-backend.bluetickconsultants.com:8000/fetch_skills",
         {
-          name: mainData?.role,
-          job_description: mainData?.jd
+          name: mainData?.role || "",
+          job_description: mainData?.jd || mainTextArea
           ,
         }
       );
 
       setMainSkill(response.data);
-      await fetchSoftSkillQuestions();
-      await fetchSoftTechQuestions();
+      await fetchSoftSkillQuestions(response.data);
+      await fetchSoftTechQuestions(response.data);
 
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -51,14 +54,14 @@ function Application() {
     setIsLoading(false);
   };
 
-  const fetchSoftSkillQuestions = async () => {
+  const fetchSoftSkillQuestions = async (data: any) => {
     try {
       const softSkillResponse = await axios.post(
         "https://coops-backend.bluetickconsultants.com:8000/generate_soft_skill_questions",
         {
           name: mainData?.role,
-          soft_skills: mainSkill?.skills?.soft_skills.join(','),  // Ensure soft_skills is an array
-          experience: mainSkill?.skills?.experience,
+          soft_skills: data?.skills?.soft_skills.join(','),// Ensure soft_skills is an array
+          experience: data?.skills?.experience,
 
         }
 
@@ -73,14 +76,17 @@ function Application() {
   };
 
 
-  const fetchSoftTechQuestions = async () => {
+
+
+  const fetchSoftTechQuestions = async (data: any) => {
+    console.log("techinalskil", data)
     try {
       const techSkillResponse = await axios.post(
         "https://coops-backend.bluetickconsultants.com:8000/generate_technical_questions",
         {
           name: mainData?.role,
-          experience: mainSkill?.skills?.experience,
-          technical_skills: mainSkill?.skills?.soft_skills.join(','),
+          experience: data?.skills?.experience,
+          technical_skills: data?.skills?.technical_skills.join(','),
         }
       );
 
@@ -168,21 +174,22 @@ function Application() {
       <Header />
       <div className="md:flex md:justify-center  gap-4">
         <div className="mx-[4rem] md:mx-[0rem]">
-          <TextArea mainData={mainData} />
-
-
+          <TextArea setMainTextArea={setMainTextArea} mainData={mainData} />
           <div>
-
             <button
-              className="mt-[1rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-600 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80"
+              className={`mt-[1rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${mainData || mainTextArea ? 'bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80' : 'bg-gray-400 cursor-not-allowed'
+                } rounded-lg focus:outline-none`}
               onClick={fetchDataFetchSkill}
+              disabled={!mainData || mainTextArea}
             >
               Submit
             </button>
 
             <button
-              className="ml-[1rem] mt-[1rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-600 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80"
+              className={`ml-[1rem] mt-[1rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${mainData || mainTextArea ? 'bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80' : 'bg-gray-400 cursor-not-allowed'
+                } rounded-lg focus:outline-none`}
               onClick={handleReset}
+              disabled={!mainData || mainTextArea}
             >
               Reset
             </button>
