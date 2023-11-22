@@ -37,11 +37,57 @@ const QuestionAccordion: FC<QuestionAccordionProps> = ({ question, type, answer,
         setShowAnswer((prevShowAnswer) => !prevShowAnswer);
     };
 
+
+    // const getDifficultyColor = () => {
+    //     const difficulty = softSkill?.soft_skills?.soft_skills[0]?.questions?.find(
+    //         (item: { question: string }) => item.question === title
+    //     )?.type;
+
+    //     console.log("difficulty", difficulty)
+
+    //     switch (difficulty) {
+    //         case "Basic":
+    //             return "bg-green-500 text-white";
+    //         case "Intermediate":
+    //             return "bg-orange-500 text-white";
+    //         case "Hard":
+    //             return "bg-red-500 text-white";
+    //         default:
+    //             return "bg-gray-500 text-white"; // Default color for unknown difficulty
+    //     }
+    // };
+
+    const getDifficultyColor = () => {
+
+
+
+
+        switch (type) {
+            case "Basic":
+                return "bg-green-500 text-white";
+            case "Intermediate":
+                return "bg-orange-500 text-white";
+            case "Advanced":
+                return "bg-red-500 text-white";
+            default:
+                return "bg-gray-500 text-white"; // Default color for unknown difficulty
+        }
+    };
+
     return (
         <div className="border rounded shadow-sm p-4 mt-4">
-            <div className="md:flex md:justify-between gap-4 cursor-pointer"onClick={toggleAnswer}>
-                <p className="text-lg font-medium cursor-pointer"  >{question}</p>
-                <div className="flex items-center gap-3">
+            <div className="md:flex md:justify-between gap-4 cursor-pointer" onClick={toggleAnswer}>
+
+                <div className="flex items-center gap-4 flex-wrap">
+                    <div className={`inline-block px-3 py-px text-xs font-semibold tracking-wider text-[#fff] uppercase rounded-full ${getDifficultyColor()}`}>
+                        {type}
+                    </div>
+                    <p className="text-lg font-medium cursor-pointer"  >{question}</p>
+
+                </div>
+
+
+                <div className="flex items-center gap-3 flex-wrap">
                     <button
                         onClick={() => handleOptionClick("Correct")}
                         className={` ${selectedOption === "Correct" ? 'bg-[green] text-white' : 'hover:bg-green-500 text-green-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "Correct" ? 'border-green-500' : 'border-green-500 hover:border-transparent'} rounded font-medium`}
@@ -50,7 +96,7 @@ const QuestionAccordion: FC<QuestionAccordionProps> = ({ question, type, answer,
                     </button>
                     <button
                         onClick={() => handleOptionClick("PartiallyCorrect")}
-                        className={`md:w-[10rem] h-[4rem] md:h-[2rem]  ${selectedOption === "PartiallyCorrect" ? 'bg-yellow-500 text-white' : 'hover:bg-yellow-500 text-yellow-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "PartiallyCorrect" ? 'border-yellow-500' : 'border-yellow-500 hover:border-transparent'} rounded font-medium`}
+                        className={`${selectedOption === "PartiallyCorrect" ? 'bg-yellow-500 text-white' : 'hover:bg-yellow-500 text-yellow-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "PartiallyCorrect" ? 'border-yellow-500' : 'border-yellow-500 hover:border-transparent'} rounded font-medium`}
                     >
                         Partially Correct
                     </button>
@@ -83,9 +129,7 @@ const QuestionAccordion: FC<QuestionAccordionProps> = ({ question, type, answer,
                 </button> */}
                 {showAnswer && (
                     <div className="mt-2 text-gray-700">
-                        <div className="inline-block px-3 py-px mb-4 text-xs font-semibold tracking-wider text-[#fff] uppercase rounded-full bg-[green]">
-                            {type}
-                        </div>
+
                         <p className="text-gray-700">Technical Skill: {answer}</p>
                         <p className="text-gray-700 mt-[0.5rem] font-bold">Keywords: {keywords}</p>
                     </div>

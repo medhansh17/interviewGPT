@@ -1,3 +1,4 @@
+
 import TextArea from "./components/TextArea";
 import Table from "./components/Table";
 import { useState } from "react";
@@ -25,10 +26,6 @@ function Application() {
 
   console.log("softSkillPercentage", techSkillOne)
 
-  const isSubmitDisabled = !mainData;
-  console.log("isSubmitDisabled", isSubmitDisabled)
-  const isResetDisabled = !mainData || isLoading;
-
 
   // console.log("mainDatamain", mainSkill?.skills?.soft_skills.join(','))
 
@@ -36,7 +33,7 @@ function Application() {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "http://coops-backend.bluetickconsultants.com:8000/fetch_skills",
+        "https://coops-backend.bluetickconsultants.com:8000/fetch_skills",
         {
           name: mainData?.role,
           job_description: mainData?.jd
@@ -57,7 +54,7 @@ function Application() {
   const fetchSoftSkillQuestions = async () => {
     try {
       const softSkillResponse = await axios.post(
-        "http://coops-backend.bluetickconsultants.com:8000/generate_soft_skill_questions",
+        "https://coops-backend.bluetickconsultants.com:8000/generate_soft_skill_questions",
         {
           name: mainData?.role,
           soft_skills: mainSkill?.skills?.soft_skills.join(','),  // Ensure soft_skills is an array
@@ -79,7 +76,7 @@ function Application() {
   const fetchSoftTechQuestions = async () => {
     try {
       const techSkillResponse = await axios.post(
-        "http://coops-backend.bluetickconsultants.com:8000/generate_technical_questions",
+        "https://coops-backend.bluetickconsultants.com:8000/generate_technical_questions",
         {
           name: mainData?.role,
           experience: mainSkill?.skills?.experience,
@@ -170,22 +167,22 @@ function Application() {
     <main id="main-content">
       <Header />
       <div className="md:flex md:justify-center  gap-4">
-        <div className="mx-[1rem] md:mx-[0rem]">
+        <div className="mx-[4rem] md:mx-[0rem]">
           <TextArea mainData={mainData} />
 
+
           <div>
+
             <button
-              className={`mt-[1rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-${isSubmitDisabled ? 'gray-400' : 'blue-600'} rounded-lg ${isSubmitDisabled ? 'cursor-not-allowed' : 'hover:bg-blue-500'} focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80`}
+              className="mt-[1rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-600 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80"
               onClick={fetchDataFetchSkill}
-              disabled={isSubmitDisabled}
             >
               Submit
             </button>
 
             <button
-              className={`ml-[1rem] mt-[1rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-${isResetDisabled ? 'gray-400' : 'blue-600'} rounded-lg ${isResetDisabled ? 'cursor-not-allowed' : 'hover:bg-blue-500'} focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80`}
+              className="ml-[1rem] mt-[1rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-600 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80"
               onClick={handleReset}
-              disabled={isResetDisabled}
             >
               Reset
             </button>

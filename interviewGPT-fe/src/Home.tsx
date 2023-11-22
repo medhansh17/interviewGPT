@@ -28,7 +28,7 @@ const Home = () => {
     <div>
       <main className="flex flex-col">
         {/* nav */}
-        <div className="flex justify-between items-center md:mx-[8rem]">
+        <div className="flex justify-between items-center md:mx-[8rem] mx-[1rem]">
           <div className="flex justify-center items-center">
             <img src="https://media.licdn.com/dms/image/C510BAQEzP4y4oeD4IA/company-logo_200_200/0/1631369563060?e=1707955200&v=beta&t=eRPP7vUWz6dSrImFSLR7JH7LetvvyacUgnP9OlHOeHU" className="md:w-[10rem] w-[6rem]" />
             {/* <h1>Blue Consultants</h1> */}
@@ -52,10 +52,10 @@ const Home = () => {
           <div className="flex md:flex-row flex-col md:gap-[8rem] gap-[4rem] items-center justify-between mx-[3rem] md:mt-[1rem]">
             <div className="flex flex-col gap-[2rem] md:w-[28rem]">
               <div>
-                <h1 className="text-[4rem] font-bold text-[#3388CC]">InterviewGPT</h1>
-                <h1 className="text-[2rem] font-bold text-[#000]">Empowering Recruiters with AI-Driven Interviews </h1>
+                <h1 className="md:text-[4rem] text-[2rem] font-bold text-[#3388CC]">InterviewGPT</h1>
+                <h1 className="md:text-[2rem] text-[1rem] font-bold text-[#000]">Empowering Recruiters with AI-Driven Interviews </h1>
               </div>
-              <h1 className="text-[1.5rem] text-[#000] text-[#656363]">Revolutionize Your Hiring Process with InterviewGPT. AI-Powered Question Generation for Accurate Candidate Assessment</h1>
+              <h1 className="md:text-[1.5rem] text-[1rem] text-[#000] text-[#656363]">Revolutionize Your Hiring Process with InterviewGPT. AI-Powered Question Generation for Accurate Candidate Assessment</h1>
               <Link to="/app" className="link-styles">
                 <button className="px-6 py-2 w-[8rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-[#336c96]  hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80">
                   Try Now
