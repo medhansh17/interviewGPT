@@ -78,7 +78,7 @@ const QuestionAccordion: FC<QuestionAccordionProps> = ({ question, type, answer,
         <div className="border rounded shadow-sm p-4 mt-4">
             <div className="md:flex md:justify-between gap-4 cursor-pointer" onClick={toggleAnswer}>
 
-                <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex flex-col items-baseline gap-4 flex-wrap">
                     <div className={`inline-block px-3 py-px text-xs font-semibold tracking-wider text-[#fff] uppercase rounded-full ${getDifficultyColor()}`}>
                         {type}
                     </div>
@@ -87,7 +87,7 @@ const QuestionAccordion: FC<QuestionAccordionProps> = ({ question, type, answer,
                 </div>
 
 
-                <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex md:flex-wrap lg:flex-nowrap items-center gap-3">
                     <button
                         onClick={() => handleOptionClick("Correct")}
                         className={` ${selectedOption === "Correct" ? 'bg-[green] text-white' : 'hover:bg-green-500 text-green-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "Correct" ? 'border-green-500' : 'border-green-500 hover:border-transparent'} rounded font-medium`}
@@ -129,6 +129,7 @@ const QuestionAccordion: FC<QuestionAccordionProps> = ({ question, type, answer,
                 </button> */}
                 {showAnswer && (
                     <div className="mt-2 text-gray-700">
+                        <hr className="my-2 border-gray-300 w-[100%]" />
 
                         <p className="text-gray-700">Technical Skill: {answer}</p>
                         <p className="text-gray-700 mt-[0.5rem] font-bold">Keywords: {keywords}</p>

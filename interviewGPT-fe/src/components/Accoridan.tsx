@@ -38,12 +38,12 @@ const Accordion: FC<AccordionProps> = ({ title, softSkill, updatePercentage }) =
     };
 
 
-       const getDifficultyColor = () => {
+    const getDifficultyColor = () => {
         const difficulty = softSkill?.soft_skills?.soft_skills[0]?.questions?.find(
             (item: { question: string }) => item.question === title
         )?.type;
 
-        console.log("difficulty",difficulty)
+        console.log("difficulty", difficulty)
 
         switch (difficulty) {
             case "Basic":
@@ -67,7 +67,7 @@ const Accordion: FC<AccordionProps> = ({ title, softSkill, updatePercentage }) =
                     className="flex items-center  p-4 focus:outline-none"
                     onClick={toggleAccordion}
                 >
-                    <div className="flex items-center gap-4 flex-wrap">
+                    <div className="flex flex-col items-baseline gap-4 flex-wrap">
                         <p className={`inline-block px-3 py-px text-xs font-semibold tracking-wider text-[#fff] uppercase rounded-full ${getDifficultyColor()}`}>
                             {softSkill?.soft_skills?.soft_skills[0]?.questions?.find(
                                 (item: { question: string }) => item.question === title
@@ -75,12 +75,17 @@ const Accordion: FC<AccordionProps> = ({ title, softSkill, updatePercentage }) =
                         </p>
                         <p className="text-lg font-medium">
                             {title}
+
                         </p>
+
+
+
 
                     </div>
 
                 </button>
-                <div className="flex items-center gap-3 flex-wrap">
+
+                <div className="flex md:flex-wrap lg:flex-nowrap items-center gap-3">
                     <button
                         onClick={() => handleOptionClick("Correct")}
                         className={` ${selectedOption === "Correct" ? 'bg-[green] text-white' : 'hover:bg-green-500 text-green-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "Correct" ? 'border-green-500' : 'border-green-500 hover:border-transparent'} rounded font-medium`}
@@ -91,7 +96,7 @@ const Accordion: FC<AccordionProps> = ({ title, softSkill, updatePercentage }) =
                         onClick={() => handleOptionClick("PartiallyCorrect")}
                         className={`${selectedOption === "PartiallyCorrect" ? 'bg-yellow-500 text-white' : 'hover:bg-yellow-500 text-yellow-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "PartiallyCorrect" ? 'border-yellow-500' : 'border-yellow-500 hover:border-transparent'} rounded font-medium`}
                     >
-                        Partially Correct
+                        PartiallyCorrect
                     </button>
                     <button
                         onClick={() => handleOptionClick("Incorrect")}
@@ -110,7 +115,7 @@ const Accordion: FC<AccordionProps> = ({ title, softSkill, updatePercentage }) =
             {isOpen && (
                 <div className="p-4 pt-0">
                     <div>
-
+                        <hr className="my-2 border-gray-300 w-[100%]" />
                         <p className="text-gray-700">
                             Soft Skill:{" "}
                             {softSkill?.soft_skills?.soft_skills[0]?.questions?.find(
