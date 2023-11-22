@@ -59,7 +59,7 @@ const Accordion: FC<AccordionProps> = ({ title, softSkill, updatePercentage }) =
 
     return (
         <div className="border rounded shadow-sm">
-            <div className="md:flex  gap-4 mx-[1rem]">
+            <div className="md:flex justify-between  gap-4 mx-[1rem]">
                 <button
                     type="button"
                     aria-label="Open item"
