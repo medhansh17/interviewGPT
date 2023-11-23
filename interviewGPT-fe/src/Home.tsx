@@ -2,6 +2,8 @@ import { useRef } from 'react'
 import styles from './altTimeline.module.css';
 import './app.css';
 import { Link } from 'react-router-dom';
+import { Features } from './components/Home/Features';
+import { Benefits } from './components/Home/Benefits';
 const Home = () => {
   const featureRef = useRef<HTMLDivElement>(null);
   const benefitsRef = useRef<HTMLDivElement>(null);
@@ -38,7 +40,7 @@ const Home = () => {
             <h1 onClick={handleBenefitsClick} className='cursor-pointer hidden md:block text-[1.5rem] font-semibold'>Benefits</h1>
 
             <Link to="/app" className="link-styles">
-              <button className="md:px-6 md:py-2 px-4 py-1 md:w-[8rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-[#336c96]  hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80">
+              <button className="md:px-6 md:py-2 px-4 py-1 md:w-[8rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-[#066ecf]  hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80">
                 Go to App
               </button>
             </Link>
@@ -52,12 +54,12 @@ const Home = () => {
           <div className="flex md:flex-row flex-col md:gap-[8rem] gap-[4rem] items-center justify-between mx-[3rem] md:mt-[1rem]">
             <div className="flex flex-col gap-[2rem] md:w-[28rem]">
               <div>
-                <h1 className="md:text-[4rem] text-[2rem] font-bold text-[#3388CC]">InterviewGPT</h1>
+                <h1 className="md:text-[4rem] text-[2rem] font-bold text-[#000]">InterviewGPT</h1>
                 <h1 className="md:text-[2rem] text-[1rem] font-bold text-[#000]">Empowering Recruiters with AI-Driven Interviews </h1>
               </div>
-              <h1 className="md:text-[1.5rem] text-[1rem] text-[#000] text-[#656363]">Revolutionize Your Hiring Process with InterviewGPT. AI-Powered Question Generation for Accurate Candidate Assessment</h1>
+              <h1 className="md:text-[1.5rem] text-[1rem] text-[#000] ">Revolutionize Your Hiring Process with InterviewGPT. AI-Powered Question Generation for Accurate Candidate Assessment</h1>
               <Link to="/app" className="link-styles">
-                <button className="px-6 py-2 w-[8rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-[#336c96]  hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80">
+                <button className="px-6 py-2 w-[8rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-[#066ecf]  hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80">
                   Try Now
                 </button>
               </Link>
@@ -79,7 +81,7 @@ const Home = () => {
         <div className="flex flex-col justify-center items-center mt-[5rem]">
 
           {/* future section */}
-          <div className="timeline-container">
+          {/* <div className="timeline-container">
             <div ref={featureRef} className="timeline">
               <h1 className="text-[3.5rem] text-[#3388CC] font-semibold  font-roboto flex justify-center mb-4">Features</h1>
               <div className="timeline__event animated fadeInUp delay-3s timeline__event--type1">
@@ -170,115 +172,21 @@ const Home = () => {
               </div>
 
             </div>
-          </div>
+          </div> */}
+          <h1 className="text-[3.5rem] text-[#3388CC] font-semibold  font-roboto flex justify-center mb-4 mt-[5rem]" ref={featureRef}>Features</h1>
+          <Features />
+          <hr className="my-2 border-gray-300 w-[100%]" />
+
 
           {/* benfits section */}
-          <div ref={benefitsRef} className={styles.altTimelineContainer}>
-            <h1 className="text-[3.5rem] text-[#3388CC] font-semibold flex justify-center mb-4">Benefits</h1>
-
-            {/* first */}
-            <div className={`animated fadeInUp delay-3s ${styles.altTimelineEvent} ${styles.altTimelineEventType1}`}>
-              <div className={styles.altTimelineEventIcon}>
-
-              </div>
-              <div className={styles.altTimelineEventDate}>
-                Time Efficiency
-              </div>
-              <div className={styles.altTimelineEventContent}>
-                <div className={styles.altTimelineEventTitle}>
-
-                </div>
-                <div className={styles.altTimelineEventDescription}>
-                  <p>Save Significant Time in Preparing for Interviews – Focus More on the Candidate, Less on the Prep Work.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* second */}
-            <div className={`animated fadeInUp delay-2s ${styles.altTimelineEvent} ${styles.altTimelineEventType2}`}>
-              <div className={styles.altTimelineEventIcon}>
-
-              </div>
-              <div className={styles.altTimelineEventDate}>
-                Enhanced Accuracy
-              </div>
-              <div className={styles.altTimelineEventContent}>
-                <div className={styles.altTimelineEventTitle}>
-
-                </div>
-                <div className={styles.altTimelineEventDescription}>
-                  <p>Leverage AI for Generating Targeted Questions, Ensuring a More Accurate Assessment of Candidates' Skills.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* third */}
-            <div className={`animated fadeInUp delay-1s ${styles.altTimelineEvent} ${styles.altTimelineEventType3}`}>
-              <div className={styles.altTimelineEventIcon}>
-
-              </div>
-              <div className={styles.altTimelineEventDate}>
-                Consistency in Interviews
-              </div>
-              <div className={styles.altTimelineEventContent}>
-                <div className={styles.altTimelineEventTitle}>
-
-                </div>
-                <div className={styles.altTimelineEventDescription}>
-                  <p>Maintain Consistency Across Interviews, Providing a Fair and Standardized Candidate Evaluation Process</p>
-                </div>
-              </div>
-            </div>
-
-            {/* fourth */}
-            <div className={`animated fadeInUp ${styles.altTimelineEvent} ${styles.altTimelineEventType1}`}>
-              <div className={styles.altTimelineEventIcon}>
-
-              </div>
-              <div className={styles.altTimelineEventDate}>
-                Data-Driven Decisions
-              </div>
-              <div className={styles.altTimelineEventContent}>
-                <div className={styles.altTimelineEventTitle}>
-
-                </div>
-                <div className={styles.altTimelineEventDescription}>
-                  <p>Make Informed Hiring Decisions with Data-Driven Insights and Comprehensive Candidate Profiles.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* fifth */}
-            <div className={`animated fadeInUp delay-3s ${styles.altTimelineEvent} ${styles.altTimelineEventType1}`}>
-              <div className={styles.altTimelineEventIcon}>
-
-              </div>
-              <div className={styles.altTimelineEventDate}>
-                User-Friendly Interface
-              </div>
-              <div className={styles.altTimelineEventContent}>
-                <div className={styles.altTimelineEventTitle}>
-
-                </div>
-                <div className={styles.altTimelineEventDescription}>
-                  <p>Enjoy a Seamless, Intuitive Experience with Our User-Friendly Platform, Designed for Recruiters of All Skill Levels</p>
-                </div>
-              </div>
-            </div>
-
-
-
-
-
-
-
-
-          </div>
+          <h1 className="text-[3.5rem] text-[#3388CC] font-semibold  font-roboto flex justify-center mb-4 mt-[5rem]" ref={benefitsRef}>Benefits</h1>
+          <Benefits />
+          {/* <hr className="my-2 border-gray-300 w-[100%]" /> */}
         </div>
 
 
         {/* footer */}
-        <div className="relative bg-deep-purple-accent-400 bg-[#0a59a2]">
+        <div className="relative bg-deep-purple-accent-400 ">
           <svg
             className="absolute top-0 w-full h-6 -mt-5 sm:-mt-10 sm:h-16 text-deep-purple-accent-400"
             preserveAspectRatio="none"
@@ -293,7 +201,7 @@ const Home = () => {
             <div className="px-4 pt-12 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-0 ">
               <div className="grid gap-16 row-gap-10 mb-8 lg:grid-cols-6">
                 <div className="md:max-w-md lg:col-span-2">
-                  <img src="https://www.bluetickconsultants.com/images/b-logo.svg" className="w-[8rem]" />
+                  {/* <img src="https://www.bluetickconsultants.com/images/b-logo.svg" className="w-[8rem]" /> */}
 
                   {/* <div className="mt-4 lg:max-w-sm">
                     <p className="text-sm text-deep-purple-50">
@@ -311,7 +219,7 @@ const Home = () => {
                 </div>
               </div>
               <div className="flex flex-col justify-between pt-5 pb-10 border-t border-deep-purple-accent-200 sm:flex-row">
-                <p className="text-lg text-[#fff]">
+                <p className="text-lg text-[#000]">
                   2023 © All rights reserved by Bluetick Consultants LLP
                 </p>
                 <div className="flex items-center mt-4 space-x-4 sm:mt-0">

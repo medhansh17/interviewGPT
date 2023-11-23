@@ -1,22 +1,22 @@
 
 import TextArea from "./components/TextArea";
 import Table from "./components/Table";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "./components/Header";
-import Accoridan from "./components/Accoridan";
-import TechAccordian from "./components/TechAccordian";
+
 
 import html2canvas from 'html2canvas';
 import axios from "axios";
-import ReportTable from "./components/ReportTable";
+
 import Loader from "../src/components/Loader";
+import { Link } from "react-router-dom";
 
 
 function Application() {
+
   const [mainData, setMainData] = useState<any | null>(null)
   const [mainTextArea, setMainTextArea] = useState<any | null>("sdawdawd")
-
-
+  console.log("mainData", mainTextArea)
   const [mainSkill, setMainSkill] = useState<any | null>(null)
   const [softSkill, setSoftSkill] = useState<any | null>(null)
   const [techSkill, setTechSkill] = useState<any | null>(null)
@@ -29,8 +29,22 @@ function Application() {
 
   console.log("softSkillPercentagesss", mainTextArea)
 
+  useEffect(() => {
+    
+    const clearLocalStorage = () => {
+      localStorage.clear();
+    };
 
-  // console.log("mainDatamain", mainSkill?.skills?.soft_skills.join(','))
+    
+    window.addEventListener("beforeunload", clearLocalStorage);
+
+    
+    return () => {
+      window.removeEventListener("beforeunload", clearLocalStorage);
+    };
+  }, []); 
+
+ 
 
   const fetchDataFetchSkill = async () => {
     setIsLoading(true);
@@ -44,14 +58,19 @@ function Application() {
         }
       );
 
+      localStorage.setItem('mainSkill', JSON.stringify(response.data));
       setMainSkill(response.data);
       await fetchSoftSkillQuestions(response.data);
       await fetchSoftTechQuestions(response.data);
+
+      window.location.href="#/app-submit"
 
     } catch (error) {
       console.error("Error fetching data:", error);
     }
     setIsLoading(false);
+
+  
   };
 
   const fetchSoftSkillQuestions = async (data: any) => {
@@ -68,6 +87,7 @@ function Application() {
 
       );
 
+      localStorage.setItem('softSkill', JSON.stringify(softSkillResponse?.data));
       setSoftSkill(softSkillResponse?.data)
 
     } catch (error) {
@@ -89,6 +109,8 @@ function Application() {
           technical_skills: data?.skills?.technical_skills.join(','),
         }
       );
+
+      localStorage.setItem('techSkill', JSON.stringify(techSkillResponse?.data));
 
       setTechSkill(techSkillResponse?.data)
 
@@ -172,38 +194,50 @@ function Application() {
   return (
     <main id="main-content">
       <Header />
-      <div className="md:flex md:justify-center  gap-4">
+      <div className="gap-4">
         <div className="mx-[4rem] md:mx-[0rem]">
-          <TextArea setMainTextArea={setMainTextArea} mainData={mainData} />
-          <div>
-            <button
-              className={`mt-[1rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${mainData || mainTextArea ? 'bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80' : 'bg-gray-400 cursor-not-allowed'
-                } rounded-lg focus:outline-none`}
-              onClick={fetchDataFetchSkill}
-              disabled={!mainData || mainTextArea}
-            >
-              Submit
-            </button>
 
-            <button
-              className={`ml-[1rem] mt-[1rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${mainData || mainTextArea ? 'bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80' : 'bg-gray-400 cursor-not-allowed'
-                } rounded-lg focus:outline-none`}
-              onClick={handleReset}
-              disabled={!mainData || mainTextArea}
-            >
-              Reset
-            </button>
+          <div className="md:flex md:justify-center md:gap-4 md:items-end">
+            <div>
+              <p className="flex justify-center items-center mb-2 font-bold md:text-[2rem] text-[1rem]">Add Job Description
+              </p>
+              <TextArea setMainTextArea={setMainTextArea} mainData={mainData} />
+            </div>
+            <div>
+              
+                <button
+                  className={`mb-[0.5rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${mainData || mainTextArea ? 'bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80' : 'bg-gray-400 cursor-not-allowed'
+                    } rounded-lg focus:outline-none`}
+                  onClick={fetchDataFetchSkill}
+                // disabled={!mainData || !mainTextArea}
+                >
+                  Submit
+                </button>
+             
+
+              <button
+                className={`ml-[1rem] mt-[1rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${mainData || mainTextArea ? 'bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80' : 'bg-gray-400 cursor-not-allowed'
+                  } rounded-lg focus:outline-none`}
+                onClick={handleReset}
+                disabled={!mainData || mainTextArea}
+              >
+                Reset
+              </button>
+            </div>
           </div>
 
+
+
         </div>
+
         <Table setMainData={setMainData} />
 
       </div>
       {
         isLoading && <Loader />
       }
-      <Accoridan setsoftSkillPercentage={setsoftSkillPercentage} softSkill={softSkill} />
-      <TechAccordian
+      {/* <Accoridan setsoftSkillPercentage={setsoftSkillPercentage} softSkill={softSkill} /> */}
+      {/* <TechAccordian
         techSkill={techSkill}
         setTechSkillOne={setTechSkillOne}
       // setTechSkillOne={setTechSkillOne}
@@ -212,24 +246,24 @@ function Application() {
       // setTechSkillFour={setTechSkillFour}
       // setTechSkillFive={setTechSkillFive}
       // setTechSkillSix={setTechSkillSix}
-      />
+      /> */}
 
-      <div className="flex justify-center items-center ">
+      {/* <div className="flex justify-center items-center ">
         {
           btnGenerate()
         }
 
-      </div>
+      </div> */}
 
-      {isReportGenerated && techSkillOne && softSkillPercentage && (
+      {/* {isReportGenerated && techSkillOne && softSkillPercentage && (
         <ReportTable
           data={JSON.parse(storedData)}
           softSkillPercentage={softSkillPercentage}
           techSkillOne={techSkillOne}
         />
-      )}
+      )} */}
 
-      <div className="flex justify-center items-center">
+      {/* <div className="flex justify-center items-center">
         {
           isReportGenerated && techSkillOne && softSkillPercentage && (
             <button
@@ -241,10 +275,10 @@ function Application() {
           )
         }
 
-      </div>
+      </div> */}
 
 
-      <div className="relative mt-16 bg-deep-purple-accent-400 bg-[#0a59a2]">
+      <div className="bg-deep-purple-accent-400 ">
         <svg
           className="absolute top-0 w-full h-6 -mt-5 sm:-mt-10 sm:h-16 text-deep-purple-accent-400"
           preserveAspectRatio="none"
@@ -259,7 +293,7 @@ function Application() {
           <div className="px-4 pt-12 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-0 ">
             <div className="grid gap-16 row-gap-10 mb-8 lg:grid-cols-6">
               <div className="md:max-w-md lg:col-span-2">
-                <img src="https://www.bluetickconsultants.com/images/b-logo.svg" className="w-[8rem]" />
+                {/* <img src="https://www.bluetickconsultants.com/images/b-logo.svg" className="w-[8rem]" /> */}
 
                 {/* <div className="mt-4 lg:max-w-sm">
                     <p className="text-sm text-deep-purple-50">
@@ -273,182 +307,11 @@ function Application() {
                   </div> */}
               </div>
               <div className="grid grid-cols-2 gap-5 row-gap-8 lg:col-span-4 md:grid-cols-4">
-                {/* <div>
-                <p className="font-semibold tracking-wide text-teal-accent-400">
-                  Category
-                </p>
-                <ul className="mt-2 space-y-2">
-                  <li>
-                    <a
-                      href="/"
-                      className="transition-colors duration-300 text-deep-purple-50 hover:text-teal-accent-400"
-                    >
-                      News
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/"
-                      className="transition-colors duration-300 text-deep-purple-50 hover:text-teal-accent-400"
-                    >
-                      World
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/"
-                      className="transition-colors duration-300 text-deep-purple-50 hover:text-teal-accent-400"
-                    >
-                      Games
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/"
-                      className="transition-colors duration-300 text-deep-purple-50 hover:text-teal-accent-400"
-                    >
-                      References
-                    </a>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <p className="font-semibold tracking-wide text-teal-accent-400">
-                  Cherry
-                </p>
-                <ul className="mt-2 space-y-2">
-                  <li>
-                    <a
-                      href="/"
-                      className="transition-colors duration-300 text-deep-purple-50 hover:text-teal-accent-400"
-                    >
-                      Web
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/"
-                      className="transition-colors duration-300 text-deep-purple-50 hover:text-teal-accent-400"
-                    >
-                      eCommerce
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/"
-                      className="transition-colors duration-300 text-deep-purple-50 hover:text-teal-accent-400"
-                    >
-                      Business
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/"
-                      className="transition-colors duration-300 text-deep-purple-50 hover:text-teal-accent-400"
-                    >
-                      Entertainment
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/"
-                      className="transition-colors duration-300 text-deep-purple-50 hover:text-teal-accent-400"
-                    >
-                      Portfolio
-                    </a>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <p className="font-semibold tracking-wide text-teal-accent-400">
-                  Apples
-                </p>
-                <ul className="mt-2 space-y-2">
-                  <li>
-                    <a
-                      href="/"
-                      className="transition-colors duration-300 text-deep-purple-50 hover:text-teal-accent-400"
-                    >
-                      Media
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/"
-                      className="transition-colors duration-300 text-deep-purple-50 hover:text-teal-accent-400"
-                    >
-                      Brochure
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/"
-                      className="transition-colors duration-300 text-deep-purple-50 hover:text-teal-accent-400"
-                    >
-                      Nonprofit
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/"
-                      className="transition-colors duration-300 text-deep-purple-50 hover:text-teal-accent-400"
-                    >
-                      Educational
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/"
-                      className="transition-colors duration-300 text-deep-purple-50 hover:text-teal-accent-400"
-                    >
-                      Projects
-                    </a>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <p className="font-semibold tracking-wide text-teal-accent-400">
-                  Business
-                </p>
-                <ul className="mt-2 space-y-2">
-                  <li>
-                    <a
-                      href="/"
-                      className="transition-colors duration-300 text-deep-purple-50 hover:text-teal-accent-400"
-                    >
-                      Infopreneur
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/"
-                      className="transition-colors duration-300 text-deep-purple-50 hover:text-teal-accent-400"
-                    >
-                      Personal
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/"
-                      className="transition-colors duration-300 text-deep-purple-50 hover:text-teal-accent-400"
-                    >
-                      Wiki
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/"
-                      className="transition-colors duration-300 text-deep-purple-50 hover:text-teal-accent-400"
-                    >
-                      Forum
-                    </a>
-                  </li>
-                </ul>
-              </div> */}
+
               </div>
             </div>
             <div className="flex flex-col justify-between pt-5 pb-10 border-t border-deep-purple-accent-200 sm:flex-row">
-              <p className="text-sm text-[#fff]">
+              <p className="text-lg text-[#000]">
                 2023 © All rights reserved by Bluetick Consultants LLP
               </p>
               <div className="flex items-center mt-4 space-x-4 sm:mt-0">

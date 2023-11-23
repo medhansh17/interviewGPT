@@ -52,9 +52,11 @@ const Table: React.FC<TableProps> = ({ setMainData }: any) => {
 
 
     return (
-        <section className="mx-[1rem] md:mx-[0rem]">
-            <div className="flex flex-col mt-6 mx-[1rem]">
+        <section className="mx-[1rem] md:mx-[0rem] mt-[2rem]">
+            <div className="md:flex md:justify-center md:items-end  gap-4">
                 <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                    <p className="flex justify-center items-center mb-2 font-bold md:text-[2rem] text-[1rem]">Table
+                    </p>
                     <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
                         <div className="overflow-hidden border border-gray-200 dark:border-gray-700 md:rounded-lg">
                             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">

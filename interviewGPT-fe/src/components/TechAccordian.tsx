@@ -149,7 +149,7 @@ interface TechAccordionProps {
 const calc = (part: number, whole: number) => isNaN(part) || isNaN(whole) || whole === 0 ? 0 : (part / whole) * 100;
 
 const TechAccordion: FC<TechAccordionProps> = ({ title, techSkill, updateTechSkillPercentage }) => {
-    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [isOpen, setIsOpen] = useState<boolean>(true);
     const [percentages, setPercentages] = useState<any>({});
 
     const toggleAccordion = () => {
