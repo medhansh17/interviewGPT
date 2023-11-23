@@ -1,4 +1,5 @@
 import { useState, FC } from "react";
+import Header from "./Header";
 
 interface AccordionProps {
     title: string;
@@ -96,7 +97,7 @@ const Accordion: FC<AccordionProps> = ({ title, softSkill, updatePercentage }) =
                         onClick={() => handleOptionClick("PartiallyCorrect")}
                         className={`${selectedOption === "PartiallyCorrect" ? 'bg-yellow-500 text-white' : 'hover:bg-yellow-500 text-yellow-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "PartiallyCorrect" ? 'border-yellow-500' : 'border-yellow-500 hover:border-transparent'} rounded font-medium`}
                     >
-                        PartiallyCorrect
+                        Acceptable
                     </button>
                     <button
                         onClick={() => handleOptionClick("Incorrect")}
@@ -104,12 +105,12 @@ const Accordion: FC<AccordionProps> = ({ title, softSkill, updatePercentage }) =
                     >
                         Incorrect
                     </button>
-                    <button
+                    {/* <button
                         onClick={() => handleOptionClick("Skip")}
                         className={` ${selectedOption === "Skip" ? 'bg-orange-500 text-white' : 'hover:bg-orange-500 text-orange-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "Skip" ? 'border-orange-500' : 'border-orange-500 hover:border-transparent'} rounded font-medium`}
                     >
                         Skip
-                    </button>
+                    </button> */}
                 </div>
             </div>
             {isOpen && (
@@ -150,10 +151,12 @@ const Faq: FC<FaqProps> = ({ softSkill, setsoftSkillPercentage }) => {
     };
 
     return (
-        <div className="px-4 py-16 mx-auto sm:max-w-xl md:max-w-full lg:w-[100%] md:px-24 lg:px-8 lg:py-20">
+        <>
+        <Header />
+        <div className="px-4 py-16 mx-auto sm:max-w-xl md:max-w-full lg:w-[100%] md:px-24 lg:px-8 lg:py-8">
             <div className="max-w-xl sm:mx-auto lg:max-w-[90rem]">
                 <div className="flex flex-col 6 sm:text-center">
-                    {softSkill && <h1 className="text-[2.5rem]">Soft Skills</h1>}
+                    {softSkill && <h1 className="text-[2.5rem]">Behavioural Assessment</h1>}
                 </div>
                 <div className="space-y-4">
                     {softSkill?.soft_skills?.soft_skills[0]?.questions?.map(
@@ -169,6 +172,7 @@ const Faq: FC<FaqProps> = ({ softSkill, setsoftSkillPercentage }) => {
                 </div>
             </div>
         </div>
+        </>
     );
 };
 

@@ -75,10 +75,11 @@ const Home = () => {
           /> */}
         </div>
 
-
+       
 
         {/* last section */}
         <div className="flex flex-col justify-center items-center mt-[5rem]">
+        <hr className="my-2 border-gray-300 w-[100%]" />
 
           {/* future section */}
           {/* <div className="timeline-container">

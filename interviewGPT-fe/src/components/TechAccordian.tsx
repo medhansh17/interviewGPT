@@ -98,7 +98,7 @@ const QuestionAccordion: FC<QuestionAccordionProps> = ({ question, type, answer,
                         onClick={() => handleOptionClick("PartiallyCorrect")}
                         className={`${selectedOption === "PartiallyCorrect" ? 'bg-yellow-500 text-white' : 'hover:bg-yellow-500 text-yellow-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "PartiallyCorrect" ? 'border-yellow-500' : 'border-yellow-500 hover:border-transparent'} rounded font-medium`}
                     >
-                        Partially Correct
+                        Acceptable
                     </button>
                     <button
                         onClick={() => handleOptionClick("Incorrect")}
@@ -106,12 +106,12 @@ const QuestionAccordion: FC<QuestionAccordionProps> = ({ question, type, answer,
                     >
                         Incorrect
                     </button>
-                    <button
+                    {/* <button
                         onClick={() => handleOptionClick("Skip")}
                         className={` ${selectedOption === "Skip" ? 'bg-orange-500 text-white' : 'hover:bg-orange-500 text-orange-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "Skip" ? 'border-orange-500' : 'border-orange-500 hover:border-transparent'} rounded font-medium`}
                     >
                         Skip
-                    </button>
+                    </button> */}
                 </div>
             </div>
 
@@ -240,7 +240,7 @@ const Faq: FC<FaqProps> = ({ techSkill, setTechSkillOne }) => {
         <div className="px-4 py-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8 lg:py-20">
             <div className="max-w-xl sm:mx-auto lg:max-w-[90rem]">
                 <div className="flex flex-col 6 sm:text-center">
-                    {techSkill && <h1 className="text-[2.5rem] ">Technical Skills</h1>}
+                    {techSkill && <h1 className="text-[2.5rem] ">Technical Assessment</h1>}
                 </div>
                 <div className="space-y-4">
                     {techSkill?.technical_skills?.technical_skills?.map((item: { name: string }, index: number) => (

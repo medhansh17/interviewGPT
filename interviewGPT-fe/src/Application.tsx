@@ -199,8 +199,8 @@ function Application() {
 
           <div className="md:flex md:justify-center md:gap-4 md:items-end">
             <div>
-              <p className="flex justify-center items-center mb-2 font-bold md:text-[2rem] text-[1rem]">Add Job Description
-              </p>
+              <p className="flex justify-left items-center mb-2 font-bold md:text-[2rem] text-[1rem]">Add Job Description</p>
+              <p>Insert your own job description or select one from the examples provided below.</p>
               <TextArea setMainTextArea={setMainTextArea} mainData={mainData} />
             </div>
             <div>

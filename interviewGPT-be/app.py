@@ -259,7 +259,7 @@ def fetch_skills_endpoint():
         db.session.add(new_entry)
         db.session.commit()
 
-    return jsonify({'message': 'Data retrieved successfully', 'data': response}), 200
+    return jsonify({'message': 'Data retrieved successfully', 'skills': response}), 200
 
 
 @app.route('/generate_soft_skill_questions', methods=['POST'])
@@ -292,7 +292,7 @@ def generate_soft_skill_questions_endpoint():
         existing_entry.soft_skills = output
         db.session.commit()
 
-    return jsonify({'message': 'Data retrieved successfully', 'data': output}), 200
+    return jsonify({'message': 'Data retrieved successfully', 'soft_skills': output}), 200
 
 
 @app.route('/generate_technical_questions', methods=['POST'])
@@ -307,7 +307,7 @@ def generate_technical_questions_endpoint():
 
     existing_entry = ResponseCache.query.filter_by(name=name).first()
 
-    if existing_entry.technical_skills != None:
+    if existing_entry and existing_entry.technical_skills != None:
         # If a record with the same name exists, return it
         return jsonify({'message': 'Data retrieved successfully', 'technical_skills': existing_entry.technical_skills}), 200
 
@@ -326,7 +326,7 @@ def generate_technical_questions_endpoint():
         existing_entry.technical_skills = output
         db.session.commit()
 
-    return jsonify({'message': 'Data retrieved successfully', 'data': output}), 200
+    return jsonify({'message': 'Data retrieved successfully', 'technical_skills': output}), 200
 
 
 @app.route('/')
