@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import ReportTable from "./components/ReportTable";
 import html2canvas from 'html2canvas';
 import Tabs from "./components/Tabs";
+import Header from "./components/Header";
 
 
 const MainPage = () => {
@@ -100,6 +101,15 @@ const MainPage = () => {
         <div id="main-content">
             {/* <h1>hello</h1> */}
             <div className="md:mx-[3rem] mx-[1rem]">
+                <Header />
+                <div className="mb-[1rem]">
+                    <p className="text-[2rem] mb-2 font-bold">Assessment Sheet
+                    </p>
+                    <p className="text-[1rem] leading-5 text-gray-600">
+                        Use the assessment sheet to evaluate the candidate
+                    </p>
+                </div>
+
                 <Tabs setsoftSkillPercentage={setsoftSkillPercentage} softSkill={softSkill} techSkill={techSkill}
                     setTechSkillOne={setTechSkillOne} />
             </div>

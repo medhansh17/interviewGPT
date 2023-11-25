@@ -332,7 +332,7 @@ const Tabs: React.FC<TabsProps> = ({ setsoftSkillPercentage, softSkill, techSkil
 
     return (
         <div>
-            <Header />
+       
 
             <div className="mb-3">
                 <TETabs>
