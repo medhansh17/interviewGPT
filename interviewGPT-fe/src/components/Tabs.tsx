@@ -20,7 +20,7 @@ import Header from "./Header";
 const QuestionAccordion = ({ question, type, answer, keywords, updatePercentage }: any) => {
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
     const [showAnswer, setShowAnswer] = useState(true);
-    console.log("setShowAnswer",setShowAnswer)
+    console.log("setShowAnswer", setShowAnswer)
 
     const handleOptionClick = (option: string) => {
         setSelectedOption(option);
@@ -85,7 +85,7 @@ const QuestionAccordion = ({ question, type, answer, keywords, updatePercentage 
     };
 
     return (
-        <div className="border rounded shadow-sm p-4 mt-4 mx-[1rem] " style={{ width: '60%', marginLeft: "30px" }}>
+        <div className="border rounded shadow-sm p-4 mt-4 mx-[1rem] md:w-[60%]">
             <div className="cursor-pointer">
 
                 <div className="flex flex-col items-baseline gap-4 flex-wrap">
@@ -167,7 +167,7 @@ const Accordion = ({ title, softSkill, updatePercentage }: any) => {
     const [isOpen, setIsOpen] = useState<boolean>(true);
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
     const [percentageUpdated, setPercentageUpdated] = useState<boolean>(false);
-    console.log("setIsOpen",setIsOpen)
+    console.log("setIsOpen", setIsOpen)
 
     // const toggleAccordion = () => {
     //     setIsOpen((prevIsOpen) => !prevIsOpen);
@@ -294,7 +294,7 @@ const Accordion = ({ title, softSkill, updatePercentage }: any) => {
     );
 };
 
-const Tabs: React.FC<TabsProps> = ({ setsoftSkillPercentage, softSkill, techSkill}) => {
+const Tabs: React.FC<TabsProps> = ({ setsoftSkillPercentage, softSkill, techSkill }) => {
     const [basicActive, setBasicActive] = useState<string>("tab1");
     const [nestedActive, setNestedActive] = useState<string>("nestedTab1");
 
@@ -339,12 +339,16 @@ const Tabs: React.FC<TabsProps> = ({ setsoftSkillPercentage, softSkill, techSkil
                     <TETabsItem
                         onClick={() => handleBasicClick("tab1")}
                         active={basicActive === "tab1"}
+                        style={{ fontWeight: "bold" }}
+                        className="font-bold"
                     >
                         Behavioural Assessment
                     </TETabsItem>
                     <TETabsItem
                         onClick={() => handleBasicClick("tab2")}
                         active={basicActive === "tab2"}
+                        style={{ fontWeight: "bold" }}
+                        className="font-bold"
                     >
                         Technical Assessment
                     </TETabsItem>
@@ -358,6 +362,8 @@ const Tabs: React.FC<TabsProps> = ({ setsoftSkillPercentage, softSkill, techSkil
                                 <TETabsItem
                                     onClick={() => handleNestedClick("nestedTab1")}
                                     active={nestedActive === "nestedTab1"}
+                                    style={{ fontWeight: "bold" }}
+                                    className="font-bold"
                                 >
                                     Questions
                                 </TETabsItem>
@@ -401,6 +407,8 @@ const Tabs: React.FC<TabsProps> = ({ setsoftSkillPercentage, softSkill, techSkil
                                     key={index}
                                     onClick={() => handleNestedClick(item.name)}
                                     active={nestedActive === item.name}
+                                    style={{ fontWeight: "bold" }}
+                                    className="font-bold"
                                 >
                                     {item?.name}
                                 </TETabsItem>

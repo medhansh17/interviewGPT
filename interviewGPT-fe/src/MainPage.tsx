@@ -99,8 +99,11 @@ const MainPage = () => {
     return (
         <div id="main-content">
             {/* <h1>hello</h1> */}
-            <Tabs setsoftSkillPercentage={setsoftSkillPercentage} softSkill={softSkill} techSkill={techSkill}
-                setTechSkillOne={setTechSkillOne} />
+            <div className="md:mx-[3rem] mx-[1rem]">
+                <Tabs setsoftSkillPercentage={setsoftSkillPercentage} softSkill={softSkill} techSkill={techSkill}
+                    setTechSkillOne={setTechSkillOne} />
+            </div>
+
             {/* <Accoridan setsoftSkillPercentage={setsoftSkillPercentage} softSkill={softSkill} />
             <TechAccordian
                 techSkill={techSkill}

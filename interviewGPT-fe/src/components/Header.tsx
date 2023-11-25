@@ -5,15 +5,24 @@ const Header = () => {
     return (
 
 
-        <div className="flex justify-between items-center mx-[3rem]">
+        <div className="flex justify-between items-center md:mx-[3rem] mx-[1rem] my-8 mb-[5rem]">
+
             <Link to="/">
-                <div className="flex justify-center items-center">
-                    <img src="https://media.licdn.com/dms/image/C510BAQEzP4y4oeD4IA/company-logo_200_200/0/1631369563060?e=1707955200&v=beta&t=eRPP7vUWz6dSrImFSLR7JH7LetvvyacUgnP9OlHOeHU" className="md:w-[10rem] w-[6rem]" />
-                    {/* <h1>Blue Consultants</h1> */}
+                <div>
+                    <h1 className="text-[2.5rem] text-[#3388CC] font-semibold  font-roboto flex justify-center mb-4 mt-[5rem]">InterviewGPT</h1>
                 </div>
 
             </Link>
 
+
+            <Link to="/">
+                <div className="flex justify-center items-center">
+                    <img src="https://pdf.bluetickconsultants.com/static/dist/images/blueticklogo.webp" className="md:w-[10rem] w-[6rem]" />
+                    {/* <h1>Blue Consultants</h1> */}
+                </div>
+
+
+            </Link>
 
         </div>
     )
