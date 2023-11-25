@@ -1,4 +1,5 @@
 import { useState, FC, useEffect } from "react";
+import Popover from "./Popover";
 
 interface QuestionAccordionProps {
     question: string;
@@ -10,8 +11,8 @@ interface QuestionAccordionProps {
 
 const QuestionAccordion: FC<QuestionAccordionProps> = ({ question, type, answer, keywords, updatePercentage }) => {
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
-    const [showAnswer, setShowAnswer] = useState(false);
-
+    const [showAnswer, setShowAnswer] = useState(true);
+    console.log("setShowAnswer",setShowAnswer)
     const handleOptionClick = (option: string) => {
         setSelectedOption(option);
 
@@ -33,9 +34,9 @@ const QuestionAccordion: FC<QuestionAccordionProps> = ({ question, type, answer,
         }
     };
 
-    const toggleAnswer = () => {
-        setShowAnswer((prevShowAnswer) => !prevShowAnswer);
-    };
+    // const toggleAnswer = () => {
+    //     setShowAnswer((prevShowAnswer) => !prevShowAnswer);
+    // };
 
 
     // const getDifficultyColor = () => {
@@ -76,19 +77,49 @@ const QuestionAccordion: FC<QuestionAccordionProps> = ({ question, type, answer,
 
     return (
         <div className="border rounded shadow-sm p-4 mt-4">
-            <div className="md:flex md:justify-between gap-4 cursor-pointer" onClick={toggleAnswer}>
+            <div className="cursor-pointer">
 
                 <div className="flex flex-col items-baseline gap-4 flex-wrap">
-                    <div className={`inline-block px-3 py-px text-xs font-semibold tracking-wider text-[#fff] uppercase rounded-full ${getDifficultyColor()}`}>
-                        {type}
+                    <div className={`inline-block h-3 w-3  ${getDifficultyColor()}`}>
+                        {/* {type} */}
                     </div>
-                    <p className="text-lg font-medium cursor-pointer"  >{question}</p>
+                    <div className="flex items-center gap-2">
+                        <p className="text-lg font-medium cursor-pointer"  >{question}</p>
+                        <Popover data={answer} />
+                    </div>
+
 
                 </div>
 
 
                 <div className="flex md:flex-wrap lg:flex-nowrap items-center gap-3">
-                    <button
+                    <div onClick={() => handleOptionClick("Correct")} className="cursor-pointer">
+                        {
+
+                            selectedOption === "Correct" ?
+                                <img width="25" height="25" src="https://img.icons8.com/color/48/checkmark--v1.png" alt="checkmark--v1" />
+                                : <img width="25" height="25" src="https://img.icons8.com/material-sharp/24/checkmark--v1.png" alt="checkmark--v1" />
+                        }
+
+                    </div>
+                    <div className="cursor-pointer" onClick={() => handleOptionClick("PartiallyCorrect")}>
+                        {
+                            selectedOption === "PartiallyCorrect" ?
+                                <img width="25" height="25" src="https://img.icons8.com/color/48/inspection.png" alt="inspection" />
+                                : <img width="25" height="25" src="https://img.icons8.com/fluency-systems-regular/48/inspection.png" alt="inspection" />
+                        }
+
+                    </div>
+                    <div className="cursor-pointer" onClick={() => handleOptionClick("Incorrect")}>
+                        {
+                            selectedOption === "Incorrect" ?
+                                <img width="25" height="25" src="https://img.icons8.com/external-others-agus-raharjo/64/external-incorrect-flat-website-ui-others-agus-raharjo.png" alt="external-incorrect-flat-website-ui-others-agus-raharjo" />
+                                :
+                                <img width="25" height="25" src="https://img.icons8.com/external-filled-agus-raharjo/64/external-incorrect-glyph-website-ui-filled-agus-raharjo.png" alt="external-incorrect-glyph-website-ui-filled-agus-raharjo" />
+
+                        }
+                    </div>
+                    {/* <button
                         onClick={() => handleOptionClick("Correct")}
                         className={` ${selectedOption === "Correct" ? 'bg-[green] text-white' : 'hover:bg-green-500 text-green-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "Correct" ? 'border-green-500' : 'border-green-500 hover:border-transparent'} rounded font-medium`}
                     >
@@ -105,7 +136,7 @@ const QuestionAccordion: FC<QuestionAccordionProps> = ({ question, type, answer,
                         className={` ${selectedOption === "Incorrect" ? 'bg-red-500 text-white' : 'hover:bg-red-500 text-red-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "Incorrect" ? 'border-red-500' : 'border-red-500 hover:border-transparent'} rounded font-medium`}
                     >
                         Incorrect
-                    </button>
+                    </button> */}
                     {/* <button
                         onClick={() => handleOptionClick("Skip")}
                         className={` ${selectedOption === "Skip" ? 'bg-orange-500 text-white' : 'hover:bg-orange-500 text-orange-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "Skip" ? 'border-orange-500' : 'border-orange-500 hover:border-transparent'} rounded font-medium`}
@@ -131,7 +162,7 @@ const QuestionAccordion: FC<QuestionAccordionProps> = ({ question, type, answer,
                     <div className="mt-2 text-gray-700">
                         <hr className="my-2 border-gray-300 w-[100%]" />
 
-                        <p className="text-gray-700">Technical Skill: {answer}</p>
+                        {/* <p className="text-gray-700">Technical Skill: {answer}</p> */}
                         <p className="text-gray-700 mt-[0.5rem] font-bold">Keywords: {keywords}</p>
                     </div>
                 )}
@@ -237,12 +268,12 @@ const Faq: FC<FaqProps> = ({ techSkill, setTechSkillOne }) => {
     };
 
     return (
-        <div className="px-4 py-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8 lg:py-20">
+        <div className="">
             <div className="max-w-xl sm:mx-auto lg:max-w-[90rem]">
                 <div className="flex flex-col 6 sm:text-center">
                     {techSkill && <h1 className="text-[2.5rem] ">Technical Assessment</h1>}
                 </div>
-                <div className="space-y-4">
+                <div className="grid md:grid-cols-3 gap-4">
                     {techSkill?.technical_skills?.technical_skills?.map((item: { name: string }, index: number) => (
                         <TechAccordion
                             key={index}

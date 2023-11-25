@@ -1,5 +1,4 @@
 import { useRef } from 'react'
-import styles from './altTimeline.module.css';
 import './app.css';
 import { Link } from 'react-router-dom';
 import { Features } from './components/Home/Features';
@@ -60,7 +59,7 @@ const Home = () => {
               <h1 className="md:text-[1.5rem] text-[1rem] text-[#000] ">Revolutionize Your Hiring Process with InterviewGPT. AI-Powered Question Generation for Accurate Candidate Assessment</h1>
               <Link to="/app" className="link-styles">
                 <button className="px-6 py-2 w-[8rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-[#066ecf]  hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80">
-                  Try Now
+                  TRY NOW
                 </button>
               </Link>
             </div>
@@ -75,11 +74,11 @@ const Home = () => {
           /> */}
         </div>
 
-       
+
 
         {/* last section */}
         <div className="flex flex-col justify-center items-center mt-[5rem]">
-        <hr className="my-2 border-gray-300 w-[100%]" />
+          <hr className="my-2 border-gray-300 w-[100%]" />
 
           {/* future section */}
           {/* <div className="timeline-container">
@@ -259,9 +258,6 @@ const Home = () => {
                   <a href='https://www.quora.com/profile/Bluetick-Consultants'>
                     <img width="25" height="32" src="https://img.icons8.com/windows/32/quora.png" alt="quora" />
                   </a>
-
-
-
                 </div>
               </div>
             </div>

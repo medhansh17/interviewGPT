@@ -5,24 +5,24 @@ import { useState, useEffect } from "react";
 import Header from "./components/Header";
 
 
-import html2canvas from 'html2canvas';
+// import html2canvas from 'html2canvas';
 import axios from "axios";
 
 import Loader from "../src/components/Loader";
-import { Link } from "react-router-dom";
+
 
 
 function Application() {
 
   const [mainData, setMainData] = useState<any | null>(null)
   const [mainTextArea, setMainTextArea] = useState<any | null>("sdawdawd")
-  console.log("mainData", mainTextArea)
   const [mainSkill, setMainSkill] = useState<any | null>(null)
   const [softSkill, setSoftSkill] = useState<any | null>(null)
   const [techSkill, setTechSkill] = useState<any | null>(null)
   const [techSkillOne, setTechSkillOne] = useState<any | null>(null)
   const [softSkillPercentage, setsoftSkillPercentage] = useState<any | null>(null)
   const [isReportGenerated, setIsReportGenerated] = useState(false);
+  console.log("mainData", mainTextArea,mainSkill,softSkill,techSkill,isReportGenerated,techSkillOne)
 
   const [isLoading, setIsLoading] = useState(false);
   console.log(softSkillPercentage, "softSkillPercentagesoftSkillPercentage")
@@ -30,21 +30,21 @@ function Application() {
   console.log("softSkillPercentagesss", mainTextArea)
 
   useEffect(() => {
-    
+
     const clearLocalStorage = () => {
       localStorage.clear();
     };
 
-    
+
     window.addEventListener("beforeunload", clearLocalStorage);
 
-    
+
     return () => {
       window.removeEventListener("beforeunload", clearLocalStorage);
     };
-  }, []); 
+  }, []);
 
- 
+
 
   const fetchDataFetchSkill = async () => {
     setIsLoading(true);
@@ -63,14 +63,14 @@ function Application() {
       await fetchSoftSkillQuestions(response.data);
       await fetchSoftTechQuestions(response.data);
 
-      window.location.href="#/app-submit"
+      window.location.href = "#/app-submit"
 
     } catch (error) {
       console.error("Error fetching data:", error);
     }
     setIsLoading(false);
 
-  
+
   };
 
   const fetchSoftSkillQuestions = async (data: any) => {
@@ -148,72 +148,72 @@ function Application() {
 
 
 
-  const handleGenerateReport = () => {
+  // const handleGenerateReport = () => {
 
-    setIsReportGenerated(true);
-  };
-
-
-  const handlePrintScreen = () => {
-
-    const mainContent = document.getElementById('main-content');
+  //   setIsReportGenerated(true);
+  // };
 
 
-    if (mainContent) {
+  // const handlePrintScreen = () => {
 
-      html2canvas(mainContent).then((canvas) => {
-
-        const dataUrl = canvas.toDataURL('image/png');
+  //   const mainContent = document.getElementById('main-content');
 
 
-        const link = document.createElement('a');
-        link.href = dataUrl;
-        link.download = 'screenshot.png';
+  //   if (mainContent) {
+
+  //     html2canvas(mainContent).then((canvas) => {
+
+  //       const dataUrl = canvas.toDataURL('image/png');
 
 
-        link.click();
-      });
-    }
-  };
+  //       const link = document.createElement('a');
+  //       link.href = dataUrl;
+  //       link.download = 'screenshot.png';
 
 
-  const btnGenerate = () => {
-    if (techSkillOne && softSkillPercentage) {
-      return <button
-        className="mt-[0rem] px-6 py-2 w-[12rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-600 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80"
-        onClick={handleGenerateReport}
-      >
-        Generate Report
-      </button>
-    }
-    return ""
-  }
+  //       link.click();
+  //     });
+  //   }
+  // };
+
+
+  // const btnGenerate = () => {
+  //   if (techSkillOne && softSkillPercentage) {
+  //     return <button
+  //       className="mt-[0rem] px-6 py-2 w-[12rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-600 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80"
+  //       onClick={handleGenerateReport}
+  //     >
+  //       Generate Report
+  //     </button>
+  //   }
+  //   return ""
+  // }
 
 
 
   return (
     <main id="main-content">
       <Header />
-      <div className="gap-4">
-        <div className="mx-[4rem] md:mx-[0rem]">
+      <div className="md:flex md:justify-center md:items-center 2xl:gap-8 xl:gap-0 gap-2">
+        <div className="">
 
-          <div className="md:flex md:justify-center md:gap-4 md:items-end">
+          <div className="mx-[2rem]">
             <div>
               <p className="flex justify-left items-center mb-2 font-bold md:text-[2rem] text-[1rem]">Add Job Description</p>
               <p>Insert your own job description or select one from the examples provided below.</p>
               <TextArea setMainTextArea={setMainTextArea} mainData={mainData} />
             </div>
-            <div>
-              
-                <button
-                  className={`mb-[0.5rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${mainData || mainTextArea ? 'bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80' : 'bg-gray-400 cursor-not-allowed'
-                    } rounded-lg focus:outline-none`}
-                  onClick={fetchDataFetchSkill}
-                // disabled={!mainData || !mainTextArea}
-                >
-                  Submit
-                </button>
-             
+            <div className="mt-[10rem]">
+
+              <button
+                className={`mb-[0.5rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${mainData || mainTextArea ? 'bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80' : 'bg-gray-400 cursor-not-allowed'
+                  } rounded-lg focus:outline-none`}
+                onClick={fetchDataFetchSkill}
+              // disabled={!mainData || !mainTextArea}
+              >
+                Submit
+              </button>
+
 
               <button
                 className={`ml-[1rem] mt-[1rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${mainData || mainTextArea ? 'bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80' : 'bg-gray-400 cursor-not-allowed'
@@ -230,7 +230,9 @@ function Application() {
 
         </div>
 
-        <Table setMainData={setMainData} />
+        <div className="">
+          <Table setMainData={setMainData} />
+        </div>
 
       </div>
       {

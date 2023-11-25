@@ -38,7 +38,8 @@ export const Features = () => {
                         /> */}
                     </svg>
                 </div>
-                <div className="relative grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="relative grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    {/* first */}
                     <div className="flex flex-col justify-between overflow-hidden text-left transition-shadow duration-200 bg-white rounded shadow-xl group hover:shadow-2xl">
                         <div className="p-5">
                             <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
@@ -52,6 +53,7 @@ export const Features = () => {
                         </div>
                         <div className="w-full h-1 ml-auto duration-300 origin-left transform scale-x-0 bg-deep-purple-accent-400 group-hover:scale-x-100" />
                     </div>
+                    {/* second */}
                     <div className="flex flex-col justify-between overflow-hidden text-left transition-shadow duration-200 bg-white rounded shadow-xl group hover:shadow-2xl">
                         <div className="p-5">
                             <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
@@ -64,6 +66,8 @@ export const Features = () => {
                         </div>
                         <div className="w-full h-1 ml-auto duration-300 origin-left transform scale-x-0 bg-deep-purple-accent-400 group-hover:scale-x-100" />
                     </div>
+
+                    {/* third */}
                     <div className="flex flex-col justify-between overflow-hidden text-left transition-shadow duration-200 bg-white rounded shadow-xl group hover:shadow-2xl">
                         <div className="p-5">
                             <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
@@ -76,32 +80,49 @@ export const Features = () => {
                         </div>
                         <div className="w-full h-1 ml-auto duration-300 origin-left transform scale-x-0 bg-deep-purple-accent-400 group-hover:scale-x-100" />
                     </div>
-                    <div className="flex flex-col justify-between overflow-hidden text-left transition-shadow duration-200 bg-white rounded shadow-xl group hover:shadow-2xl">
-                        <div className="p-5">
-                            <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
-                                <img width="30" height="30" src="https://img.icons8.com/ios-filled/50/visualization-skill.png" alt="visualization-skill" />
-                            </div>
-                            <p className="mb-2 font-bold">Skill-Based Scoring System</p>
-                            <p className="text-sm leading-5 text-gray-900">
-                                Quantify Candidate Competency with an Automated Scoring System Based on Interview Responses.
-                            </p>
-                        </div>
-                        <div className="w-full h-1 ml-auto duration-300 origin-left transform scale-x-0 bg-deep-purple-accent-400 group-hover:scale-x-100" />
-                    </div>
-                    <div className="flex flex-col justify-between overflow-hidden text-left transition-shadow duration-200 bg-white rounded shadow-xl group hover:shadow-2xl">
-                        <div className="p-5">
-                            <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
-                                <img width="30" height="30" src="https://img.icons8.com/ios-glyphs/30/share-rounded.png" alt="share-rounded" />
-                            </div>
-                            <p className="mb-2 font-bold">Downloadable Reports</p>
-                            <p className="text-sm leading-5 text-gray-900">
-                                Easily Download Candidate Evaluations and Comprehensive Reports for Record-Keeping and Analysis
-                            </p>
-                        </div>
-                        <div className="w-full h-1 ml-auto duration-300 origin-left transform scale-x-0 bg-deep-purple-accent-400 group-hover:scale-x-100" />
-                    </div>
+                    {/* fourth */}
+
+
 
                 </div>
+                {/* five */}
+                <div className="flex justify-center items-center gap-5">
+                    <div className="relative flex justify-center items-center mt-5">
+                        <div className="flex flex-col justify-between overflow-hidden text-left transition-shadow duration-200 bg-white rounded shadow-xl group hover:shadow-2xl">
+                            <div className="p-5">
+                                <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
+                                    <img width="30" height="30" src="https://img.icons8.com/ios-filled/50/visualization-skill.png" alt="visualization-skill" />
+                                </div>
+                                <p className="mb-2 font-bold">Skill-Based Scoring System</p>
+                                <p className="text-sm leading-5 text-gray-900 w-full md:w-[20rem]">
+                                    Quantify Candidate Competency with an Automated Scoring System Based on Interview Responses.
+                                </p>
+                            </div>
+                            <div className="w-full h-1 ml-auto duration-300 origin-left transform scale-x-0 bg-deep-purple-accent-400 group-hover:scale-x-100" />
+                        </div>
+                    </div>
+
+
+
+
+
+                    <div className="relative flex justify-center items-center mt-5">
+                        <div className="flex flex-col justify-between overflow-hidden text-left transition-shadow duration-200 bg-white rounded shadow-xl group hover:shadow-2xl">
+                            <div className="p-5">
+                                <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
+                                    <img width="30" height="30" src="https://img.icons8.com/ios-glyphs/30/share-rounded.png" alt="share-rounded" />
+                                </div>
+                                <p className="mb-2 font-bold">Downloadable Reports</p>
+                                <p className="text-sm leading-5 text-gray-900 w-full md:w-[20rem]">
+                                    Easily Download Candidate Evaluations and Comprehensive Reports for Record-Keeping and Analysis
+                                </p>
+                            </div>
+                            <div className="w-full h-1 ml-auto duration-300 origin-left transform scale-x-0 bg-deep-purple-accent-400 group-hover:scale-x-100" />
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
         </div>
     );

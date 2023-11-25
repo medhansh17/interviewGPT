@@ -53,9 +53,9 @@ const Table: React.FC<TableProps> = ({ setMainData }: any) => {
 
     return (
         <section className="mx-[1rem] md:mx-[0rem] mt-[2rem]">
-            <div className="md:flex md:justify-center md:items-end  gap-4">
-                <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                    <p className="flex justify-left items-center mb-2 font-bold md:text-[2rem] text-[1rem]">Load example Job Description
+            <div className="">
+                <div className="">
+                    <p className="flex justify-left items-center mb-2 font-bold md:text-[2rem] text-[1rem] md:pl-[2rem]">Load example Job Description
                     </p>
                     <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
                         <div className="overflow-hidden border border-gray-200 dark:border-gray-700 md:rounded-lg">
@@ -75,27 +75,27 @@ const Table: React.FC<TableProps> = ({ setMainData }: any) => {
                                         </th>
                                         <th scope="col" className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                             <button className="flex items-center gap-x-2">
-                                                <span className='md:text-[1.2rem]'>JD</span>
+                                                <span className='md:text-[1.2rem]'>Job Description</span>
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" className="w-4 h-4"></svg>
                                             </button>
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
+                                <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900 lg:h-[22rem]">
                                     {data?.map((item) => (
                                         <tr key={item.id}>
-                                            <td className="px-4 py-4 text-sm font-medium text-gray-700 ">
+                                            <td className="px-4  text-sm font-medium text-gray-700 ">
                                                 <div className="inline-flex items-center gap-x-3">
                                                     <input
                                                         type="checkbox"
-                                                        className="text-blue-500 border-gray-300 rounded dark:bg-gray-900 dark:ring-offset-gray-900 dark:border-gray-700"
+                                                        className="text-blue-500 border-gray-300 rounded dark:bg-gray-900 dark:ring-offset-gray-900 dark:border-gray-700 transform scale-125"
                                                         onChange={() => handleCheckboxChange(item)}
                                                         checked={selectedJd?.id === item.id}
                                                     />
                                                 </div>
                                             </td>
-                                            <td className="md:text-[1.2rem] px-4 py-4 text-sm text-gray-500 dark:text-gray-300 ">{item.role}</td>
-                                            <td className=" md:text-[1.2rem] px-4 py-4 text-sm text-gray-500 dark:text-gray-300 "> {truncateText(item.jd, 5)}</td>
+                                            <td className="lg:text-[1.2rem]  px-4 md:text-[0.5rem]  dark:text-gray-300 ">{item.role}</td>
+                                            <td className="lg:text-[1.2rem] px-4 md:text-[0.5rem]  dark:text-gray-300 "> {truncateText(item.jd, 12)}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -104,7 +104,7 @@ const Table: React.FC<TableProps> = ({ setMainData }: any) => {
                     </div>
                 </div>
                 <button
-                    className="mt-[1rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-600 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80"
+                    className=" ml-[2rem] mt-[1rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-600 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80"
                     onClick={handleLoadClick}
                 >
                     Load

@@ -38,7 +38,7 @@ export const Benefits = () => {
                         /> */}
                     </svg>
                 </div>
-                <div className="relative grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="relative grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     <div className="flex flex-col justify-between overflow-hidden text-left transition-shadow duration-200 bg-white rounded shadow-xl group hover:shadow-2xl">
                         <div className="p-5">
                             <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
@@ -76,32 +76,42 @@ export const Benefits = () => {
                         </div>
                         <div className="w-full h-1 ml-auto duration-300 origin-left transform scale-x-0 bg-deep-purple-accent-400 group-hover:scale-x-100" />
                     </div>
-                    <div className="flex flex-col justify-between overflow-hidden text-left transition-shadow duration-200 bg-white rounded shadow-xl group hover:shadow-2xl">
-                        <div className="p-5">
-                            <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
-                                <img width="30" height="30" src="https://img.icons8.com/ios-glyphs/30/voice-and-touch.png" alt="voice-and-touch" />
-                            </div>
-                            <p className="mb-2 font-bold">User-Friendly Interface</p>
-                            <p className="text-sm leading-5 text-gray-900">
-                                Enjoy a Seamless, Intuitive Experience with Our User-Friendly Platform, Designed for Recruiters of All Skill Levels.
-                            </p>
-                        </div>
-                        <div className="w-full h-1 ml-auto duration-300 origin-left transform scale-x-0 bg-deep-purple-accent-400 group-hover:scale-x-100" />
-                    </div>
-                    <div className="flex flex-col justify-between overflow-hidden text-left transition-shadow duration-200 bg-white rounded shadow-xl group hover:shadow-2xl">
-                        <div className="p-5">
-                            <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
-                                <img width="30" height="30" src="https://img.icons8.com/ios-filled/50/tiny-decisions.png" alt="tiny-decisions" />
-                            </div>
-                            <p className="mb-2 font-bold">Data-Driven Decisions</p>
-                            <p className="text-sm leading-5 text-gray-900">
-                                Make Informed Hiring Decisions with Data-Driven Insights and Comprehensive Candidate Profiles.
-                            </p>
-                        </div>
-                        <div className="w-full h-1 ml-auto duration-300 origin-left transform scale-x-0 bg-deep-purple-accent-400 group-hover:scale-x-100" />
-                    </div>
+
 
                 </div>
+                <div className="flex items-center justify-center gap-5">
+                    <div className="relative flex justify-center items-center mt-5" >
+                        <div className="flex flex-col justify-between overflow-hidden text-left transition-shadow duration-200 bg-white rounded shadow-xl group hover:shadow-2xl">
+                            <div className="p-5">
+                                <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
+                                    <img width="30" height="30" src="https://img.icons8.com/ios-glyphs/30/voice-and-touch.png" alt="voice-and-touch" />
+                                </div>
+                                <p className="mb-2 font-bold">User-Friendly Interface</p>
+                                <p className="text-sm leading-5 text-gray-900 w-full md:w-[20rem]">
+                                    Enjoy a Seamless, Intuitive Experience with Our User-Friendly Platform, Designed for Recruiters of All Skill Levels.
+                                </p>
+                            </div>
+                            <div className="w-full h-1 ml-auto duration-300 origin-left transform scale-x-0 bg-deep-purple-accent-400 group-hover:scale-x-100" />
+                        </div>
+                    </div>
+                    <div className="relative flex justify-center items-center mt-5">
+                        <div className="flex flex-col justify-between overflow-hidden text-left transition-shadow duration-200 bg-white rounded shadow-xl group hover:shadow-2xl">
+                            <div className="p-5">
+                                <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
+                                    <img width="30" height="30" src="https://img.icons8.com/ios-filled/50/tiny-decisions.png" alt="tiny-decisions" />
+                                </div>
+                                <p className="mb-2 font-bold">Data-Driven Decisions</p>
+                                <p className="text-sm leading-5 text-gray-900 w-full md:w-[20rem]">
+                                    Make Informed Hiring Decisions with Data-Driven Insights and Comprehensive Candidate Profiles.
+                                </p>
+                            </div>
+                            <div className="w-full h-1 ml-auto duration-300 origin-left transform scale-x-0 bg-deep-purple-accent-400 group-hover:scale-x-100" />
+                        </div>
+                    </div>
+                </div>
+
+
+
             </div>
         </div>
     );

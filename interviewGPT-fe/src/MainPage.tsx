@@ -1,9 +1,10 @@
 
-import Accoridan from "./components/Accoridan";
-import TechAccordian from "./components/TechAccordian";
+// import Accoridan from "./components/Accoridan";
+// import TechAccordian from "./components/TechAccordian";
 import { useState, useEffect } from "react";
 import ReportTable from "./components/ReportTable";
 import html2canvas from 'html2canvas';
+import Tabs from "./components/Tabs";
 
 
 const MainPage = () => {
@@ -41,7 +42,7 @@ const MainPage = () => {
     const btnGenerate = () => {
         if (techSkillOne && softSkillPercentage) {
             return <button
-                className="mt-[0rem] px-6 py-2 w-[12rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-600 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80"
+                className="mt-[2rem] px-6 py-2 w-[12rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-600 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80"
                 onClick={handleGenerateReport}
             >
                 Generate Report
@@ -98,7 +99,9 @@ const MainPage = () => {
     return (
         <div id="main-content">
             {/* <h1>hello</h1> */}
-            <Accoridan setsoftSkillPercentage={setsoftSkillPercentage} softSkill={softSkill} />
+            <Tabs setsoftSkillPercentage={setsoftSkillPercentage} softSkill={softSkill} techSkill={techSkill}
+                setTechSkillOne={setTechSkillOne} />
+            {/* <Accoridan setsoftSkillPercentage={setsoftSkillPercentage} softSkill={softSkill} />
             <TechAccordian
                 techSkill={techSkill}
                 setTechSkillOne={setTechSkillOne}
@@ -108,7 +111,7 @@ const MainPage = () => {
             // setTechSkillFour={setTechSkillFour}
             // setTechSkillFive={setTechSkillFive}
             // setTechSkillSix={setTechSkillSix}
-            />
+            /> */}
             <div className="flex justify-center items-center ">
                 {
                     btnGenerate()
