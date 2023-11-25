@@ -85,15 +85,15 @@ const QuestionAccordion = ({ question, type, answer, keywords, updatePercentage 
     };
 
     return (
-        <div className="border rounded shadow-sm p-4 mt-4 mx-[1rem] ">
+        <div className="border rounded shadow-sm p-4 mt-4 mx-[1rem] " style={{ width: '60%', marginLeft: "30px" }}>
             <div className="cursor-pointer">
 
                 <div className="flex flex-col items-baseline gap-4 flex-wrap">
                     <div className={`inline-block h-3 w-3  ${getDifficultyColor()}`}>
                         {/* {type} */}
                     </div>
-                    <div className="flex items-center justify-between gap-2">
-                        <p className="text-lg font-medium cursor-pointer"  >{question}</p>
+                    <div className="flex items-center justify-between gap-2 w-full">
+                        <p className="text-lg font-bold cursor-pointer"  >{question}</p>
                         <Popover data={answer} />
                     </div>
 
@@ -142,7 +142,7 @@ const QuestionAccordion = ({ question, type, answer, keywords, updatePercentage 
                         <hr className="my-2 border-gray-300 w-[100%]" />
 
                         {/* <p className="text-gray-700">Technical Skill: {answer}</p> */}
-                        <p className="text-gray-700 mt-[0.5rem] font-bold">Keywords: {keywords}</p>
+                        <p className="text-gray-500 mt-[0.5rem] font-bold">Keywords: {keywords}</p>
                     </div>
                 )}
             </div>
@@ -224,10 +224,10 @@ const Accordion = ({ title, softSkill, updatePercentage }: any) => {
                     <div className={`inline-block mt-2 h-3 w-3  ${getDifficultyColor()}`}>
                         {/* {type} */}
                     </div>
-                    <div className="flex items-center justify-between gap-8">
+                    <div className="flex items-center justify-between gap-8 w-full">
 
 
-                        <p className="text-lg font-medium">
+                        <p className="text-lg text-black-400  font-medium">
                             {title}
 
                         </p>
@@ -278,7 +278,7 @@ const Accordion = ({ title, softSkill, updatePercentage }: any) => {
                             )?.answer}
                         </p> */}
                         <div>
-                            <p className="text-gray-700 mt-[0.5rem] font-bold mb-[0.5rem]">
+                            <p className="text-gray-600 mt-[0.5rem] font-bold mb-[0.5rem]">
                                 Keywords:{" "}
                                 {softSkill?.soft_skills?.soft_skills[0]?.questions?.find(
                                     (item: { question: string }) => item.question === title
@@ -368,7 +368,7 @@ const Tabs: React.FC<TabsProps> = ({ setsoftSkillPercentage, softSkill, techSkil
                         <div className="flex" style={{ flexDirection: 'row' }}>
                             <TETabsContent>
                                 <TETabsPane show={nestedActive === "nestedTab1"}>
-                                    <div className="md:grid md:grid-cols-2 gap-4 mx-[1rem]" >
+                                    <div className="md:grid md:grid-cols-2 gap-8 mx-[1rem]" >
                                         {softSkill?.soft_skills?.soft_skills[0]?.questions?.map(
                                             (item: { question: string }, index: number) => (
                                                 <Accordion

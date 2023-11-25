@@ -44,9 +44,9 @@ export const Benefits = () => {
                             <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
                                 <img width="30" height="30" src="https://img.icons8.com/ios-filled/50/time-management-skills.png" alt="time-management-skills" />
                             </div>
-                            <p className="mb-2 font-bold">Time Efficiency
+                            <p className="text-xl  mb-2 font-bold">Time Efficiency
                             </p>
-                            <p className="text-sm leading-5 text-gray-900">
+                            <p className="text-lg leading-5 text-gray-600">
                                 Save Significant Time in Preparing for Interviews – Focus More on the Candidate, Less on the Prep Work
                             </p>
                         </div>
@@ -57,8 +57,8 @@ export const Benefits = () => {
                             <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
                                 <img width="30" height="30" src="https://img.icons8.com/ios-glyphs/30/accuracy--v1.png" alt="accuracy--v1" />
                             </div>
-                            <p className="mb-2 font-bold">Enhanced Accuracy</p>
-                            <p className="text-sm leading-5 text-gray-900">
+                            <p className="text-xl mb-2 font-bold">Enhanced Accuracy</p>
+                            <p className="text-lg leading-5 text-gray-600">
                                 Leverage AI for Generating Targeted Questions, Ensuring a More Accurate Assessment of Candidates' Skills
                             </p>
                         </div>
@@ -69,8 +69,8 @@ export const Benefits = () => {
                             <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
                                 <img width="30" height="30" src="https://img.icons8.com/ios-glyphs/30/enter-2.png" alt="enter-2" />
                             </div>
-                            <p className="mb-2 font-bold">Consistency in Interviews</p>
-                            <p className="text-sm leading-5 text-gray-900">
+                            <p className="text-xl mb-2 font-bold">Consistency in Interviews</p>
+                            <p className="text-lg leading-5 text-gray-600">
                                 Effortlessly Mark Responses as Correct, Partially Correct, or Wrong - Streamline the Scoring Process for Each Skill
                             </p>
                         </div>
@@ -86,8 +86,8 @@ export const Benefits = () => {
                                 <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
                                     <img width="30" height="30" src="https://img.icons8.com/ios-glyphs/30/voice-and-touch.png" alt="voice-and-touch" />
                                 </div>
-                                <p className="mb-2 font-bold">User-Friendly Interface</p>
-                                <p className="text-sm leading-5 text-gray-900 w-full md:w-[20rem]">
+                                <p className="text-xl mb-2 font-bold">User-Friendly Interface</p>
+                                <p className="text-lg leading-5 text-gray-600 w-full md:w-[20rem]">
                                     Enjoy a Seamless, Intuitive Experience with Our User-Friendly Platform, Designed for Recruiters of All Skill Levels.
                                 </p>
                             </div>
@@ -100,8 +100,8 @@ export const Benefits = () => {
                                 <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
                                     <img width="30" height="30" src="https://img.icons8.com/ios-filled/50/tiny-decisions.png" alt="tiny-decisions" />
                                 </div>
-                                <p className="mb-2 font-bold">Data-Driven Decisions</p>
-                                <p className="text-sm leading-5 text-gray-900 w-full md:w-[20rem]">
+                                <p className="text-xl mb-2 font-bold">Data-Driven Decisions</p>
+                                <p className="text-lg leading-5 text-gray-600 w-full md:w-[20rem]">
                                     Make Informed Hiring Decisions with Data-Driven Insights and Comprehensive Candidate Profiles.
                                 </p>
                             </div>

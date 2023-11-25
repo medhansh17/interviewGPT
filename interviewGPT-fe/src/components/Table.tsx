@@ -81,7 +81,7 @@ const Table: React.FC<TableProps> = ({ setMainData }: any) => {
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900 lg:h-[22rem]">
+                                <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900 lg:h-[20rem]">
                                     {data?.map((item) => (
                                         <tr key={item.id}>
                                             <td className="px-4  text-sm font-medium text-gray-700 ">

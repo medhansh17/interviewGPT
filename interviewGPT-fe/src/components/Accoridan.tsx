@@ -79,7 +79,7 @@ const Accordion: FC<AccordionProps> = ({ title, softSkill, updatePercentage }) =
                         </p>
                         <div className="flex items-center">
 
-                            <p className="text-lg font-medium">
+                            <p className="text-lg text-black-400  font-medium">
                                 {title}
 
                             </p>
@@ -160,7 +160,7 @@ const Accordion: FC<AccordionProps> = ({ title, softSkill, updatePercentage }) =
                             )?.answer}
                         </p> */}
                         <div>
-                            <p className="text-gray-700 mt-[0.5rem] font-bold mb-[0.5rem]">
+                            <p className="text-gray-600 mt-[0.5rem] font-bold mb-[0.5rem]">
                                 Keywords:{" "}
                                 {softSkill?.soft_skills?.soft_skills[0]?.questions?.find(
                                     (item: { question: string }) => item.question === title

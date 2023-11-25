@@ -45,9 +45,9 @@ export const Features = () => {
                             <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
                                 <img width="30" height="30" src="https://img.icons8.com/ios-glyphs/30/decision--v1.png" alt="decision--v1" />
                             </div>
-                            <p className="mb-2 font-bold">Custom Question Generation:
+                            <p className="text-xl mb-2 font-bold">Custom Question Generation:
                             </p>
-                            <p className="text-sm leading-5 text-gray-900">
+                            <p className="text-lg leading-5 text-gray-600">
                                 Enter Job Descriptions, Get AI-Crafted Interview Questions - Tailored to Assess Key Skills and Experience Levels.
                             </p>
                         </div>
@@ -59,8 +59,8 @@ export const Features = () => {
                             <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
                                 <img width="25" height="25" src="https://img.icons8.com/ios-filled/50/faq.png" alt="faq" />
                             </div>
-                            <p className="mb-2 font-bold">Comprehensive Answer Guide</p>
-                            <p className="text-sm leading-5 text-gray-900">
+                            <p className=" text-xl mb-2 font-bold">Comprehensive Answer Guide</p>
+                            <p className="text-lg leading-5 text-gray-600">
                                 Access Well-Structured Answers and Key Keywords for Each Question, Enabling In-Depth Candidate Evaluation.
                             </p>
                         </div>
@@ -73,8 +73,8 @@ export const Features = () => {
                             <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
                                 <img width="24" height="24" src="https://img.icons8.com/material-sharp/24/level-tool.png" alt="level-tool" />
                             </div>
-                            <p className="mb-2 font-bold">Candidate Evaluation Tool</p>
-                            <p className="text-sm leading-5 text-gray-900">
+                            <p className="text-xl mb-2 font-bold">Candidate Evaluation Tool</p>
+                            <p className="text-lg leading-5 text-gray-600">
                                 Effortlessly Mark Responses as Correct, Partially Correct, or Wrong - Streamline the Scoring Process for Each Skill
                             </p>
                         </div>
@@ -93,8 +93,8 @@ export const Features = () => {
                                 <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
                                     <img width="30" height="30" src="https://img.icons8.com/ios-filled/50/visualization-skill.png" alt="visualization-skill" />
                                 </div>
-                                <p className="mb-2 font-bold">Skill-Based Scoring System</p>
-                                <p className="text-sm leading-5 text-gray-900 w-full md:w-[20rem]">
+                                <p className="text-xl mb-2 font-bold">Skill-Based Scoring System</p>
+                                <p className="text-lg leading-5 text-gray-600 w-full md:w-[20rem]">
                                     Quantify Candidate Competency with an Automated Scoring System Based on Interview Responses.
                                 </p>
                             </div>
@@ -112,8 +112,8 @@ export const Features = () => {
                                 <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
                                     <img width="30" height="30" src="https://img.icons8.com/ios-glyphs/30/share-rounded.png" alt="share-rounded" />
                                 </div>
-                                <p className="mb-2 font-bold">Downloadable Reports</p>
-                                <p className="text-sm leading-5 text-gray-900 w-full md:w-[20rem]">
+                                <p className="text-xl mb-2 font-bold">Downloadable Reports</p>
+                                <p className="text-lg leading-5 text-gray-600 w-full md:w-[20rem]">
                                     Easily Download Candidate Evaluations and Comprehensive Reports for Record-Keeping and Analysis
                                 </p>
                             </div>

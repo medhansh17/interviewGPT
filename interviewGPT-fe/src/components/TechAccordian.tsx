@@ -84,7 +84,7 @@ const QuestionAccordion: FC<QuestionAccordionProps> = ({ question, type, answer,
                         {/* {type} */}
                     </div>
                     <div className="flex items-center gap-2">
-                        <p className="text-lg font-medium cursor-pointer"  >{question}</p>
+                        <p className="text-lg font-bold cursor-pointer"  >{question}</p>
                         <Popover data={answer} />
                     </div>
 
@@ -163,7 +163,7 @@ const QuestionAccordion: FC<QuestionAccordionProps> = ({ question, type, answer,
                         <hr className="my-2 border-gray-300 w-[100%]" />
 
                         {/* <p className="text-gray-700">Technical Skill: {answer}</p> */}
-                        <p className="text-gray-700 mt-[0.5rem] font-bold">Keywords: {keywords}</p>
+                        <p className="text-gray-500 mt-[0.5rem] font-bold">Keywords: {keywords}</p>
                     </div>
                 )}
             </div>
