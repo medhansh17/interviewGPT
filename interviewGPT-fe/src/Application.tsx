@@ -197,7 +197,7 @@ function Application() {
       <div className="md:flex md:justify-center md:items-center 2xl:gap-8 xl:gap-0 gap-2">
         <div className="">
 
-          <div className="mx-[2rem]">
+          <div className="mx-[3rem]">
             <div>
               <p className="flex justify-left items-center mb-2 font-bold md:text-[2rem] text-[1rem]">Add Job Description</p>
               <p>Insert your own job description or select one from the examples provided below.</p>

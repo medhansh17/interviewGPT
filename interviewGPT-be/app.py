@@ -98,6 +98,7 @@ def ask_question(skill, work_experience, num_of_questions, is_soft_skill=False):
         prompt = """You will be provided with a set of soft skills. Generate four 4 different relevant questions to evaluate the soft skills. 
         Add 1 compuslaory question which will be "tell me about yourself"
       Also, generate a one-line answer for the question, along with mandatory keywords to be used in the while answering that question. 
+      tell me about yourself should be first question
       Order the questions in the sequence that we need to ask. display keywords to be present in the answer by prefixing with keyword: "Keywords:"
       
       Generate output in the form of 
@@ -115,7 +116,7 @@ def ask_question(skill, work_experience, num_of_questions, is_soft_skill=False):
 
     # OpenAI API call with constructed messages
     response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4",
         messages=[
             {"role": "system", "content": prompt},
             {"role": "user", "content": f"Skill is {skill} and years of experience {work_experience}"}

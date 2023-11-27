@@ -6,7 +6,7 @@ import {
     TETabsPane,
 } from "tw-elements-react";
 import Popover from "./Popover";
-import Header from "./Header";
+// import Header from "./Header";
 
 
 // interface QuestionAccordionProps {
@@ -334,7 +334,7 @@ const Tabs: React.FC<TabsProps> = ({ setsoftSkillPercentage, softSkill, techSkil
         <div>
        
 
-            <div className="mb-3">
+            <div className="mb-3 md:mx-[2rem] shadow-lg">
                 <TETabs>
                     <TETabsItem
                         onClick={() => handleBasicClick("tab1")}

@@ -102,7 +102,7 @@ const MainPage = () => {
             {/* <h1>hello</h1> */}
             <div className="md:mx-[3rem] mx-[1rem]">
                 <Header />
-                <div className="mb-[1rem]">
+                <div className="mb-[1rem] md:mx-[2rem]">
                     <p className="text-[2rem] mb-2 font-bold">Assessment Sheet
                     </p>
                     <p className="text-[1rem] leading-5 text-gray-600">
