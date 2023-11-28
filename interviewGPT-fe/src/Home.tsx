@@ -55,10 +55,10 @@ const Home = () => {
           <div className="flex md:flex-row flex-col md:gap-[8rem] gap-[4rem] items-center justify-between mx-[3rem] md:mt-[1rem]">
             <div className="flex flex-col gap-[2rem] md:w-[28rem]">
               <div>
-                <h1 className="md:text-[3rem] text-[3rem] font-bold text-[#000] mb-4">InterviewGPT</h1>
-                <h1 className="md:text-[1.5rem] text-[2rem] font-bold text-[#000]">Empowering Recruiters with AI-Driven Interviews </h1>
+                <h1 className="md:text-[4rem] text-[3rem] font-bold text-[#000] mb-4">InterviewGPT</h1>
+                <h1 className="md:text-[2rem] text-[2rem] font-bold text-[#000]">Empowering Recruiters with AI-Driven Interviews </h1>
               </div>
-              <h1 className="md:text-[1.3rem] text-[1.9rem] text-[#000] ">Revolutionize Your Hiring Process with InterviewGPT. AI-Powered Question Generation for Accurate Candidate Assessment</h1>
+              <h1 className="md:text-[1.5rem] text-[1.9rem] text-[#000] ">Revolutionize Your Hiring Process with InterviewGPT. AI-Powered Question Generation for Accurate Candidate Assessment</h1>
               <Link to="/app" className="link-styles">
                 <button className="px-6 py-2 w-[8rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-[#066ecf]  hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80">
                   TRY NOW
@@ -66,7 +66,7 @@ const Home = () => {
               </Link>
             </div>
             <div className='ravelent'>
-              <img src={Image} className="w-[55rem]" alt="logo"/>
+              <img src={Image} className="w-[60rem] shadow-2xl" alt="logo"/>
             </div>
 
           </div>
@@ -80,7 +80,7 @@ const Home = () => {
 
         {/* last section */}
         <div className="flex flex-col justify-center items-center mt-[5rem]">
-          <hr className="my-2 border-gray-300 w-[100%]" />
+          <hr className="my-2 border-gray-300 w-[100%] 2xl:mt-[15rem]" />
 
           {/* future section */}
           {/* <div className="timeline-container">
