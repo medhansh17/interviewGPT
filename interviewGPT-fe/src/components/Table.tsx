@@ -60,22 +60,22 @@ const Table: React.FC<TableProps> = ({ setMainData }: any) => {
                     <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
                         <div className="overflow-hidden border border-gray-200 dark:border-gray-700 md:rounded-lg">
                             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                <thead style={{ backgroundColor: ' rgb(173, 216, 230)' }} className="dark:bg-gray-800">
+                                <thead style={{ backgroundColor: '#80808042' }} className="dark:bg-gray-800">
                                     <tr>
                                         <th scope="col" className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                             <div className="flex items-center gap-x-3">
-                                                <span className='md:text-[1.2rem]'>Select</span>
+                                                <span className='md:text-[1.2rem] text-[#000]'>Select</span>
                                             </div>
                                         </th>
                                         <th scope="col" className="px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                             <button className="flex items-center gap-x-2">
-                                                <span className='md:text-[1.2rem]'>Role</span>
+                                                <span className='md:text-[1.2rem] text-[#000]'>Role</span>
                                                 <svg className="h-3" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg"></svg>
                                             </button>
                                         </th>
                                         <th scope="col" className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                             <button className="flex items-center gap-x-2">
-                                                <span className='md:text-[1.2rem]'>Job Description</span>
+                                                <span className='md:text-[1.2rem] text-[#000]'>Job Description</span>
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" className="w-4 h-4"></svg>
                                             </button>
                                         </th>
