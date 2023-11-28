@@ -3,6 +3,8 @@ import './app.css';
 import { Link } from 'react-router-dom';
 import { Features } from './components/Home/Features';
 import { Benefits } from './components/Home/Benefits';
+import Image from "./assets/landing.gif"
+
 const Home = () => {
   const featureRef = useRef<HTMLDivElement>(null);
   const benefitsRef = useRef<HTMLDivElement>(null);
@@ -64,7 +66,7 @@ const Home = () => {
               </Link>
             </div>
             <div className='ravelent'>
-              <img src="https://pdf.bluetickconsultants.com/static/dist/images/landing_image.webp" className="w-[55rem]" />
+              <img src={Image} className="w-[55rem]" alt="logo"/>
             </div>
 
           </div>

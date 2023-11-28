@@ -30,7 +30,7 @@ const Table: React.FC<TableProps> = ({ setMainData }: any) => {
         },
         {
             id: 2,
-            role: "Senior Python Developer ",
+            role: "Senior Python Developer",
             jd: "Responsibilities: \n Design and develop automation solutions for healthcare processes using Python. \n Maintain and enhance existing solutions for seamless integration and improved performance. \n Conduct API testing and integration to ensure smooth connectivity with other systems. \n Apply problem-solving and critical thinking skills to quickly analyze and solve issues \n Collaborate with the team and communicate effectively to contribute to the transformation. Qualifications: \n Professional career of 3+ years as Python developer. \n Experience with API testing and integration \n Knowledge of automation frameworks such as Selenium or PlayWright (this is required)\n Familiarity with software development life cycle (SDLC)\n Good problem-solving and critical-thinking skills. Expectations:Follow the PEP 8 Style Guide. Modularize Code with Functions and Classes. Write Unit Test. Apply Design Patterns. Document Code and APIs. Optimize Performance. Understanding of relational databases and SQL. Familiarity with AWS, SQL, Docker, JavaScript. Experience with server-side applications"
         },
         {
