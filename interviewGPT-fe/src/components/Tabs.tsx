@@ -93,7 +93,7 @@ const QuestionAccordion = ({ question, type, answer, keywords, updatePercentage 
                         {/* {type} */}
                     </div>
                     <div className="flex items-center justify-between gap-2 w-full">
-                        <p className="text-lg font-bold cursor-pointer"  >{question}</p>
+                        <p className="text-lg  cursor-pointer"  >{question}</p>
                         <Popover data={answer} />
                     </div>
 
@@ -103,6 +103,7 @@ const QuestionAccordion = ({ question, type, answer, keywords, updatePercentage 
 
                 <div className="flex md:flex-wrap lg:flex-nowrap items-center gap-3">
                     <button
+                        title="correct"
                         onClick={() => handleOptionClick("Correct")}
                         className={`cursor-pointer ${selectedOption === "Correct" ? 'bg-green-500 text-white' : 'hover:bg-green-500 text-green-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "Correct" ? 'border-green-500' : 'border-green-500 hover:border-transparent'} rounded font-medium`}
                     >
@@ -110,6 +111,7 @@ const QuestionAccordion = ({ question, type, answer, keywords, updatePercentage 
                     </button>
 
                     <button
+                        title="PartiallyCorrect"
                         onClick={() => handleOptionClick("PartiallyCorrect")}
                         className={`cursor-pointer ${selectedOption === "PartiallyCorrect" ? 'bg-yellow-500 text-white' : 'hover:bg-yellow-500 text-yellow-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "PartiallyCorrect" ? 'border-yellow-500' : 'border-yellow-500 hover:border-transparent'} rounded font-medium`}
                     >
@@ -117,6 +119,7 @@ const QuestionAccordion = ({ question, type, answer, keywords, updatePercentage 
                     </button>
 
                     <button
+                        title="Incorrect"
                         onClick={() => handleOptionClick("Incorrect")}
                         className={`cursor-pointer ${selectedOption === "Incorrect" ? 'bg-red-500 text-white' : 'hover:bg-red-500 text-red-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "Incorrect" ? 'border-red-500' : 'border-red-500 hover:border-transparent'} rounded font-medium`}
                     >
@@ -246,6 +249,7 @@ const Accordion = ({ title, softSkill, updatePercentage }: any) => {
 
                 <div className="flex md:flex-wrap lg:flex-nowrap items-center gap-3">
                     <button
+                        title="correct"
                         onClick={() => handleOptionClick("Correct")}
                         className={`cursor-pointer ${selectedOption === "Correct" ? 'bg-green-500 text-white' : 'hover:bg-green-500 text-green-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "Correct" ? 'border-green-500' : 'border-green-500 hover:border-transparent'} rounded font-medium`}
                     >
@@ -253,6 +257,7 @@ const Accordion = ({ title, softSkill, updatePercentage }: any) => {
                     </button>
 
                     <button
+                        title="PartiallyCorrect"
                         onClick={() => handleOptionClick("PartiallyCorrect")}
                         className={`cursor-pointer ${selectedOption === "PartiallyCorrect" ? 'bg-yellow-500 text-white' : 'hover:bg-yellow-500 text-yellow-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "PartiallyCorrect" ? 'border-yellow-500' : 'border-yellow-500 hover:border-transparent'} rounded font-medium`}
                     >
@@ -260,6 +265,7 @@ const Accordion = ({ title, softSkill, updatePercentage }: any) => {
                     </button>
 
                     <button
+                        title="Incorrect"
                         onClick={() => handleOptionClick("Incorrect")}
                         className={`cursor-pointer ${selectedOption === "Incorrect" ? 'bg-red-500 text-white' : 'hover:bg-red-500 text-red-500 hover:text-white'} h-[2rem] py-0 px-4 border ${selectedOption === "Incorrect" ? 'border-red-500' : 'border-red-500 hover:border-transparent'} rounded font-medium`}
                     >
@@ -332,14 +338,14 @@ const Tabs: React.FC<TabsProps> = ({ setsoftSkillPercentage, softSkill, techSkil
 
     return (
         <div>
-       
+
 
             <div className="mb-3 md:mx-[2rem] shadow-lg">
                 <TETabs>
                     <TETabsItem
                         onClick={() => handleBasicClick("tab1")}
                         active={basicActive === "tab1"}
-                        style={{ fontWeight: "bold" }}
+                        style={{ fontWeight: "bold", fontSize: "0.8rem" }}
                         className="font-bold"
                     >
                         Behavioural Assessment
@@ -347,7 +353,7 @@ const Tabs: React.FC<TabsProps> = ({ setsoftSkillPercentage, softSkill, techSkil
                     <TETabsItem
                         onClick={() => handleBasicClick("tab2")}
                         active={basicActive === "tab2"}
-                        style={{ fontWeight: "bold" }}
+                        style={{ fontWeight: "bold", fontSize: "0.8rem" }}
                         className="font-bold"
                     >
                         Technical Assessment
