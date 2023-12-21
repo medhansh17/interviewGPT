@@ -9,6 +9,7 @@ import Header from "./components/Header";
 import axios from "axios";
 
 import Loader from "../src/components/Loader";
+import ErrorAlert from "./components/Alerts/ErrorAlert";
 
 
 
@@ -22,7 +23,10 @@ function Application() {
   const [techSkillOne, setTechSkillOne] = useState<any | null>(null)
   const [softSkillPercentage, setsoftSkillPercentage] = useState<any | null>(null)
   const [isReportGenerated, setIsReportGenerated] = useState(false);
-  console.log("mainData", mainTextArea,mainSkill,softSkill,techSkill,isReportGenerated,techSkillOne)
+  console.log("mainData", mainTextArea, mainSkill, softSkill, techSkill, isReportGenerated, techSkillOne);
+
+  const [error, setError] = useState<string | null>(null);
+
 
   const [isLoading, setIsLoading] = useState(false);
   console.log(softSkillPercentage, "softSkillPercentagesoftSkillPercentage")
@@ -65,8 +69,13 @@ function Application() {
 
       window.location.href = "#/app-submit"
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching data:", error);
+      console.error('API Error:', error);
+      setError(error);
+      setTimeout(() => {
+        setError(null);
+      }, 3000);
     }
     setIsLoading(false);
 
@@ -90,8 +99,14 @@ function Application() {
       localStorage.setItem('softSkill', JSON.stringify(softSkillResponse?.data));
       setSoftSkill(softSkillResponse?.data)
 
-    } catch (error) {
+    } catch (error:any) {
       console.error("Error fetching soft skill questions:", error);
+      console.error("Error fetching data:", error);
+      console.error('API Error:', error);
+      setError(error);
+      setTimeout(() => {
+        setError(null);
+      }, 3000);
     }
   };
 
@@ -114,8 +129,14 @@ function Application() {
 
       setTechSkill(techSkillResponse?.data)
 
-    } catch (error) {
+    } catch (error:any) {
       console.error("Error fetching soft skill questions:", error);
+      console.error("Error fetching data:", error);
+      console.error('API Error:', error);
+      setError(error);
+      setTimeout(() => {
+        setError(null);
+      }, 3000);
     }
   };
 
@@ -194,6 +215,9 @@ function Application() {
   return (
     <main id="main-content">
       <Header />
+      <div className='flex justify-end'>
+        {error && <ErrorAlert message={"asda"} />}
+      </div>
       <div className="md:flex md:justify-center md:items-center 2xl:gap-8 xl:gap-0 gap-2">
         <div className="">
 
