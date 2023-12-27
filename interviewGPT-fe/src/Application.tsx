@@ -10,6 +10,8 @@ import axios from "axios";
 
 import Loader from "../src/components/Loader";
 import ErrorAlert from "./components/Alerts/ErrorAlert";
+import SoftSkillTable from "./components/SofSkillTable";
+import TechSkillTable from "./components/TechSkillTable";
 
 
 
@@ -23,6 +25,8 @@ function Application() {
   const [techSkillOne, setTechSkillOne] = useState<any | null>(null)
   const [softSkillPercentage, setsoftSkillPercentage] = useState<any | null>(null)
   const [isReportGenerated, setIsReportGenerated] = useState(false);
+  const [fetchSkill, setFetchSkill] = useState<any | null>(null)
+
   console.log("mainData", mainTextArea, mainSkill, softSkill, techSkill, isReportGenerated, techSkillOne);
 
   const [error, setError] = useState<string | null>(null);
@@ -62,12 +66,13 @@ function Application() {
         }
       );
 
+      setFetchSkill(response.data)
       localStorage.setItem('mainSkill', JSON.stringify(response.data));
       setMainSkill(response.data);
       await fetchSoftSkillQuestions(response.data);
       await fetchSoftTechQuestions(response.data);
 
-      window.location.href = "#/app-submit"
+      // window.location.href = "#/app-submit"
 
     } catch (error: any) {
       console.error("Error fetching data:", error);
@@ -99,7 +104,7 @@ function Application() {
       localStorage.setItem('softSkill', JSON.stringify(softSkillResponse?.data));
       setSoftSkill(softSkillResponse?.data)
 
-    } catch (error:any) {
+    } catch (error: any) {
       console.error("Error fetching soft skill questions:", error);
       console.error("Error fetching data:", error);
       console.error('API Error:', error);
@@ -129,7 +134,7 @@ function Application() {
 
       setTechSkill(techSkillResponse?.data)
 
-    } catch (error:any) {
+    } catch (error: any) {
       console.error("Error fetching soft skill questions:", error);
       console.error("Error fetching data:", error);
       console.error('API Error:', error);
@@ -302,6 +307,39 @@ function Application() {
         }
 
       </div> */}
+      <div>
+        <div className="flex  w-full flex-wrap">
+          <div className="w-[50%]">
+            <p className=" text-center md:text-[2rem] text-[1rem] my-[1rem]">SoftSkill</p>
+
+            <SoftSkillTable fetchSkill={fetchSkill} />
+
+          </div>
+
+          <div className="w-[50%]">
+            <p className=" text-center md:text-[2rem] text-[1rem] my-[1rem]">TechinalSkill</p>
+
+            <TechSkillTable fetchSkill={fetchSkill} />
+
+          </div>
+
+
+
+
+
+        </div>
+        <div className="flex justify-center items-center my-[1rem]">
+          <button
+            className={`mb-[0.5rem] px-6 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${mainData || mainTextArea ? 'bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80' : 'bg-gray-400 cursor-not-allowed'
+              } rounded-lg focus:outline-none`}
+            // onClick={fetchDataFetchSkill}
+          // disabled={!mainData || !mainTextArea}
+          >
+            Generate Questions
+          </button>
+        </div>
+
+      </div>
 
 
       <div className="bg-deep-purple-accent-400 ">
@@ -332,9 +370,7 @@ function Application() {
                     </p>
                   </div> */}
               </div>
-              <div className="grid grid-cols-2 gap-5 row-gap-8 lg:col-span-4 md:grid-cols-4">
 
-              </div>
             </div>
             <div className="flex flex-col justify-between pt-5 pb-10 border-t border-deep-purple-accent-200 sm:flex-row">
               <p className="text-lg text-[#000]">
