@@ -3,6 +3,8 @@ import TextArea from "./components/TextArea";
 import Table from "./components/Table";
 import { useState, useEffect } from "react";
 import Header from "./components/Header";
+import Image from "./assets/loader.gif"
+
 
 
 // import html2canvas from 'html2canvas';
@@ -265,7 +267,15 @@ function Application() {
 
       </div>
       {
-        isLoading && <Loader />
+        isLoading &&
+        <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <div>
+            <img src={Image} className="" alt="logo" />
+            <h1 className="text-center">Estimated time: 1 min-6.5</h1>
+          </div>
+        </div>
+
+
       }
       {/* <Accoridan setsoftSkillPercentage={setsoftSkillPercentage} softSkill={softSkill} /> */}
       {/* <TechAccordian
@@ -332,7 +342,7 @@ function Application() {
           <button
             className={`mb-[0.5rem] px-6 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${mainData || mainTextArea ? 'bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80' : 'bg-gray-400 cursor-not-allowed'
               } rounded-lg focus:outline-none`}
-            // onClick={fetchDataFetchSkill}
+          // onClick={fetchDataFetchSkill}
           // disabled={!mainData || !mainTextArea}
           >
             Generate Questions
