@@ -40,9 +40,9 @@ const Home = () => {
             <h1 onClick={handleFeatureClick} className='cursor-pointer hidden md:block text-[1.5rem] font-semibold'>Features</h1>
             <h1 onClick={handleBenefitsClick} className='cursor-pointer hidden md:block text-[1.5rem] font-semibold'>Benefits</h1>
 
-            <Link to="/app" className="link-styles">
+            <Link to="/login" className="link-styles">
               <button className="md:px-6 md:py-2 px-4 py-1 md:w-[8rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-[#066ecf]  hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80">
-                Go to App
+                Login
               </button>
             </Link>
 

@@ -27,6 +27,8 @@ function Application() {
   const [techSkillOne, setTechSkillOne] = useState<any | null>(null)
   const [softSkillPercentage, setsoftSkillPercentage] = useState<any | null>(null)
   const [isReportGenerated, setIsReportGenerated] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
+
   const [fetchSkill, setFetchSkill] = useState<any | null>(null)
 
   console.log("mainData", mainTextArea, mainSkill, softSkill, techSkill, isReportGenerated, techSkillOne);
@@ -73,6 +75,7 @@ function Application() {
       setMainSkill(response.data);
       await fetchSoftSkillQuestions(response.data);
       await fetchSoftTechQuestions(response.data);
+      setIsHidden(true)
 
       // window.location.href = "#/app-submit"
 
@@ -317,16 +320,16 @@ function Application() {
         }
 
       </div> */}
-      <div>
+      <div style={{ display: isHidden ? 'block' : 'none' }}>
         <div className="flex  w-full flex-wrap">
-          <div className="w-[50%]">
+          {/* <div className="w-[50%]">
             <p className=" text-center md:text-[2rem] text-[1rem] my-[1rem]">SoftSkill</p>
 
             <SoftSkillTable fetchSkill={fetchSkill} />
 
-          </div>
+          </div> */}
 
-          <div className="w-[50%]">
+          <div className="w-[100%]">
             <p className=" text-center md:text-[2rem] text-[1rem] my-[1rem]">TechinalSkill</p>
 
             <TechSkillTable fetchSkill={fetchSkill} />
@@ -350,6 +353,9 @@ function Application() {
         </div>
 
       </div>
+
+
+
 
 
       <div className="bg-deep-purple-accent-400 ">
