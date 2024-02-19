@@ -1,11 +1,9 @@
-
 import TextArea from "./components/TextArea";
 import Table from "./components/Table";
 import { useState, useEffect } from "react";
 import Header from "./components/Header";
-import Image from "./assets/loader.gif"
-
-
+import Image from "./assets/loader.gif";
+import { Button } from "@/components/ui/button";
 
 // import html2canvas from 'html2canvas';
 import axios from "axios";
@@ -14,49 +12,51 @@ import Loader from "../src/components/Loader";
 import ErrorAlert from "./components/Alerts/ErrorAlert";
 import SoftSkillTable from "./components/SofSkillTable";
 import TechSkillTable from "./components/TechSkillTable";
-
-
+import Pricing from "./components/Pricing";
 
 function Application() {
-
-  const [mainData, setMainData] = useState<any | null>(null)
-  const [mainTextArea, setMainTextArea] = useState<any | null>("sdawdawd")
-  const [mainSkill, setMainSkill] = useState<any | null>(null)
-  const [softSkill, setSoftSkill] = useState<any | null>(null)
-  const [techSkill, setTechSkill] = useState<any | null>(null)
-  const [techSkillOne, setTechSkillOne] = useState<any | null>(null)
-  const [softSkillPercentage, setsoftSkillPercentage] = useState<any | null>(null)
+  const [mainData, setMainData] = useState<any | null>(null);
+  const [mainTextArea, setMainTextArea] = useState<any | null>("sdawdawd");
+  const [mainSkill, setMainSkill] = useState<any | null>(null);
+  const [softSkill, setSoftSkill] = useState<any | null>(null);
+  const [techSkill, setTechSkill] = useState<any | null>(null);
+  const [techSkillOne, setTechSkillOne] = useState<any | null>(null);
+  const [softSkillPercentage, setsoftSkillPercentage] = useState<any | null>(
+    null,
+  );
   const [isReportGenerated, setIsReportGenerated] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
 
-  const [fetchSkill, setFetchSkill] = useState<any | null>(null)
+  const [fetchSkill, setFetchSkill] = useState<any | null>(null);
 
-  console.log("mainData", mainTextArea, mainSkill, softSkill, techSkill, isReportGenerated, techSkillOne);
+  console.log(
+    "mainData",
+    mainTextArea,
+    mainSkill,
+    softSkill,
+    techSkill,
+    isReportGenerated,
+    techSkillOne,
+  );
 
   const [error, setError] = useState<string | null>(null);
 
-
   const [isLoading, setIsLoading] = useState(false);
-  console.log(softSkillPercentage, "softSkillPercentagesoftSkillPercentage")
+  console.log(softSkillPercentage, "softSkillPercentagesoftSkillPercentage");
 
-  console.log("softSkillPercentagesss", mainTextArea)
+  console.log("softSkillPercentagesss", mainTextArea);
 
   useEffect(() => {
-
     const clearLocalStorage = () => {
       localStorage.clear();
     };
 
-
     window.addEventListener("beforeunload", clearLocalStorage);
-
 
     return () => {
       window.removeEventListener("beforeunload", clearLocalStorage);
     };
   }, []);
-
-
 
   const fetchDataFetchSkill = async () => {
     setIsLoading(true);
@@ -65,31 +65,27 @@ function Application() {
         "https://coops-backend.bluetickconsultants.com:8000/fetch_skills",
         {
           name: mainData?.role || "",
-          job_description: mainData?.jd || mainTextArea
-          ,
-        }
+          job_description: mainData?.jd || mainTextArea,
+        },
       );
 
-      setFetchSkill(response.data)
-      localStorage.setItem('mainSkill', JSON.stringify(response.data));
+      setFetchSkill(response.data);
+      localStorage.setItem("mainSkill", JSON.stringify(response.data));
       setMainSkill(response.data);
       await fetchSoftSkillQuestions(response.data);
       await fetchSoftTechQuestions(response.data);
-      setIsHidden(true)
+      setIsHidden(true);
 
       // window.location.href = "#/app-submit"
-
     } catch (error: any) {
       console.error("Error fetching data:", error);
-      console.error('API Error:', error);
+      console.error("API Error:", error);
       setError(error);
       setTimeout(() => {
         setError(null);
       }, 3000);
     }
     setIsLoading(false);
-
-
   };
 
   const fetchSoftSkillQuestions = async (data: any) => {
@@ -98,21 +94,20 @@ function Application() {
         "https://coops-backend.bluetickconsultants.com:8000/generate_soft_skill_questions",
         {
           name: mainData?.role,
-          soft_skills: data?.skills?.soft_skills.join(','),// Ensure soft_skills is an array
+          soft_skills: data?.skills?.soft_skills.join(","), // Ensure soft_skills is an array
           experience: data?.skills?.experience,
-
-        }
-
-
+        },
       );
 
-      localStorage.setItem('softSkill', JSON.stringify(softSkillResponse?.data));
-      setSoftSkill(softSkillResponse?.data)
-
+      localStorage.setItem(
+        "softSkill",
+        JSON.stringify(softSkillResponse?.data),
+      );
+      setSoftSkill(softSkillResponse?.data);
     } catch (error: any) {
       console.error("Error fetching soft skill questions:", error);
       console.error("Error fetching data:", error);
-      console.error('API Error:', error);
+      console.error("API Error:", error);
       setError(error);
       setTimeout(() => {
         setError(null);
@@ -120,37 +115,34 @@ function Application() {
     }
   };
 
-
-
-
   const fetchSoftTechQuestions = async (data: any) => {
-    console.log("techinalskil", data)
+    console.log("techinalskil", data);
     try {
       const techSkillResponse = await axios.post(
         "https://coops-backend.bluetickconsultants.com:8000/generate_technical_questions",
         {
           name: mainData?.role,
           experience: data?.skills?.experience,
-          technical_skills: data?.skills?.technical_skills.join(','),
-        }
+          technical_skills: data?.skills?.technical_skills.join(","),
+        },
       );
 
-      localStorage.setItem('techSkill', JSON.stringify(techSkillResponse?.data));
+      localStorage.setItem(
+        "techSkill",
+        JSON.stringify(techSkillResponse?.data),
+      );
 
-      setTechSkill(techSkillResponse?.data)
-
+      setTechSkill(techSkillResponse?.data);
     } catch (error: any) {
       console.error("Error fetching soft skill questions:", error);
       console.error("Error fetching data:", error);
-      console.error('API Error:', error);
+      console.error("API Error:", error);
       setError(error);
       setTimeout(() => {
         setError(null);
       }, 3000);
     }
   };
-
-
 
   const handleReset = () => {
     setMainData(null);
@@ -162,33 +154,22 @@ function Application() {
     setIsReportGenerated(false);
   };
 
+  const storedData = localStorage.getItem("techSkillPercentages") ?? "{}";
 
-
-
-
-
-  const storedData = localStorage.getItem("techSkillPercentages") ?? '{}';
-
-  console.log("maindatastore", storedData)
-  Object.keys(JSON.parse(storedData))?.map(itm => {
-    console.log('Question ->', itm)
-    console.log('Answer ->', JSON.parse(storedData)[itm])
-  })
-
-
-
-
+  console.log("maindatastore", storedData);
+  Object.keys(JSON.parse(storedData))?.map((itm) => {
+    console.log("Question ->", itm);
+    console.log("Answer ->", JSON.parse(storedData)[itm]);
+  });
 
   // const handleGenerateReport = () => {
 
   //   setIsReportGenerated(true);
   // };
 
-
   // const handlePrintScreen = () => {
 
   //   const mainContent = document.getElementById('main-content');
-
 
   //   if (mainContent) {
 
@@ -196,17 +177,14 @@ function Application() {
 
   //       const dataUrl = canvas.toDataURL('image/png');
 
-
   //       const link = document.createElement('a');
   //       link.href = dataUrl;
   //       link.download = 'screenshot.png';
-
 
   //       link.click();
   //     });
   //   }
   // };
-
 
   // const btnGenerate = () => {
   //   if (techSkillOne && softSkillPercentage) {
@@ -220,38 +198,44 @@ function Application() {
   //   return ""
   // }
 
-
-
   return (
     <main id="main-content">
       <Header />
-      <div className='flex justify-end'>
+      <div className="flex justify-end">
         {error && <ErrorAlert message={"asda"} />}
       </div>
       <div className="md:flex md:justify-center md:items-center 2xl:gap-8 xl:gap-0 gap-2">
         <div className="">
-
           <div className="mx-[3rem]">
             <div>
-              <p className="flex justify-left items-center mb-2 font-bold md:text-[2rem] text-[1rem]">Add Job Description</p>
-              <p>Insert your own job description or select one from the examples provided below.</p>
+              <p className="flex justify-left items-center mb-2 font-bold md:text-[2rem] text-[1rem]">
+                Add Job Description
+              </p>
+              <p>
+                Insert your own job description or select one from the examples
+                provided below.
+              </p>
               <TextArea setMainTextArea={setMainTextArea} mainData={mainData} />
             </div>
             <div className="mt-[10rem]">
-
               <button
-                className={`mb-[0.5rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${mainData || mainTextArea ? 'bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80' : 'bg-gray-400 cursor-not-allowed'
-                  } rounded-lg focus:outline-none`}
+                className={`mb-[0.5rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${
+                  mainData || mainTextArea
+                    ? "bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80"
+                    : "bg-gray-400 cursor-not-allowed"
+                } rounded-lg focus:outline-none`}
                 onClick={fetchDataFetchSkill}
-              // disabled={!mainData || !mainTextArea}
+                // disabled={!mainData || !mainTextArea}
               >
                 Submit
               </button>
 
-
               <button
-                className={`ml-[1rem] mt-[1rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${mainData || mainTextArea ? 'bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80' : 'bg-gray-400 cursor-not-allowed'
-                  } rounded-lg focus:outline-none`}
+                className={`ml-[1rem] mt-[1rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${
+                  mainData || mainTextArea
+                    ? "bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80"
+                    : "bg-gray-400 cursor-not-allowed"
+                } rounded-lg focus:outline-none`}
                 onClick={handleReset}
                 disabled={!mainData || mainTextArea}
               >
@@ -259,134 +243,60 @@ function Application() {
               </button>
             </div>
           </div>
-
-
-
         </div>
 
         <div className="">
           <Table setMainData={setMainData} />
         </div>
-
       </div>
-      {
-        isLoading &&
-        <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      {isLoading && (
+        <div
+          style={{
+            position: "relative",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <div>
             <img src={Image} className="" alt="logo" />
             <h1 className="text-center">Estimated time: 1 min-6.5</h1>
           </div>
         </div>
-
-
-      }
-      {/* <Accoridan setsoftSkillPercentage={setsoftSkillPercentage} softSkill={softSkill} /> */}
-      {/* <TechAccordian
-        techSkill={techSkill}
-        setTechSkillOne={setTechSkillOne}
-      // setTechSkillOne={setTechSkillOne}
-      // setTechSkillTwo={setTechSkillTwo}
-      // setTechSkillThree={setTechSkillThree}
-      // setTechSkillFour={setTechSkillFour}
-      // setTechSkillFive={setTechSkillFive}
-      // setTechSkillSix={setTechSkillSix}
-      /> */}
-
-      {/* <div className="flex justify-center items-center ">
-        {
-          btnGenerate()
-        }
-
-      </div> */}
-
-      {/* {isReportGenerated && techSkillOne && softSkillPercentage && (
-        <ReportTable
-          data={JSON.parse(storedData)}
-          softSkillPercentage={softSkillPercentage}
-          techSkillOne={techSkillOne}
-        />
-      )} */}
-
-      {/* <div className="flex justify-center items-center">
-        {
-          isReportGenerated && techSkillOne && softSkillPercentage && (
-            <button
-              className="mt-[0rem] px-6 py-2 w-[12rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-600 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80"
-              onClick={handlePrintScreen}
-            >
-              Print Screen
-            </button>
-          )
-        }
-
-      </div> */}
-      <div style={{ display: isHidden ? 'block' : 'none' }}>
+      )}
+      <Pricing />
+      <div style={{ display: isHidden ? "block" : "none" }}>
         <div className="flex  w-full flex-wrap">
-          {/* <div className="w-[50%]">
-            <p className=" text-center md:text-[2rem] text-[1rem] my-[1rem]">SoftSkill</p>
-
-            <SoftSkillTable fetchSkill={fetchSkill} />
-
-          </div> */}
-
           <div className="w-[100%]">
-            <p className=" text-center md:text-[2rem] text-[1rem] my-[1rem]">TechinalSkill</p>
-
+            <p className=" text-center md:text-[2rem] text-[1rem] my-[1rem]">
+              TechinalSkill
+            </p>
             <TechSkillTable fetchSkill={fetchSkill} />
-
           </div>
-
-
-
-
-
         </div>
         <div className="flex justify-center items-center my-[1rem]">
           <button
-            className={`mb-[0.5rem] px-6 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${mainData || mainTextArea ? 'bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80' : 'bg-gray-400 cursor-not-allowed'
-              } rounded-lg focus:outline-none`}
-          // onClick={fetchDataFetchSkill}
-          // disabled={!mainData || !mainTextArea}
+            className={`mb-[0.5rem] px-6 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${
+              mainData || mainTextArea
+                ? "bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80"
+                : "bg-gray-400 cursor-not-allowed"
+            } rounded-lg focus:outline-none`}
           >
             Generate Questions
           </button>
         </div>
-
       </div>
-
-
-
-
 
       <div className="bg-deep-purple-accent-400 ">
         <svg
           className="absolute top-0 w-full h-6 -mt-5 sm:-mt-10 sm:h-16 text-deep-purple-accent-400"
           preserveAspectRatio="none"
           viewBox="0 0 1440 54"
-        >
-          {/* <path
-            fill="currentColor"
-            d="M0 22L120 16.7C240 11 480 1.00001 720 0.700012C960 1.00001 1200 11 1320 16.7L1440 22V54H1320C1200 54 960 54 720 54C480 54 240 54 120 54H0V22Z"
-          /> */}
-        </svg>
+        ></svg>
         <div className="">
           <div className="px-4 pt-12 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-0 ">
             <div className="grid gap-16 row-gap-10 mb-8 lg:grid-cols-6">
-              <div className="md:max-w-md lg:col-span-2">
-                {/* <img src="https://www.bluetickconsultants.com/images/b-logo.svg" className="w-[8rem]" /> */}
-
-                {/* <div className="mt-4 lg:max-w-sm">
-                    <p className="text-sm text-deep-purple-50">
-                      Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-                      accusantium doloremque laudantium, totam rem aperiam.
-                    </p>
-                    <p className="mt-4 text-sm text-deep-purple-50">
-                      Eaque ipsa quae ab illo inventore veritatis et quasi architecto
-                      beatae vitae dicta sunt explicabo.
-                    </p>
-                  </div> */}
-              </div>
-
+              <div className="md:max-w-md lg:col-span-2"></div>
             </div>
             <div className="flex flex-col justify-between pt-5 pb-10 border-t border-deep-purple-accent-200 sm:flex-row">
               <p className="text-lg text-[#000]">
@@ -419,23 +329,34 @@ function Application() {
                   </svg>
                 </a>
 
-                <a href='https://www.linkedin.com/company/bluetick-consultants/'>
-                  <img width="25" height="50" src="https://img.icons8.com/ios-filled/50/linkedin.png" alt="linkedin" />
+                <a href="https://www.linkedin.com/company/bluetick-consultants/">
+                  <img
+                    width="25"
+                    height="50"
+                    src="https://img.icons8.com/ios-filled/50/linkedin.png"
+                    alt="linkedin"
+                  />
                 </a>
-                <a href='https://www.threads.net/@bluetickconsultants'>
-                  <img width="25" height="48" src="https://img.icons8.com/pulsar-line/48/threads.png" alt="threads" />
+                <a href="https://www.threads.net/@bluetickconsultants">
+                  <img
+                    width="25"
+                    height="48"
+                    src="https://img.icons8.com/pulsar-line/48/threads.png"
+                    alt="threads"
+                  />
                 </a>
-                <a href='https://www.quora.com/profile/Bluetick-Consultants'>
-                  <img width="25" height="32" src="https://img.icons8.com/windows/32/quora.png" alt="quora" />
+                <a href="https://www.quora.com/profile/Bluetick-Consultants">
+                  <img
+                    width="25"
+                    height="32"
+                    src="https://img.icons8.com/windows/32/quora.png"
+                    alt="quora"
+                  />
                 </a>
-
-
-
               </div>
             </div>
           </div>
         </div>
-
       </div>
     </main>
   );

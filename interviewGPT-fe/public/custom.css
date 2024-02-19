@@ -1,0 +1,60 @@
+.pricing {
+  text-align: center;
+}
+
+.pricing h2 {
+  font-family: "Poppins", sans-serif !important;
+  font-weight: 300;
+  margin-block: 1rem;
+}
+
+.pricing div > label {
+  width: 250px;
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 300px));
+  gap: 40px;
+  justify-content: center;
+}
+
+.pricing-card {
+  background: #ffffff;
+  box-shadow: 0px 0px 20px 4px rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  transition: 0.25s;
+}
+
+.pricing-card h3 {
+  align-self: start;
+  font-family: "Poppins", sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 1.3rem;
+  color: #2f2f2f;
+}
+.pricing-card h3:has(sup) {
+  align-self: end;
+}
+
+.pricing-card p {
+  align-self: start;
+  margin: 0.1rem;
+  text-align: left;
+}
+
+.pricing-card button {
+  width: 100%;
+}
+
+@media only screen and (max-width: 800px) {
+  .pricing div > label {
+    width: auto;
+  }
+}
