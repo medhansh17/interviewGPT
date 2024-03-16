@@ -1,3 +1,4 @@
+.chooseyourplan { font-size: clamp(2rem, 4vw, 3.5rem) !important;}
 .timeline-container {
   width: 100%;
   background-color: rgb(226, 244, 250);

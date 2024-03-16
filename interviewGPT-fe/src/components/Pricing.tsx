@@ -29,7 +29,7 @@ export default function Pricing() {
 		<section className="pricing mt-16 w-full" >
 			{/* <h2 className="text-[3.5rem] text-[#3388CC] font-semibold  font-roboto flex justify-center mb-4 mt-[5rem]">Choose the plan that best fits your needs</h2> */}
 			<div
-				className="btn-group flex w-1/2 m-auto"
+				className="btn-group mx-auto block"
 				role="group"
 				aria-label="radio toggle button group"
 			>
@@ -46,7 +46,7 @@ export default function Pricing() {
 				<label className="btn btn-outline-primary" htmlFor="vbtn-radio1">
 					Monthly
 				</label>
-				<input
+				{/* <input
 					onChange={handleRadioClick}
 					type="radio"
 					className="btn-check"
@@ -58,8 +58,8 @@ export default function Pricing() {
 				/>
 				<label className="btn btn-outline-primary" htmlFor="vbtn-radio2">
 					Quarterly save 33%
-				</label>
-				<input
+				</label> */}
+				{/* <input
 					onChange={handleRadioClick}
 					type="radio"
 					className="btn-check"
@@ -71,7 +71,7 @@ export default function Pricing() {
 				/>
 				<label className="btn btn-outline-primary" htmlFor="vbtn-radio3">
 					Yearly save 50%
-				</label>
+				</label> */}
 			</div>
 			<br />
 			<br />
@@ -81,7 +81,7 @@ export default function Pricing() {
 						<h3>Silver Plan</h3>
 						<br />
 						<h3 >
-							${silverPlan}<sup> per user / month</sup>
+						<span className="line-through">$100</span>  - ${silverPlan}<sup> per user / month</sup>
 						</h3>
 						<br />
 						<p>
@@ -105,7 +105,7 @@ export default function Pricing() {
 						<button
 							id="free-btn"
 							type="button"
-							className="btn btn-outline-primary"
+							className="btn btn-outline-primary openModalButton"
 						>
 							Contact us
 						</button>
@@ -114,7 +114,7 @@ export default function Pricing() {
 						<h3>Gold Plan</h3>
 						<br />
 						<h3>
-							${goldPlan}<sup>per user / month</sup>
+						<span className="line-through">$1000</span>  - ${goldPlan}<sup>per user / month</sup>
 						</h3>
 						<br />
 						<p>
@@ -135,7 +135,7 @@ export default function Pricing() {
 							collaboration in their recruitment efforts.
 						</p>
 						<br />
-						<button type="button" className="btn btn-outline-primary">
+						<button type="button" className="btn btn-outline-primary openModalButton">
 							Contact Us
 						</button>
 					</div>
@@ -147,12 +147,13 @@ export default function Pricing() {
 							priority support.
 						</h4>
 						<br />
-						<button type="button" className="btn btn-outline-primary">
+						<button type="button" className="btn btn-outline-primary openModalButton">
 							Contact Us
 						</button>
 					</div>
 				</div>
 			</div>
+
 		</section>
 	);
 }

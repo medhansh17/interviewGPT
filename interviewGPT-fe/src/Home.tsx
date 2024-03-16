@@ -88,7 +88,7 @@ const Home = () => {
         <div className="flex flex-col justify-center items-center mt-[5rem]">
           <hr className="my-2 border-gray-400 w-[100%] 2xl:mt-[15rem] border-t-[2px]" />
           <h1
-            className="text-[3.5rem] text-[#3388CC] font-semibold  font-roboto flex justify-center mb-4 mt-[5rem]"
+            className="text-[3.5rem] text-[#3388CC] font-semibold  font-roboto flex justify-center mb-4 mt-[5rem] chooseyourplan"
             ref={featureRef}
           >
             Choose Your Plan
