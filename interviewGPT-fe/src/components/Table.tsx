@@ -56,10 +56,10 @@ const Table: React.FC<TableProps> = ({ setMainData }: any) => {
             Load example Job Description
           </p>
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-            <div className="overflow-hidden border border-gray-200 dark:border-gray-700 md:rounded-lg">
+            <div className="overflow-hidden border border-gray-200 dark:border-gray-700 md:rounded shadow-md">
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead
-                  style={{ backgroundColor: "#80808042" }}
+                  style={{ backgroundColor: "#0d6efd" }}
                   className="dark:bg-gray-800"
                 >
                   <tr>
@@ -68,7 +68,7 @@ const Table: React.FC<TableProps> = ({ setMainData }: any) => {
                       className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                     >
                       <div className="flex items-center gap-x-3">
-                        <span className="md:text-[1.2rem] text-[#000]">
+                        <span className="md:text-[1.2rem] text-[#fff]">
                           Select
                         </span>
                       </div>
@@ -78,7 +78,7 @@ const Table: React.FC<TableProps> = ({ setMainData }: any) => {
                       className="px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                     >
                       <button className="flex items-center gap-x-2">
-                        <span className="md:text-[1.2rem] text-[#000]">
+                        <span className="md:text-[1.2rem] text-[#fff]">
                           Role
                         </span>
                         <svg
@@ -94,7 +94,7 @@ const Table: React.FC<TableProps> = ({ setMainData }: any) => {
                       className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                     >
                       <button className="flex items-center gap-x-2">
-                        <span className="md:text-[1.2rem] text-[#000]">
+                        <span className="md:text-[1.2rem] text-[#fff]">
                           Job Description
                         </span>
                         <svg
@@ -111,7 +111,7 @@ const Table: React.FC<TableProps> = ({ setMainData }: any) => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900 lg:h-[20rem]">
                   {data?.map((item) => (
-                    <tr key={item.id}>
+                    <tr key={item.id} className="odd:bg-white even:bg-slate-50" >
                       <td className="px-4  text-sm font-medium text-gray-700 ">
                         <div className="inline-flex items-center gap-x-3">
                           <input
@@ -122,10 +122,10 @@ const Table: React.FC<TableProps> = ({ setMainData }: any) => {
                           />
                         </div>
                       </td>
-                      <td className="lg:text-[1.2rem]  px-4 md:text-[0.5rem]  dark:text-gray-300 ">
+                      <td className="lg:text-[1rem]  px-4 md:text-[0.5rem]  dark:text-gray-300 ">
                         {item.role}
                       </td>
-                      <td className="lg:text-[1.2rem] px-4 md:text-[0.5rem]  dark:text-gray-300 ">
+                      <td className="lg:text-[1rem] px-4 md:text-[0.5rem]  dark:text-gray-300 ">
                         {" "}
                         {truncateText(item.jd, 12)}
                       </td>

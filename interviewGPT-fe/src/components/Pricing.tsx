@@ -26,10 +26,10 @@ export default function Pricing() {
 	}
 
 	return (
-		<section className="pricing mt-16">
-			<h2 className="scroll-m-20 pb-2 text-3xl font-semibold tracking-tight first:mt-0">Choose the plan that best fits your needs</h2>
+		<section className="pricing mt-16 w-full" >
+			{/* <h2 className="text-[3.5rem] text-[#3388CC] font-semibold  font-roboto flex justify-center mb-4 mt-[5rem]">Choose the plan that best fits your needs</h2> */}
 			<div
-				className="btn-group"
+				className="btn-group flex w-1/2 m-auto"
 				role="group"
 				aria-label="radio toggle button group"
 			>
@@ -75,12 +75,12 @@ export default function Pricing() {
 			</div>
 			<br />
 			<br />
-			<div className="container">
+			<div className="container" data-aos="fade-up">
 				<div className="pricing-grid my-5">
 					<div className="pricing-card">
 						<h3>Silver Plan</h3>
 						<br />
-						<h3 style={{ alignSelf: "end" }}>
+						<h3 >
 							${silverPlan}<sup> per user / month</sup>
 						</h3>
 						<br />

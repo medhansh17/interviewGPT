@@ -20,7 +20,7 @@ const TechSkillTable: React.FC<TechSkillTableProps> = ({ fetchSkill }) => {
   const initialInputValues: InputValues = Object.fromEntries(
     (fetchSkill?.skills?.technical_skills || []).map((skill) => [
       skill,
-      { basic: 0, intermediate: 0, advance: 0 },
+      { basic: 1, intermediate: 1, advance: 1 },
     ]),
   );
 
@@ -35,7 +35,7 @@ const TechSkillTable: React.FC<TechSkillTableProps> = ({ fetchSkill }) => {
     setInputValues((prevValues) => ({
       ...prevValues,
       [softSkill]: {
-        ...(prevValues[softSkill] || { basic: 0, intermediate: 0, advance: 0 }), // Ensure the state exists
+        ...(prevValues[softSkill] || { basic: 1, intermediate: 1, advance: 1 }), // Ensure the state exists
         [level]: value,
       },
     }));
@@ -46,7 +46,7 @@ const TechSkillTable: React.FC<TechSkillTableProps> = ({ fetchSkill }) => {
     level: "basic" | "intermediate" | "advance",
   ): number => {
     const skillData = inputValues[softSkill];
-    return skillData ? skillData[level] : 0;
+    return skillData ? skillData[level] : 1;
   };
 
   return (
@@ -88,12 +88,13 @@ const TechSkillTable: React.FC<TechSkillTableProps> = ({ fetchSkill }) => {
                         <input
                           className="block  mt-2 w-full placeholder-gray-400/70 dark:placeholder-gray-500 rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-gray-700 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-40 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-blue-300"
                           type="number"
-                          value={inputValues[softSkill]?.basic || 0}
+                          max='5'
+                          value={inputValues[softSkill]?.basic || 1}
                           onChange={(e) =>
                             handleInputChange(
                               softSkill,
                               "basic",
-                              parseInt(e.target.value, 10) || 0,
+                              parseInt(e.target.value, 10) || 1,
                             )
                           }
                         />
@@ -102,12 +103,13 @@ const TechSkillTable: React.FC<TechSkillTableProps> = ({ fetchSkill }) => {
                         <input
                           className="block  mt-2 w-full placeholder-gray-400/70 dark:placeholder-gray-500 rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-gray-700 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-40 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-blue-300"
                           type="number"
-                          value={inputValues[softSkill]?.intermediate || 0}
+                          max='5'
+                          value={inputValues[softSkill]?.intermediate || 1}
                           onChange={(e) =>
                             handleInputChange(
                               softSkill,
                               "intermediate",
-                              parseInt(e.target.value, 10) || 0,
+                              parseInt(e.target.value, 10) || 1,
                             )
                           }
                         />
@@ -116,12 +118,13 @@ const TechSkillTable: React.FC<TechSkillTableProps> = ({ fetchSkill }) => {
                         <input
                           className="block  mt-2 w-full placeholder-gray-400/70 dark:placeholder-gray-500 rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-gray-700 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-40 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-blue-300"
                           type="number"
-                          value={inputValues[softSkill]?.advance || 0}
+                          max='5'
+                          value={inputValues[softSkill]?.advance || 1}
                           onChange={(e) =>
                             handleInputChange(
                               softSkill,
                               "advance",
-                              parseInt(e.target.value, 10) || 0,
+                              parseInt(e.target.value, 10) || 1,
                             )
                           }
                         />

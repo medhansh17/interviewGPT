@@ -1,6 +1,6 @@
 export const Benefits = () => {
   return (
-    <div className="mx-auto">
+    <div className="mx-auto" data-aos="fade-up">
       <div className="relative px-4 py-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8 lg:py-20">
         <div className="absolute inset-x-0 top-0 items-center justify-center hidden overflow-hidden md:flex md:inset-y-0">
           <svg

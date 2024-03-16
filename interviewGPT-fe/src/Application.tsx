@@ -264,7 +264,7 @@ function Application() {
           </div>
         </div>
       )}
-      <Pricing />
+     
       <div style={{ display: isHidden ? "block" : "none" }}>
         <div className="flex  w-full flex-wrap">
           <div className="w-[100%]">

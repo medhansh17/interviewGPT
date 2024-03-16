@@ -3,8 +3,8 @@
 }
 
 .pricing h2 {
-  font-family: "Poppins", sans-serif !important;
-  font-weight: 300;
+  /* font-family: "Poppins", sans-serif !important;
+  font-weight: 300; */
   margin-block: 1rem;
 }
 
@@ -32,15 +32,16 @@
 }
 
 .pricing-card h3 {
-  align-self: start;
+  text-align: center;
+  /* align-self: start;
   font-family: "Poppins", sans-serif;
-  font-style: normal;
+  font-style: normal; */
   font-weight: 500;
   font-size: 1.3rem;
   color: #2f2f2f;
 }
 .pricing-card h3:has(sup) {
-  align-self: end;
+  /* align-self: end; */
 }
 
 .pricing-card p {
@@ -51,6 +52,14 @@
 
 .pricing-card button {
   width: 100%;
+  background-color: #0d6efd;
+  color: #fff;
+}
+.pricing-card .btn:hover{
+  color: #000;
+  border: 1px solid #0d6efd;
+  background-color: #fff;
+
 }
 
 @media only screen and (max-width: 800px) {

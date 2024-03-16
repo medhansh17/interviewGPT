@@ -5,6 +5,7 @@ import { Features } from "./components/Home/Features";
 import { Benefits } from "./components/Home/Benefits";
 import Image from "./assets/landing.gif";
 import { Button } from "@/components/ui/button";
+import Pricing from "./components/Pricing";
 
 const Home = () => {
   const featureRef = useRef<HTMLDivElement>(null);
@@ -23,13 +24,13 @@ const Home = () => {
   };
 
   return (
-    <div className="pt-8">
+    <div className="pt-4">
       <main className="flex flex-col">
-        <div className="flex justify-between items-center md:mx-[8rem] mx-[1rem]">
+        <div className="flex justify-between items-center md:mx-[8rem] mx-[1rem] mb-20">
           <div className="flex justify-center items-center">
             <img
-              src="https://media.licdn.com/dms/image/C510BAQEzP4y4oeD4IA/company-logo_200_200/0/1631369563060?e=1707955200&v=beta&t=eRPP7vUWz6dSrImFSLR7JH7LetvvyacUgnP9OlHOeHU"
-              className="md:w-[10rem] w-[6rem]"
+              src="./assets/blueticklogo.webp"
+              className="md:w-[12rem] w-[12rem]"
             />
           </div>
           <div className="flex md:gap-[4rem] gap-[1rem] items-center">
@@ -47,7 +48,7 @@ const Home = () => {
             </h1>
 
             <Link to="/login" className="link-styles">
-              <button className="md:px-6 md:py-2 px-4 py-1 md:w-[8rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-[#066ecf]  hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80">
+              <button className="px-6 py-2 rounded-sm w-[8rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-[#066ecf]  hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80">
                 Login
               </button>
             </Link>
@@ -55,44 +56,61 @@ const Home = () => {
         </div>
 
         {/* middle section */}
-        <div className="overflow-x-hidden  md:mx-[5.2rem]">
+        <div className="overflow-x-hidden  md:mx-[5.2rem]" >
           <div className="flex md:flex-row flex-col md:gap-[8rem] gap-[4rem] items-center justify-between mx-[3rem] md:mt-[1rem]">
-            <div className="flex flex-col gap-[2rem] md:w-[28rem]">
+            <div className="flex flex-col gap-[1.5rem] md:w-[41rem]"data-aos="fade-right">
               <div>
-                <h1 className="md:text-[4rem] text-[3rem] font-bold text-[#000] mb-4">
+                <h1 className="md:text-[3rem] text-[3rem] font-bold text-[#000] mb-4">
                   InterviewGPT
                 </h1>
-                <h1 className="md:text-[2rem] text-[2rem] font-bold text-[#000]">
+                <h1 className="md:text-[2rem] text-[2rem] font-semibold text-[#000]">
                   Empowering Recruiters with AI-Driven Interviews{" "}
                 </h1>
               </div>
-              <h1 className="md:text-[1.5rem] text-[1.9rem] text-[#000] ">
+              <h1 className="md:text-[1.5rem] text-[1.9rem] text-[#808080] ">
                 Revolutionize Your Hiring Process with InterviewGPT. AI-Powered
                 Question Generation for Accurate Candidate Assessment
               </h1>
               <Link to="/app" className="link-styles">
-                <button className="px-6 py-2 w-[8rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-[#066ecf]  hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80">
+                <button className="px-6 py-2 rounded-sm w-[8rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-[#066ecf]  hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80">
                   TRY NOW
                 </button>
               </Link>
             </div>
-            <div className="ravelent">
+            <div className="ravelent" data-aos="fade-left">
               <img src={Image} className="w-[60rem] shadow-2xl" alt="logo" />
             </div>
           </div>
         </div>
 
         {/* last section */}
+        {/* pricing section */}
         <div className="flex flex-col justify-center items-center mt-[5rem]">
-          <hr className="my-2 border-gray-300 w-[100%] 2xl:mt-[15rem]" />
+          <hr className="my-2 border-gray-400 w-[100%] 2xl:mt-[15rem] border-t-[2px]" />
+          <h1
+            className="text-[3.5rem] text-[#3388CC] font-semibold  font-roboto flex justify-center mb-4 mt-[5rem]"
+            ref={featureRef}
+          >
+            Choose Your Plan
+          </h1>
+          
+          <Pricing />
+         
+
+          {/* features section */}
+          
+        </div>
+        <div className="flex flex-col justify-center items-center mt-[5rem]">
+          <hr className="my-2 border-gray-400 w-[100%] 2xl:mt-[15rem] border-t-[2px]" />
           <h1
             className="text-[3.5rem] text-[#3388CC] font-semibold  font-roboto flex justify-center mb-4 mt-[5rem]"
             ref={featureRef}
           >
             Features
           </h1>
+          
           <Features />
-          <hr className="my-2 border-gray-300 w-[100%]" />
+          <hr className="my-2 border-gray-400 w-[100%] border-t-[2px]" />
 
           {/* benfits section */}
           <h1
