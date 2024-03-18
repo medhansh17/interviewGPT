@@ -73,7 +73,7 @@ function Application() {
       localStorage.setItem("mainSkill", JSON.stringify(response.data));
       setMainSkill(response.data);
       await fetchSoftSkillQuestions(response.data);
-      await fetchSoftTechQuestions(response.data);
+      // await fetchSoftTechQuestions(response.data);
       setIsHidden(true);
 
       // window.location.href = "#/app-submit"
@@ -87,7 +87,26 @@ function Application() {
     }
     setIsLoading(false);
   };
-
+// const generateQuestion=async ()=>{
+//   try {
+//     const response = await axios.post(
+//       "https://coops-backend.bluetickconsultants.com:8000/fetch_skills",
+//       {
+//         technical_skills:[
+//           {
+//             num_basic:"" ,
+//             intermediate:"",
+//             advance: "",
+//           }
+//         ],
+//         name:"role"
+//       },
+//     );
+//   }
+//   catch(err){
+//     console.log(err)
+//   }
+// }
   const fetchSoftSkillQuestions = async (data: any) => {
     try {
       const softSkillResponse = await axios.post(
@@ -197,7 +216,7 @@ function Application() {
   //   }
   //   return ""
   // }
-
+console.log("ffff",fetchSkill)
   return (
     <main id="main-content">
       <Header />
@@ -274,7 +293,7 @@ function Application() {
             <TechSkillTable fetchSkill={fetchSkill} />
           </div>
         </div>
-        <div className="flex justify-center items-center my-[1rem]">
+        {/* <div className="flex justify-center items-center my-[1rem]">
           <button
             className={`mb-[0.5rem] px-6 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${
               mainData || mainTextArea
@@ -284,7 +303,7 @@ function Application() {
           >
             Generate Questions
           </button>
-        </div>
+        </div> */}
       </div>
 
       <div className="bg-deep-purple-accent-400 ">

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 interface TechSkillTableProps {
   fetchSkill: {
@@ -17,16 +18,21 @@ interface InputValues {
 }
 
 const TechSkillTable: React.FC<TechSkillTableProps> = ({ fetchSkill }) => {
-  const initialInputValues: InputValues = Object.fromEntries(
+  // const initialInputValues: InputValues = Object.fromEntries(
+  //   (fetchSkill?.skills?.technical_skills || []).map((skill) => [
+  //     skill,
+  //     { basic: 1, intermediate: 1, advance: 1 },
+  //   ]),
+  // );
+
+  const [inputValues, setInputValues] =useState(Object.fromEntries(
     (fetchSkill?.skills?.technical_skills || []).map((skill) => [
       skill,
       { basic: 1, intermediate: 1, advance: 1 },
     ]),
-  );
-
-  const [inputValues, setInputValues] =
-    useState<InputValues>(initialInputValues);
-
+  ));
+  
+  console.log("input",inputValues)
   const handleInputChange = (
     softSkill: string,
     level: "basic" | "intermediate" | "advance",
@@ -35,7 +41,7 @@ const TechSkillTable: React.FC<TechSkillTableProps> = ({ fetchSkill }) => {
     setInputValues((prevValues) => ({
       ...prevValues,
       [softSkill]: {
-        ...(prevValues[softSkill] || { basic: 1, intermediate: 1, advance: 1 }), // Ensure the state exists
+        ...prevValues[softSkill],
         [level]: value,
       },
     }));
@@ -48,28 +54,53 @@ const TechSkillTable: React.FC<TechSkillTableProps> = ({ fetchSkill }) => {
     const skillData = inputValues[softSkill];
     return skillData ? skillData[level] : 1;
   };
-
+  const generateQuestion=async ()=>{
+    console.log("input",inputValues)
+  
+    try {
+      const response = await axios.post(
+        "https://coops-backend.bluetickconsultants.com:8000/fetch_skills",
+        {
+          technical_skills:[
+           { "skill": "",
+            "experience": "2-3 years",
+            "num_basic": 2,
+            "num_intermediate": 0,
+            "num_advanced": 3}
+          ],
+          name:"software"
+        },
+      );
+    }
+    catch(err){
+      console.log(err)
+    }
+   
+  }
   return (
     <div className="flex flex-col mx-[3rem]">
       <div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div className="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-          <div className="overflow-hidden">
-            <table className="min-w-full text-left text-sm font-light border dark:border-neutral-500">
-              <thead className="border-b font-medium dark:border-neutral-500">
+          <div className="overflow-hidden md:rounded shadow-md ">
+            <table className="border-collapse w-full md:rounded divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-blue-600 text-white">
                 <tr>
-                  <th scope="col" className="px-6 py-4">
+                  <th scope="col" className="border border-blue-600 text-center p-2.5" >
                     TechinalSkill
                   </th>
-                  <th scope="col" className="px-6 py-4">
-                    Basic Question
+                  <th scope="col" className="border border-blue-600 text-center p-2.5 w-38">
+                    <p>Basic Question</p>
+                    <p className="text-slate-300 text-sm">(1 - 5)</p>
                   </th>
-                  <th scope="col" className="px-6 py-4">
-                    Intermediate
+                  <th scope="col" className="border border-blue-600 text-center p-2.5 w-38">
+                    <p>Intermediate</p>
+                    <p className="text-slate-300 text-sm">(1 - 5)</p>
                   </th>
-                  <th scope="col" className="px-6 py-4">
-                    Advance
+                  <th scope="col" className="border border-blue-600 text-center p-2.5 w-38">
+                    <p>Advance</p>
+                    <p className="text-slate-300 text-sm">(1 - 5)</p>
                   </th>
-                  <th scope="col" className="px-6 py-4">
+                  <th scope="col" className="border border-blue-600 text-center p-2.5 w-38">
                     Total
                   </th>
                 </tr>
@@ -79,14 +110,14 @@ const TechSkillTable: React.FC<TechSkillTableProps> = ({ fetchSkill }) => {
                   (softSkill, index) => (
                     <tr
                       key={index}
-                      className="border-b dark:border-neutral-500"
+                      className="even:bg-blue-100 odd:bg-blue-50"
                     >
-                      <td className="whitespace-nowrap px-6 py-4">
+                      <td className="border border-blue-600 text-left p-2.5">
                         {softSkill}
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4">
+                      <td className="border border-blue-600 text-left p-2.5 flex justify-center">
                         <input
-                          className="block  mt-2 w-full placeholder-gray-400/70 dark:placeholder-gray-500 rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-gray-700 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-40 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-blue-300"
+                          className="w-2/5 text-center p-1 rounded"
                           type="number"
                           max='5'
                           value={inputValues[softSkill]?.basic || 1}
@@ -99,9 +130,9 @@ const TechSkillTable: React.FC<TechSkillTableProps> = ({ fetchSkill }) => {
                           }
                         />
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4">
+                      <td className="border border-blue-600 text-center p-2.5">
                         <input
-                          className="block  mt-2 w-full placeholder-gray-400/70 dark:placeholder-gray-500 rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-gray-700 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-40 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-blue-300"
+                          className="w-2/5 text-center p-1 rounded"
                           type="number"
                           max='5'
                           value={inputValues[softSkill]?.intermediate || 1}
@@ -114,9 +145,9 @@ const TechSkillTable: React.FC<TechSkillTableProps> = ({ fetchSkill }) => {
                           }
                         />
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4">
+                      <td className="border border-blue-600 text-center p-2.5">
                         <input
-                          className="block  mt-2 w-full placeholder-gray-400/70 dark:placeholder-gray-500 rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-gray-700 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-40 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-blue-300"
+                          className="w-2/5 text-center p-1 rounded"
                           type="number"
                           max='5'
                           value={inputValues[softSkill]?.advance || 1}
@@ -129,7 +160,7 @@ const TechSkillTable: React.FC<TechSkillTableProps> = ({ fetchSkill }) => {
                           }
                         />
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4">
+                      <td className="border border-blue-600 text-left p-2.5">
                         <span>
                           {calculateTotal(softSkill, "basic") +
                             calculateTotal(softSkill, "intermediate") +
@@ -142,6 +173,13 @@ const TechSkillTable: React.FC<TechSkillTableProps> = ({ fetchSkill }) => {
               </tbody>
             </table>
           </div>
+          <div className="flex justify-center items-center my-[1rem]">
+          <button
+           onClick={generateQuestion}
+          >
+            Generate Questions
+          </button>
+        </div>
         </div>
       </div>
     </div>
