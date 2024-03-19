@@ -10,3 +10,9 @@
 .loader {
   animation: spin 2s linear infinite;
 }
+.invalid-feedback{
+  background: #FFFFFF;
+    border: 1px solid #DADADA;
+    box-sizing: border-box;
+    border-radius: 4px;
+}
