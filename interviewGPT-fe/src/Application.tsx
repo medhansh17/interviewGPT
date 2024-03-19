@@ -14,6 +14,7 @@ import SoftSkillTable from "./components/SofSkillTable";
 import TechSkillTable from "./components/TechSkillTable";
 import Pricing from "./components/Pricing";
 import { FetchSkillsData } from "./types";
+import api from './components/customAxios/Axios';
 
 function Application() {
 	const [mainData, setMainData] = useState<any | null>(null);
@@ -49,8 +50,8 @@ function Application() {
 	const fetchDataFetchSkill = async () => {
 		setIsLoading(true);
 		try {
-			const response = await axios.post<FetchSkillsData>(
-				"https://coops-backend.bluetickconsultants.com:8000/fetch_skills",
+			const response = await api.post<FetchSkillsData>(
+				"/fetch_skills",
 				{
 					name: mainData?.role || "",
 					job_description: mainData?.jd || mainTextArea,

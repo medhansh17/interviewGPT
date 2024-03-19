@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { FetchSkillsData } from "@/types";
+import api from './customAxios/Axios';
 
 interface TechSkillTableProps {
 	fetchSkill?: FetchSkillsData;
@@ -21,7 +22,7 @@ const TechSkillTable: React.FC<TechSkillTableProps> = ({ fetchSkill }) => {
 			{ basic: 1, intermediate: 1, advance: 1 },
 		]),
 	));
-
+console.log("vv",inputValues)
 	const handleInputChange = (
 		softSkill: string,
 		level: "basic" | "intermediate" | "advance",
@@ -43,30 +44,29 @@ const TechSkillTable: React.FC<TechSkillTableProps> = ({ fetchSkill }) => {
 		const skillData = inputValues[softSkill];
 		return skillData ? skillData[level] : 1;
 	};
-
 	const generateQuestion = async () => {
+		console.log("bb",inputValues)
 		try {
-			const response = await axios.post(
-				"https://coops-backend.bluetickconsultants.com:8000/fetch_skills",
-				{
-					technical_skills: [
-						{
-							"skill": "",
-							"experience": "2-3 years",
-							"num_basic": 2,
-							"num_intermediate": 0,
-							"num_advanced": 3
-						}
-					],
-					name: "software"
-				},
-			);
-		}
-		catch (err) {
-			console.error(err)
-		}
-
-	}
+		  const transformedSkills = Object.entries(inputValues).map(([softSkill, levels]) => ({
+			skill: softSkill,
+			experience: "2-3 years", // Example value, you can adjust this as needed
+			num_basic: levels.basic,
+			num_intermediate: levels.intermediate,
+			num_advanced: levels.advance
+		  }));
+	  console.log("transformed",transformedSkills)
+		  const response = await api.post(
+			"/generate_technical_questions",
+			{
+			  technical_skills: transformedSkills,
+			  name: "Software Engineer Job"
+			}
+		  );
+	  
+		  console.log(response.data); // Assuming the response contains data field with the result
+		} catch (err) {
+		}}
+	
 	return (
 		<div className="flex flex-col mx-[3rem]">
 			<div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -165,7 +165,8 @@ const TechSkillTable: React.FC<TechSkillTableProps> = ({ fetchSkill }) => {
 					</div>
 					<div className="flex justify-center items-center my-[1rem]">
 						<button
-							onClick={generateQuestion}
+						className="mt-[2rem] px-6 py-2 w-[12rem] font-medium  text-white capitalize transition-colors duration-300 transform bg-blue-600 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80"
+						onClick={generateQuestion}
 						>
 							Generate Questions
 						</button>
