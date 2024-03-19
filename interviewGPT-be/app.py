@@ -61,38 +61,69 @@ def extract_question_and_answer(text):
     return result["Question"], result["Answer"], result["Keywords"], result["Type"]
 
 
-def ask_question(skill, work_experience, num_of_questions, is_soft_skill=False):
+def ask_question(skill, work_experience, num_basic=0, num_intermediate=0, num_advanced=0, is_soft_skill=False):
+    
     """
     Generates questions based on skill and work experience.
+    Generates the specified number of questions based on number of num_basic, num_intermediate, and num_advanced for each level of difficulty.
     Adjusts prompt for soft skills if is_soft_skill is True.
     """
-    # Define base prompt
-    prompt = f"""You will be provided with skill and year of experience.
-        Based on years of experience Your task is to generate technical three (3) question for the given core skill set.
-        First question should be easy, second, intermediate and last hard question.
-        Questions should be specifically related to skill mentioned. And questions should not be repeated
-        Also, generate a one-line answer for the question, along with mandatory keywords to be used in the while answering that question
-        display keywords to be present in the answer by prefixing with keyword: "Keywords:"
+    
+    def llm_output(prompt):
+        print("Generating questions with prompt:", prompt)
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": prompt},
+                {"role": "user", "content": f"Skill is {skill} and years of experience {work_experience}"}
+            ],
+            temperature=0,
+            max_tokens=1000,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0
+        )
         
+        response = dict(response)
+        response_data = dict(dict(response['choices'][0])['message'])['content'].replace("\n", " ")
+
+        data = []
+        if "------" in response_data:
+            data = response_data.split("------")
+        else:
+            data = response_data.split("Question")
+            data = [item for item in data if item not in ('', "", None)]
+            data = ["Question" + x for x in data if x]
+
+        questions = []
+        for qa in data:
+            q, a, k, l = extract_question_and_answer(qa)
+            if q and a:
+                questions.append({"question": q, "answer": a, "keywords": k, "type": l})
+
+        return questions
+    questions = []
+
+    # Generate prompt dynamically based on the number of questions for each level
+    prompt = f"""You will be provided with skill and year of experience.
+        Based on years of experience Your task is to generate the following number of technical questions for the given core skill set based on the difficult level below ie(basic,intermediate and advanced):
+        
+        Basic: {num_basic} questions
+        Intermediate: {num_intermediate} questions
+        Advanced: {num_advanced} questions
+        If any of the {num_basic} or {num_intermediate} or {num_advanced} is 0 then dont find technical question for that respective difficulty level.
+
+        Questions should be specifically related to the mentioned skill and should not be repeated.
+        Also, generate a one-line answer for each question, along with mandatory keywords to be used while answering.
+        Display keywords to be present in the answer by prefixing with keyword: "Keywords:"
+        for each difficult level of question , give corresponding Type ie for Basic questions give Type as "Basic" below, in the same passion for intermediate question give Type as "Intermediate" below and for advance question give Type as "Advanced" 
         Generate output in the form of 
         Question:
         Answer:
         Keywords:
-        Type: Basic, Intermediate or Advance
+        Type: Basic/Intermediate/Advanced
         ------
-        Question:
-        Answer:
-        Keywords:
-        Type: Basic, Intermediate or Advance
-        ------
-        Question:
-        Answer:
-        Keywords:
-        Type: Basic, Intermediate or Advance
-        ------
-
-     """
-
+        """
     if is_soft_skill:
         # Adjust prompt for soft skills
         prompt = """You will be provided with a set of soft skills. Generate four 4 different relevant questions to evaluate the soft skills. 
@@ -114,39 +145,8 @@ def ask_question(skill, work_experience, num_of_questions, is_soft_skill=False):
       ------
       """
 
-    # OpenAI API call with constructed messages
-    response = client.chat.completions.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": prompt},
-            {"role": "user", "content": f"Skill is {skill} and years of experience {work_experience}"}
-        ],
-        temperature=0,
-        max_tokens=1000,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0
-    )
-    response = dict(response)
-    response_data = dict(dict(response['choices'][0])['message'])[
-        'content'].replace("\n", " ")
-
-    data = []
-    if "------" in response_data:
-        data = response_data.split("------")
-    else:
-        data = response_data.split("Question")
-        data = [item for item in data if item not in ('', "", None)]
-        data = ["Question" + x for x in data if x]
-
-    print(data)
-    # Process and parse the response
-    questions = []
-    for qa in data:
-        q, a, k, l = extract_question_and_answer(qa)
-        if q and a:
-            questions.append(
-                {"question": q, "answer": a, "keywords": k, "type": l})
+    # Add for basic, intermediate, and advanced questions
+    questions.extend(llm_output(prompt))
 
     return questions
 
@@ -176,11 +176,11 @@ Follow these guidelines:
 8. Add a point on debugging or containerization or orchestration is mentioned
 9. Add a point on cloud services like AWS or GCP or Azure or any other cloud skills are mentioned
 10. Add only one point combining all the CI CD points like github, jenkins, circeci or GitLab CI or GH Actions
-5. Important point. From the skills you've identified, list 6 technical skills randomly. Ensure that 6 points covers all the points listed in job description. It should not be just 1 word skill
+5. Important point. From the skills you've identified,list only 4 technical skills randomly. Ensure that 4 points covers all the points listed in job description. It should not be just 1 word skill
 
 If the job description does not specify the required years of experience, estimate this based on the role's level (internship, junior, senior, lead). Format your response as follows: 
 Soft Skills: ["Skill 1", "Skill 2", "Good Communication Skills"]
-Technical Skills: [ "Tool/Skill 1", "Tool/Skill 2". "Tool/Skill 3", "Tool/Skill 4", "Tool/Skill 5", "Tool/Skill 6"]
+Technical Skills: [ "Tool/Skill 1", "Tool/Skill 2". "Tool/Skill 3", "Tool/Skill 4"]
 Years of Experience: <estimated range, e.g., 2-3 years>"
 
 This revised version is more explicit about how to list the JavaScript frameworks, emphasizing that they should be included in one entry and not separated into individual lines or points.       """
@@ -302,9 +302,9 @@ def generate_technical_questions_endpoint():
     Flask endpoint to generate questions based on job description.
     """
     data = request.get_json()
-    technical_skills = data.get("technical_skills", "").strip()
+    skills_info = data.get("technical_skills", [])  # List of skill information
     name = data.get("name", "").strip()
-    experience = data.get("experience", "").strip()
+    output = {"technical_skills": []}
 
     existing_entry = ResponseCache.query.filter_by(name=name).first()
 
@@ -312,17 +312,21 @@ def generate_technical_questions_endpoint():
         # If a record with the same name exists, return it
         return jsonify({'message': 'Data retrieved successfully', 'technical_skills': existing_entry.technical_skills}), 200
 
-    technical_skills = remove_special_characters_from_list(
-        technical_skills.split(","))
+    for skill_info in skills_info:
+        skill = skill_info.get("skill", "").strip()
+        experience = skill_info.get("experience", "").strip()
+        num_basic = skill_info.get("num_basic")
+        num_intermediate = skill_info.get("num_intermediate")
+        num_advanced = skill_info.get("num_advanced")
 
-    output = {"technical_skills": []}
+        if num_basic == num_intermediate == num_advanced == 0:
+            continue  # Skip this skill if all difficulty levels are zero
+ 
+        questions = ask_question(skill, experience, num_basic, num_intermediate, num_advanced)
 
-    # Process technical skills
-    for skill in technical_skills:
-        questions = ask_question(skill, experience, num_of_questions=1)
-        output["technical_skills"].append(
-            {"name": skill, "questions": questions})
+        output["technical_skills"].append({"name": skill, "questions": questions})
 
+    
     if len(name):
         existing_entry.technical_skills = output
         db.session.commit()
