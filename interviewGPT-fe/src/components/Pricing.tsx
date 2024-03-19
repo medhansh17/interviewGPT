@@ -140,12 +140,8 @@ const custom={
 						<button
 							id="free-btn"
 							type="button"
-<<<<<<< HEAD
-							className="btn btn-outline-primary openModalButton"
-=======
 							className="btn btn-outline-primary"
 							onClick={()=>setModalIsOpen(true)}
->>>>>>> b091fabd4019a01e062ad3047c3192eba194b335
 						>
 							Contact us
 						</button>
@@ -175,11 +171,7 @@ const custom={
 							collaboration in their recruitment efforts.
 						</p>
 						<br />
-<<<<<<< HEAD
-						<button type="button" className="btn btn-outline-primary openModalButton">
-=======
 						<button type="button" className="btn btn-outline-primary" onClick={()=>setModalIsOpen(true)}>
->>>>>>> b091fabd4019a01e062ad3047c3192eba194b335
 							Contact Us
 						</button>
 					</div>
@@ -191,19 +183,12 @@ const custom={
 							priority support.
 						</h4>
 						<br />
-<<<<<<< HEAD
-						<button type="button" className="btn btn-outline-primary openModalButton">
-=======
 						<button type="button" className="btn btn-outline-primary" onClick={()=>setModalIsOpen(true)}>
->>>>>>> b091fabd4019a01e062ad3047c3192eba194b335
 							Contact Us
 						</button>
 					</div>
 				</div>
 			</div>
-<<<<<<< HEAD
-
-=======
 			<Modal
         isOpen={modalIsOpen}
         style={customStyles}
@@ -269,7 +254,6 @@ const custom={
 	  </div>
 	   </div>
       </Modal>
->>>>>>> b091fabd4019a01e062ad3047c3192eba194b335
 		</section>
 		
 	);
