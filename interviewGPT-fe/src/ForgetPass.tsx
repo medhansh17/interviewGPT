@@ -6,14 +6,6 @@ const ForgetPass: React.FC = () => {
     // Add your form submission logic here
   };
 
-  const handleGoogleSignIn = () => {
-    // Add logic for signing in with Google
-  };
-
-  const handleForgotPassword = () => {
-    // Add logic for handling forgot password (e.g., show a modal, navigate to a reset password page, etc.)
-  };
-
   return (
     <div className="bg-gray-100 flex h-screen items-center justify-center p-4">
       <div className="w-full max-w-md">

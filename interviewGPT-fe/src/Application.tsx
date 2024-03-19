@@ -3,30 +3,25 @@ import Table from "./components/Table";
 import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import Image from "./assets/loader.gif";
-import { Button } from "@/components/ui/button";
 
 // import html2canvas from 'html2canvas';
 import axios from "axios";
-
-import Loader from "../src/components/Loader";
 import ErrorAlert from "./components/Alerts/ErrorAlert";
-import SoftSkillTable from "./components/SofSkillTable";
 import TechSkillTable from "./components/TechSkillTable";
-import Pricing from "./components/Pricing";
 import { FetchSkillsData } from "./types";
 import api from './components/customAxios/Axios';
 
 function Application() {
 	const [mainData, setMainData] = useState<any | null>(null);
 	const [mainTextArea, setMainTextArea] = useState<any | null>("sdawdawd");
-	const [mainSkill, setMainSkill] = useState<any | null>(null);
-	const [softSkill, setSoftSkill] = useState<any | null>(null);
-	const [techSkill, setTechSkill] = useState<any | null>(null);
-	const [techSkillOne, setTechSkillOne] = useState<any | null>(null);
-	const [softSkillPercentage, setsoftSkillPercentage] = useState<any | null>(
-		null,
-	);
-	const [isReportGenerated, setIsReportGenerated] = useState(false);
+	// const [mainSkill, setMainSkill] = useState<any | null>(null);
+	// const [softSkill, setSoftSkill] = useState<any | null>(null);
+	// const [techSkill, setTechSkill] = useState<any | null>(null);
+	// const [techSkillOne, setTechSkillOne] = useState<any | null>(null);
+	// const [softSkillPercentage, setsoftSkillPercentage] = useState<any | null>(
+	// 	null,
+	// );
+	// const [isReportGenerated, setIsReportGenerated] = useState(false);
 	const [isHidden, setIsHidden] = useState(false);
 
 	const [fetchSkill, setFetchSkill] = useState<FetchSkillsData & { timestamp: number }>();
@@ -60,7 +55,7 @@ function Application() {
 
 			setFetchSkill({ ...response.data, timestamp: Date.now() });
 			localStorage.setItem("mainSkill", JSON.stringify(response.data));
-			setMainSkill(response.data);
+			// setMainSkill(response.data);
 			await fetchSoftSkillQuestions(response.data);
 			// await fetchSoftTechQuestions(response.data);
 			setIsHidden(true);
@@ -111,7 +106,7 @@ function Application() {
 				"softSkill",
 				JSON.stringify(softSkillResponse?.data),
 			);
-			setSoftSkill(softSkillResponse?.data);
+			// setSoftSkill(softSkillResponse?.data);
 		} catch (error: any) {
 			console.error("Error fetching soft skill questions:", error);
 			console.error("Error fetching data:", error);
@@ -123,48 +118,48 @@ function Application() {
 		}
 	};
 
-	const fetchSoftTechQuestions = async (data: any) => {
-		try {
-			const techSkillResponse = await axios.post(
-				"https://coops-backend.bluetickconsultants.com:8000/generate_technical_questions",
-				{
-					name: mainData?.role,
-					experience: data?.skills?.experience,
-					technical_skills: data?.skills?.technical_skills.join(","),
-				},
-			);
+	// const fetchSoftTechQuestions = async (data: any) => {
+	// 	try {
+	// 		const techSkillResponse = await axios.post(
+	// 			"https://coops-backend.bluetickconsultants.com:8000/generate_technical_questions",
+	// 			{
+	// 				name: mainData?.role,
+	// 				experience: data?.skills?.experience,
+	// 				technical_skills: data?.skills?.technical_skills.join(","),
+	// 			},
+	// 		);
 
-			localStorage.setItem(
-				"techSkill",
-				JSON.stringify(techSkillResponse?.data),
-			);
+	// 		localStorage.setItem(
+	// 			"techSkill",
+	// 			JSON.stringify(techSkillResponse?.data),
+	// 		);
 
-			setTechSkill(techSkillResponse?.data);
-		} catch (error: any) {
-			console.error("Error fetching soft skill questions:", error);
-			console.error("Error fetching data:", error);
-			console.error("API Error:", error);
-			setError(error);
-			setTimeout(() => {
-				setError(null);
-			}, 3000);
-		}
-	};
+	// 		// setTechSkill(techSkillResponse?.data);
+	// 	} catch (error: any) {
+	// 		console.error("Error fetching soft skill questions:", error);
+	// 		console.error("Error fetching data:", error);
+	// 		console.error("API Error:", error);
+	// 		setError(error);
+	// 		setTimeout(() => {
+	// 			setError(null);
+	// 		}, 3000);
+	// 	}
+	// };
 
 	const handleReset = () => {
 		setMainData(null);
-		setMainSkill(null);
-		setSoftSkill(null);
-		setTechSkill(null);
-		setsoftSkillPercentage(null);
-		setTechSkillOne(null);
-		setIsReportGenerated(false);
+		// setMainSkill(null);
+		// setSoftSkill(null);
+		// setTechSkill(null);
+		// setsoftSkillPercentage(null);
+		// setTechSkillOne(null);
+		// setIsReportGenerated(false);
 	};
 
-	const storedData = localStorage.getItem("techSkillPercentages") ?? "{}";
+	// const storedData = localStorage.getItem("techSkillPercentages") ?? "{}";
 
-	Object.keys(JSON.parse(storedData))?.map((itm) => {
-	});
+	// Object.keys(JSON.parse(storedData))?.map((itm) => {
+	// });
 
 	// const handleGenerateReport = () => {
 

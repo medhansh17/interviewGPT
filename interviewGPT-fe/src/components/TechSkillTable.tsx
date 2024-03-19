@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { FetchSkillsData } from "@/types";
 import api from './customAxios/Axios';
 
@@ -7,13 +6,13 @@ interface TechSkillTableProps {
 	fetchSkill?: FetchSkillsData;
 }
 
-interface InputValues {
-	[key: string]: {
-		basic: number;
-		intermediate: number;
-		advance: number;
-	};
-}
+// interface InputValues {
+// 	[key: string]: {
+// 		basic: number;
+// 		intermediate: number;
+// 		advance: number;
+// 	};
+// }
 
 const TechSkillTable: React.FC<TechSkillTableProps> = ({ fetchSkill }) => {
 	const [inputValues, setInputValues] = useState(() => Object.fromEntries(

@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { Features } from "./components/Home/Features";
 import { Benefits } from "./components/Home/Benefits";
 import Image from "./assets/landing.gif";
-import { Button } from "@/components/ui/button";
 import Pricing from "./components/Pricing";
 
 const Home = () => {

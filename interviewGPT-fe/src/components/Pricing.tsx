@@ -209,7 +209,7 @@ const custom={
 				Full Name
 				<span>*</span>
 			  </label>
-			  <input type="text" className="form-control text-field-bg"  id="fullname" required/>
+			  <input type="text" className="form-control text-field-bg"  id="fullname" name="fullname" required/>
 			  
 			</div>
 			<div className="col-md-4 mb-3 px-1.5">
@@ -217,7 +217,7 @@ const custom={
 				Email
 				<span>*</span>
 			  </label>
-			  <input type="email" className="form-control text-field-bg"  id="fullname" required/>
+			  <input type="email" className="form-control text-field-bg"  id="email" name="email"  required/>
 			  
 			</div>
 			<div className="col-md-4 mb-3 px-1.5">
@@ -225,7 +225,7 @@ const custom={
 				Phone Number
 				<span>*</span>
 			  </label>
-			  <input type="number" className="form-control text-field-bg"  id="fullname" required/>
+			  <input type="number" className="form-control text-field-bg"  id="phone number" name="phone number" required/>
 			  
 			</div>
 
@@ -242,7 +242,7 @@ const custom={
 			 </div>
 			 <div>
 				<label style={{display:"inline-block"}}>Message</label>
-				<textarea name="description" required rows={5} className="form-control text-field-bg" style={{height:"auto",width: '100%',
+				<textarea name="description"  required rows={5} className="form-control text-field-bg" style={{height:"auto",width: '100%',
     }} />
 			 </div>
 		  </div>
