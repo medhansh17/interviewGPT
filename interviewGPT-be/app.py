@@ -62,15 +62,14 @@ def extract_question_and_answer(text):
 
 
 def ask_question(skill, work_experience, num_basic=0, num_intermediate=0, num_advanced=0, is_soft_skill=False):
-    
     """
     Generates questions based on skill and work experience.
     Generates the specified number of questions based on number of num_basic, num_intermediate, and num_advanced for each level of difficulty.
     Adjusts prompt for soft skills if is_soft_skill is True.
     """
-    
+
     def llm_output(prompt):
-        print("Generating questions with prompt:", prompt)
+        # print("Generating questions with prompt:", prompt)
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[
@@ -83,9 +82,10 @@ def ask_question(skill, work_experience, num_basic=0, num_intermediate=0, num_ad
             frequency_penalty=0,
             presence_penalty=0
         )
-        
+
         response = dict(response)
-        response_data = dict(dict(response['choices'][0])['message'])['content'].replace("\n", " ")
+        response_data = dict(dict(response['choices'][0])['message'])[
+            'content'].replace("\n", " ")
 
         data = []
         if "------" in response_data:
@@ -99,7 +99,8 @@ def ask_question(skill, work_experience, num_basic=0, num_intermediate=0, num_ad
         for qa in data:
             q, a, k, l = extract_question_and_answer(qa)
             if q and a:
-                questions.append({"question": q, "answer": a, "keywords": k, "type": l})
+                questions.append(
+                    {"question": q, "answer": a, "keywords": k, "type": l})
 
         return questions
     questions = []
@@ -285,7 +286,7 @@ def generate_soft_skill_questions_endpoint():
 
     # Process soft skills
     soft_skill_questions = ask_question(
-        soft_skills, experience, num_of_questions=5, is_soft_skill=True)
+        soft_skills, experience, 1, 1, 1, is_soft_skill=True)
     output["soft_skills"].append(
         {"name": "Soft Skills", "questions": soft_skill_questions})
 
@@ -321,12 +322,13 @@ def generate_technical_questions_endpoint():
 
         if num_basic == num_intermediate == num_advanced == 0:
             continue  # Skip this skill if all difficulty levels are zero
- 
-        questions = ask_question(skill, experience, num_basic, num_intermediate, num_advanced)
 
-        output["technical_skills"].append({"name": skill, "questions": questions})
+        questions = ask_question(
+            skill, experience, num_basic, num_intermediate, num_advanced)
 
-    
+        output["technical_skills"].append(
+            {"name": skill, "questions": questions})
+
     if len(name):
         existing_entry.technical_skills = output
         db.session.commit()

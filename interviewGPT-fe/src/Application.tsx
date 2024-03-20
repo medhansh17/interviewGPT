@@ -94,7 +94,7 @@ function Application() {
 	const fetchSoftSkillQuestions = async (data: any) => {
 		try {
 			const softSkillResponse = await axios.post(
-				"https://coops-backend.bluetickconsultants.com:8000/generate_soft_skill_questions",
+				"http://127.0.0.1:5000/generate_soft_skill_questions",
 				{
 					name: mainData?.role,
 					soft_skills: data?.skills?.soft_skills.join(","), // Ensure soft_skills is an array
@@ -268,7 +268,7 @@ function Application() {
 							TechinalSkill
 						</p>
 						{fetchSkill?.skills &&
-							<TechSkillTable key={fetchSkill?.timestamp} fetchSkill={fetchSkill} />
+							<TechSkillTable key={fetchSkill?.timestamp} fetchSkill={fetchSkill} role={mainData?.role} />
 						}
 					</div>
 				</div>

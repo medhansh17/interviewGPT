@@ -4,6 +4,8 @@ import api from './customAxios/Axios';
 
 interface TechSkillTableProps {
 	fetchSkill?: FetchSkillsData;
+	role?: any;
+
 }
 
 // interface InputValues {
@@ -14,7 +16,7 @@ interface TechSkillTableProps {
 // 	};
 // }
 
-const TechSkillTable: React.FC<TechSkillTableProps> = ({ fetchSkill }) => {
+const TechSkillTable: React.FC<TechSkillTableProps> = ({ fetchSkill, role }) => {
 	const [inputValues, setInputValues] = useState(() => Object.fromEntries(
 		(fetchSkill?.skills.technical_skills || []).map((skill) => [
 			skill,
@@ -58,10 +60,14 @@ console.log("vv",inputValues)
 			"/generate_technical_questions",
 			{
 			  technical_skills: transformedSkills,
-			  name: "Software Engineer Job"
+			  name: role
 			}
 		  );
-	  
+		  localStorage.setItem(
+						"techSkill",
+						JSON.stringify(response?.data),
+					);
+		 window.location.href = "#/app-submit"
 		  console.log(response.data); // Assuming the response contains data field with the result
 		} catch (err) {
 		}}
