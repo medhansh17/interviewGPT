@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import Image from "./assets/loader.gif";
 
+
 // import html2canvas from 'html2canvas';
 import axios from "axios";
 import ErrorAlert from "./components/Alerts/ErrorAlert";
@@ -93,8 +94,8 @@ function Application() {
 	// }
 	const fetchSoftSkillQuestions = async (data: any) => {
 		try {
-			const softSkillResponse = await axios.post(
-				"http://127.0.0.1:5000/generate_soft_skill_questions",
+			const softSkillResponse = await api.post(
+				"/generate_soft_skill_questions",
 				{
 					name: mainData?.role,
 					soft_skills: data?.skills?.soft_skills.join(","), // Ensure soft_skills is an array

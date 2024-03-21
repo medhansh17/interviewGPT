@@ -70,6 +70,7 @@ console.log("vv",inputValues)
 		 window.location.href = "#/app-submit"
 		  console.log(response.data); // Assuming the response contains data field with the result
 		} catch (err) {
+			console.log(err)
 		}}
 	
 	return (

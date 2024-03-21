@@ -138,15 +138,16 @@ const QuestionAccordion = ({
             className={`cursor-pointer ${selectedOption === "Incorrect" ? "bg-red-500 text-white" : "hover:bg-red-500 text-red-500 hover:text-white"} h-[2rem] py-0 px-4 border ${selectedOption === "Incorrect" ? "border-red-500" : "border-red-500 hover:border-transparent"} rounded font-medium`}
           >
             <img
-              width="25"
-              height="25"
+              width="16"
+              height="16"
               src={
                 selectedOption === "Incorrect"
-                  ? "https://img.icons8.com/external-others-agus-raharjo/64/external-incorrect-flat-website-ui-others-agus-raharjo.png"
-                  : "https://img.icons8.com/external-filled-agus-raharjo/64/external-incorrect-glyph-website-ui-filled-agus-raharjo.png"
+                  ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrGHgsTnDoquPLJ-NoOUq60tVZDgwd8YRGJw&usqp=CAU"
+                  : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrGHgsTnDoquPLJ-NoOUq60tVZDgwd8YRGJw&usqp=CAU"
               }
               alt="external-incorrect"
             />
+            
           </button>
         </div>
       </div>
@@ -299,12 +300,12 @@ const Accordion = ({ title, softSkill, updatePercentage }: any) => {
             className={`cursor-pointer ${selectedOption === "Incorrect" ? "bg-red-500 text-white" : "hover:bg-red-500 text-red-500 hover:text-white"} h-[2rem] py-0 px-4 border ${selectedOption === "Incorrect" ? "border-red-500" : "border-red-500 hover:border-transparent"} rounded font-medium`}
           >
             <img
-              width="25"
-              height="25"
+              width="19"
+              height="19"
               src={
                 selectedOption === "Incorrect"
-                  ? "https://img.icons8.com/external-others-agus-raharjo/64/external-incorrect-flat-website-ui-others-agus-raharjo.png"
-                  : "https://img.icons8.com/external-filled-agus-raharjo/64/external-incorrect-glyph-website-ui-filled-agus-raharjo.png"
+                  ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrGHgsTnDoquPLJ-NoOUq60tVZDgwd8YRGJw&usqp=CAU"
+                  : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrGHgsTnDoquPLJ-NoOUq60tVZDgwd8YRGJw&usqp=CAU"
               }
               alt="external-incorrect"
             />
@@ -378,12 +379,13 @@ const Tabs: React.FC<TabsProps> = ({
 
   return (
     <div>
-      <div className="mb-3 md:mx-[2rem] shadow-lg">
-        <TETabs>
+      <div className="mb-1 md:mx-[2rem] shadow-lg">
+        < div style={{backgroundColor:"lightblue",marginBottom:'1rem'}}>
+        <TETabs className="hover-style">
           <TETabsItem
             onClick={() => handleBasicClick("tab1")}
             active={basicActive === "tab1"}
-            style={{ fontWeight: "bold", fontSize: "0.8rem" }}
+            style={{ fontWeight: "bold", fontSize: "0.8rem",paddingTop:'0!important'}}
             className="font-bold"
           >
             Behavioural Assessment
@@ -397,6 +399,7 @@ const Tabs: React.FC<TabsProps> = ({
             Technical Assessment
           </TETabsItem>
         </TETabs>
+        </div>
 
         <TETabsContent>
           <TETabsPane show={basicActive === "tab1"}>

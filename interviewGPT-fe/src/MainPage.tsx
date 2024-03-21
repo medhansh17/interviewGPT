@@ -5,8 +5,10 @@ import ReportTable from "./components/ReportTable";
 import html2canvas from "html2canvas";
 import Tabs from "./components/Tabs";
 import Header from "./components/Header";
+import { Console } from "console";
 
 const MainPage = () => {
+  
   const [softSkill, setSoftSkill] = useState<any | null>(null);
   const [techSkillOne, setTechSkillOne] = useState<any | null>(null);
   console.log("softSkill", techSkillOne);
@@ -16,7 +18,15 @@ const MainPage = () => {
   const [isReportGenerated, setIsReportGenerated] = useState(false);
   const [techSkill, setTechSkill] = useState<any | null>(null);
   const [storedDatas, setStoredDatas] = useState<any | null>(null);
+const [isLoadSection,setIsLoadSection]=useState(true)
+ console.log('ss',isLoadSection)
 
+
+ useEffect(()=>{
+       setTimeout(() => {
+        setIsLoadSection(false)
+       }, 1000);
+ },[])
   // useEffect(() => {
 
   //     const clearLocalStorage = () => {
@@ -84,10 +94,14 @@ const MainPage = () => {
   };
 
   return (
+  <>
+    {isLoadSection?<div className="loader"></div>:
     <div id="main-content">
       {/* <h1>hello</h1> */}
       <div className="md:mx-[3rem] mx-[1rem]">
         <Header />
+        
+        
         <div className="mb-[1rem] md:mx-[2rem]">
           <p className="text-[2rem] mb-2 font-bold">Assessment Sheet</p>
           <p className="text-[1rem] leading-5 text-gray-600">
@@ -224,8 +238,11 @@ const MainPage = () => {
             </div>
           </div>
         </div>
+       
       </div>
+     
     </div>
+}</>
   );
 };
 
