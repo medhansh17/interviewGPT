@@ -16,15 +16,16 @@ const Popover = ({ data }: any) => {
   };
 
   return (
-    <div className="relative group inline-block cursor-pointer">
+    <div className="relative group inline-block cursor-pointer ">
       <button
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className={`cursor-pointer ${isHovered ? "bg-blue-500 text-white" : "bg-gray-200"} rounded-full p-2`}
+        className={`cursor-pointer w-8 h-8 ${isHovered ? "bg-blue-500 text-white" : "bg-gray-200"} rounded-full p-2`}
       >
         <img
-          width="18"
-          height="18"
+        className=""
+          width="20"
+          height="20"
           src="https://img.icons8.com/ios/50/information--v1.png"
           alt="circled-i"
         />

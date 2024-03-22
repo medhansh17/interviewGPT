@@ -82,7 +82,7 @@ const Table: React.FC<TableProps> = ({ setMainData }: any) => {
                           Role
                         </span>
                         <svg
-                          className="h-3"
+                          className=""
                           viewBox="0 0 10 11"
                           fill="none"
                           xmlns="http://www.w3.org/2000/svg"

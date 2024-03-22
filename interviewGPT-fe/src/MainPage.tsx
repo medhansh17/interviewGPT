@@ -5,7 +5,8 @@ import ReportTable from "./components/ReportTable";
 import html2canvas from "html2canvas";
 import Tabs from "./components/Tabs";
 import Header from "./components/Header";
-import { Console } from "console";
+import Image from "./assets/loader.gif";
+import { Link } from "react-router-dom";
 
 const MainPage = () => {
   
@@ -25,7 +26,7 @@ const [isLoadSection,setIsLoadSection]=useState(true)
  useEffect(()=>{
        setTimeout(() => {
         setIsLoadSection(false)
-       }, 1000);
+       }, 10000);
  },[])
   // useEffect(() => {
 
@@ -95,7 +96,19 @@ const [isLoadSection,setIsLoadSection]=useState(true)
 
   return (
   <>
-    {isLoadSection?<div className="loader"></div>:
+    {isLoadSection?<div
+					style={{
+						position: "relative",
+						display: "flex",
+						justifyContent: "center",
+						alignItems: "center",
+					}}
+				>
+					<div>
+						<img src={Image} className="" alt="logo" />
+						<h1 className="text-center">Estimated time: 5 mins <span className="block mt-2 ">For faster result - <Link className="text-sky-600 underline underline-offset-2" to='https://www.bluetickconsultants.com/contact-us.html'>Here</Link></span></h1>
+					</div>
+				</div>:
     <div id="main-content">
       {/* <h1>hello</h1> */}
       <div className="md:mx-[3rem] mx-[1rem]">

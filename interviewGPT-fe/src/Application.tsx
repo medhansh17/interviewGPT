@@ -11,6 +11,7 @@ import ErrorAlert from "./components/Alerts/ErrorAlert";
 import TechSkillTable from "./components/TechSkillTable";
 import { FetchSkillsData } from "./types";
 import api from './components/customAxios/Axios';
+import { Link } from "react-router-dom";
 
 function Application() {
 	const [mainData, setMainData] = useState<any | null>(null);
@@ -256,8 +257,8 @@ function Application() {
 					}}
 				>
 					<div>
-						<img src={Image} className="" alt="logo" />
-						<h1 className="text-center">Estimated time: 1 min-6.5</h1>
+					<img src={Image} className="" alt="logo" />
+						<h1 className="text-center">Estimated time: 5 mins <span className="block mt-2 ">For faster result - <Link className="text-sky-600 underline underline-offset-2" to='https://www.bluetickconsultants.com/contact-us.html'>Here</Link></span></h1>
 					</div>
 				</div>
 			)}
