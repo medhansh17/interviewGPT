@@ -26,7 +26,7 @@ const [isLoadSection,setIsLoadSection]=useState(true)
  useEffect(()=>{
        setTimeout(() => {
         setIsLoadSection(false)
-       }, 10000);
+       }, 8000);
  },[])
   // useEffect(() => {
 

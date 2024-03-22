@@ -304,8 +304,8 @@ const Accordion = ({ title, softSkill, updatePercentage }: any) => {
               height="19"
               src={
                 selectedOption === "Incorrect"
-                  ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrGHgsTnDoquPLJ-NoOUq60tVZDgwd8YRGJw&usqp=CAU"
-                  : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrGHgsTnDoquPLJ-NoOUq60tVZDgwd8YRGJw&usqp=CAU"
+                  ? "./assets/intgptinto.png"
+                  : "./assets/intgptinto.png"
               }
               alt="external-incorrect"
             />
