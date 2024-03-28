@@ -178,7 +178,7 @@ Follow these guidelines:
 9. Add a point on cloud services like AWS or GCP or Azure or any other cloud skills are mentioned
 10. Add only one point combining all the CI CD points like github, jenkins, circeci or GitLab CI or GH Actions
 5. Important point. From the skills you've identified,list only 4 technical skills randomly. Ensure that 4 points covers all the points listed in job description. It should not be just 1 word skill
-
+11.Combine all mentioned versions of [SOFTWARE] (e.g., [VERSION_1], [VERSION_2], and [VERSION_3]) into a single skill entry labeled '[SOFTWARE] Versions'.".dont give as seperate version as individual skills.
 If the job description does not specify the required years of experience, estimate this based on the role's level (internship, junior, senior, lead). Format your response as follows: 
 Soft Skills: ["Skill 1", "Skill 2", "Good Communication Skills"]
 Technical Skills: [ "Tool/Skill 1", "Tool/Skill 2". "Tool/Skill 3", "Tool/Skill 4"]
