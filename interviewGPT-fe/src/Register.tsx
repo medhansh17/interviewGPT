@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Register: React.FC = () => {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -92,22 +93,25 @@ const Register: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-4">
+            {/* <div className="mt-4">
               <button
                 onClick={handleGoogleSignUp}
                 className="flex w-full justify-center rounded-md border border-transparent bg-red-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-opacity-75 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
               >
                 Sign Up with Google
               </button>
-            </div>
+            </div> */}
 
             <div>
               <button
                 type="submit"
                 className="flex w-full justify-center rounded-md border border-transparent bg-sky-400 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-opacity-75 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2"
               >
-                Register Account
+                Register 
               </button>
+            </div>
+            <div className="text-center">
+              <p className="text-zinc-600 dark:text-zinc-300 text-sm">Already have an account? <Link to="/login" className="text-blue-500 hover:text-blue-800 dark:hover:text-blue-300">Login</Link></p>
             </div>
           </form>
         </div>

@@ -1,28 +1,28 @@
 import React, { useRef, useState } from "react";
 
 interface TextAreaProps {
-	mainData: {
+	mainData2: {
 		jd: string;
 	} | null;
-	setMainTextArea: any;
+	setMainTextArea2: any;
 }
 
-const TextArea: React.FC<TextAreaProps> = ({ mainData, setMainTextArea }) => {
+const TextArea2: React.FC<TextAreaProps> = ({ mainData2, setMainTextArea2 }) => {
 	const [text, setText] = useState("");
-	setMainTextArea(text);
-	const initialJdValue = mainData?.jd || "";
+	setMainTextArea2(text);
+	const initialJdValue = mainData2?.jd || "";
 
-	const fileInputRef = useRef(null);
+	// const fileInputRef = useRef(null);
 
-	const handleBrowseClick = () => {
-	  if (fileInputRef.current !== null && fileInputRef.current !== undefined) {
-		(fileInputRef.current as HTMLInputElement).click();
-	  }
-	};
+	// const handleBrowseClick = () => {
+	//   if (fileInputRef.current !== null && fileInputRef.current !== undefined) {
+	// 	(fileInputRef.current as HTMLInputElement).click();
+	//   }
+	// };
 	return (
 		<div>
 			
-			<div className="md:w-[35rem] lg:w-[40rem] xl:w-[45rem]  mt-6 2xl:w-[50rem] md:h-[15rem] mb-[4rem] ">
+			<div className="md:w-[35rem] lg:w-[40rem] xl:w-[45rem]   2xl:w-[50rem] md:h-[15rem] mb-[4rem] ">
 				<textarea style={{height:'300px'}}
 					id="message"
 					rows={15}
@@ -36,4 +36,4 @@ const TextArea: React.FC<TextAreaProps> = ({ mainData, setMainTextArea }) => {
 	);
 };
 
-export default TextArea;
+export default TextArea2;

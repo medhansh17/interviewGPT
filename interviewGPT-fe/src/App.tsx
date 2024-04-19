@@ -5,7 +5,9 @@ import MainPage from "./MainPage";
 import "tw-elements-react/dist/css/tw-elements-react.min.css";
 import Register from "./Register";
 import Login from "./Login";
+import Sample from "./components/Test/Sample"
 import ForgetPass from "./ForgetPass";
+import Dashboard from "./components/Dashboard";
 
 function App() {
   return (
@@ -18,7 +20,9 @@ function App() {
             <Route path="/app-submit" element={<MainPage />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/dashboard" element={<Dashboard/>}/>
             <Route path="/forget-password" element={<ForgetPass />} />
+            <Route path="/test" element={<Sample/>} />
           </Routes>
         </div>
       </Router>

@@ -12,10 +12,15 @@ import TechSkillTable from "./components/TechSkillTable";
 import { FetchSkillsData } from "./types";
 import api from './components/customAxios/Axios';
 import { Link } from "react-router-dom";
+import AddJd from "./components/AddJd";
+import TextArea2 from "./components/TextArea2";
 
 function Application() {
 	const [mainData, setMainData] = useState<any | null>(null);
 	const [mainTextArea, setMainTextArea] = useState<any | null>("sdawdawd");
+
+	const [mainData2, setMainData2] = useState<any | null>(null);
+	const [mainTextArea2, setMainTextArea2] = useState<any | null>("sdawdawd");
 	// const [mainSkill, setMainSkill] = useState<any | null>(null);
 	// const [softSkill, setSoftSkill] = useState<any | null>(null);
 	// const [techSkill, setTechSkill] = useState<any | null>(null);
@@ -31,7 +36,9 @@ function Application() {
 	const [error, setError] = useState<string | null>(null);
 
 	const [isLoading, setIsLoading] = useState(false);
-
+   
+	const [doc,setDoc]=useState(false);
+	const [manual,setManual]=useState(false)
 	useEffect(() => {
 		const clearLocalStorage = () => {
 			localStorage.clear();
@@ -198,6 +205,13 @@ function Application() {
 	//   }
 	//   return ""
 	// }
+	const docHanler=()=>{
+setManual(false);
+setDoc(true)}
+	const manualHandler=()=>{
+		setDoc(false);
+		setManual(true);
+	}
 	return (
 		<main id="main-content">
 			<Header />
@@ -215,9 +229,23 @@ function Application() {
 								Insert your own job description or select one from the examples
 								provided below.
 							</p>
-							<TextArea setMainTextArea={setMainTextArea} mainData={mainData} />
+							<div>
+								<button onClick={docHanler} className="  mt-[1rem]  py-2 w-[7rem] font-medium tracking-wide text-white text-center capitalize transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80">Document</button>
+								<button onClick={manualHandler} className=" ml-[2rem] mt-[1rem]  py-2 w-[8rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80">Type Manually</button></div>
+							
+							{doc && <>
+								<input type="text" className="border my-4 border-zinc-300 shadow-sm w-full px-3 py-2 placeholder-zinc-400 text-zinc-700 bg-white rounded-lg focus:outline-none focus:shadow-outline" placeholder="Enter Role"/>
+							
+							<AddJd/>
+							</>}
+							{manual && <>
+								<input type="text" className="border my-4 border-zinc-300 shadow-sm w-full px-3 py-2 placeholder-zinc-400 text-zinc-700 bg-white rounded-lg focus:outline-none focus:shadow-outline" placeholder="Enter Role"/>
+							
+							<TextArea2 setMainTextArea2={setMainTextArea2} mainData2={mainData2} />
+							</>}	
+                     {doc==false && manual==false && <TextArea setMainTextArea={setMainTextArea} mainData={mainData} />}
 						</div>
-						<div className="mt-[10rem]">
+						<div className="mt-[2rem]">
 							<button
 								className={`mb-[0.5rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${mainData || mainTextArea
 									? "bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80"

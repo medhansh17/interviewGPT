@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Login: React.FC = () => {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -16,9 +17,9 @@ const Login: React.FC = () => {
 
   return (
     <div className="bg-gray-100 flex h-screen items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      {/* <div className="w-full max-w-md">
         <div className="bg-white shadow-md rounded-md p-8">
-          {/* <img className="mx-auto h-12 w-auto" src="https://www.svgrepo.com/show/499664/user-happy.svg" alt="" /> */}
+         
 
           <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
             Sign in to your account
@@ -97,7 +98,43 @@ const Login: React.FC = () => {
             </button>
           </div>
         </div>
-      </div>
+      </div> */}
+      <div className="flex items-center justify-center h-screen w-[500px] bg-zinc-100 dark:bg-zinc-800">
+          <div className="bg-white dark:bg-zinc-700 rounded-lg shadow p-8 m-4  w-full">
+            <h2 className="text-2xl font-bold mb-8 text-center text-zinc-800 dark:text-white">Login</h2>
+            <div className="mb-4">
+              <label htmlFor="email" className="block text-zinc-700 dark:text-zinc-200 text-sm font-bold mb-2">Email</label>
+              <input type="email" id="email" className="shadow appearance-none border rounded w-full py-2 px-3 text-zinc-700 dark:text-zinc-300 leading-tight focus:outline-none focus:shadow-outline" placeholder="Email"/>
+            </div>
+            <div className="mb-6">
+              <label htmlFor="password" className="block text-zinc-700 dark:text-zinc-200 text-sm font-bold mb-2">Password</label>
+              <input type="password" id="password" className="shadow appearance-none border rounded w-full py-2 px-3 text-zinc-700 dark:text-zinc-300 leading-tight focus:outline-none focus:shadow-outline" placeholder="Password"/>
+              
+            </div>
+            <div className="mb-6 flex items-center justify-center">
+            <Link to="/forget-password" className="  font-bold text-sm text-blue-500 hover:text-blue-800 dark:hover:text-blue-300 float-right mt-2">Forgot password?</Link>
+            </div>
+            <div className="mb-8">
+              <button className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Login</button>
+            </div>
+            <div className="text-center">
+              <p className="text-zinc-600 dark:text-zinc-300 text-sm">Don't have an account? <Link to="/register" className="text-blue-500 hover:text-blue-800 dark:hover:text-blue-300">Signup</Link></p>
+            </div>
+            {/* <div className="flex items-center justify-between my-8">
+              <hr className="w-full bg-zinc-300" style={{height:'1px', border:'none'}}/>
+              <span className="p-2 text-zinc-400 dark:text-zinc-500 bg-white dark:bg-zinc-700">Or</span>
+              <hr className="w-full bg-zinc-300" style={{height:'1px', border:'none'}}/>
+            </div> */}
+            {/* <div>
+              <button className="w-full mb-4 bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                <img src="https://placehold.co/20x20" alt="Facebook" className="inline mr-2"/> Login with Facebook
+              </button>
+              <button className="w-full bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                <img src="https://placehold.co/20x20" alt="Google" className="inline mr-2"/> Login with Google
+              </button>
+      </div> */}
+      </div>          
+    </div>
     </div>
   );
 };

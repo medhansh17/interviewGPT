@@ -45,7 +45,7 @@ const Home = () => {
             >
               Benefits
             </h1>
-
+            
             <Link to="/login" className="link-styles">
               <button className="px-6 py-2 rounded-sm w-[8rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-[#066ecf]  hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80">
                 Login
