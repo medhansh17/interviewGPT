@@ -23,7 +23,7 @@ from datetime import datetime, timedelta
 from itsdangerous import URLSafeTimedSerializer
 from flask import Flask, request, jsonify, render_template_string
 from flask_migrate import Migrate
-
+from openai import OpenAI
 app = Flask(__name__)
 CORS(app)
 current_directory=os.getcwd()
@@ -53,6 +53,8 @@ class Job(db.Model):
     role = db.Column(db.String(100), nullable=False)
     jd = db.Column(db.Text, nullable=False)
     resumes = db.relationship('Resume', backref='job', lazy=True)
+    #status of the job 
+    active = db.Column(db.Boolean, default=False, nullable=False)
      # Timestamp when the job is uploaded
     #timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))
 
@@ -74,7 +76,8 @@ class ExtractedInfo(db.Model):
     resume_id = db.Column(db.Integer, db.ForeignKey('resume.id'), nullable=False)
     name = db.Column(db.String(100))
     total_experience = db.Column(db.String(50))
-    phone_number = db.Column(db.String(20))
+    phone_number = db.Column(db.String(30))
+    email_id=db.Column(db.String(30))
     address = db.Column(db.String(200))
     linkedin_id = db.Column(db.String(200))
     github_id = db.Column(db.String(200))
@@ -82,6 +85,20 @@ class ExtractedInfo(db.Model):
     tech_skill = db.Column(db.JSON)
     behaviour_skill = db.Column(db.JSON)
     date_of_birth = db.Column(db.Text)
+
+class ResumeScore(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    job_id = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
+    #resume_id = db.Column(db.Integer, db.ForeignKey('resume.id'), nullable=False)
+    resume_filename=db.Column(db.Text)
+    
+    jd_match = db.Column(db.String(10), nullable=False)
+    match_status = db.Column(db.String(20), nullable=False)
+    matching_skills = db.Column(db.JSON, nullable=True)
+    missing_skills = db.Column(db.JSON, nullable=True)
+
+    def __repr__(self):
+        return f'<ResumeScore {self.id}>'
 
 
 """
@@ -387,6 +404,50 @@ def export_jobs_json():
     jobs_list = [{'id': job.id, 'role': job.role, 'jd': job.jd} for job in jobs]
     return jsonify(jobs_list)
 
+
+# API endpoint to update job status(ACTIVE)
+@app.route('/jobs/<int:job_id>/status', methods=['PUT'])
+def update_job_status(job_id):
+    new_status_str = request.json.get('status')
+    if new_status_str is None:
+        return jsonify({'message': 'Status not provided'}), 400
+    
+    # Map status string to boolean
+    new_status = True if new_status_str.lower() == 'active' else False
+    
+    # Update job status in the database
+    job = Job.query.get(job_id)
+    if job is None:
+        return jsonify({'message': 'Job not found'}), 404
+    
+    job.active = new_status
+    db.session.commit()
+    
+    return jsonify({'message': 'Job status updated successfully'}), 200
+
+# API endpoint to edit job details
+@app.route('/edit_job/<int:job_id>', methods=['PUT'])
+def edit_job(job_id):
+    # Get the new role and job description from the request
+    new_role = request.json.get('role')
+    new_jd = request.json.get('jd')
+
+    # Validate if both role and job description are provided
+    if new_role is None or new_jd is None:
+        return jsonify({'message': 'Role or job description not provided'}), 400
+
+    # Get the job from the database
+    job = Job.query.get(job_id)
+    if job is None:
+        return jsonify({'message': 'Job not found'}), 404
+
+    # Update the job details
+    job.role = new_role
+    job.jd = new_jd
+    db.session.commit()
+
+    return jsonify({'message': 'Job details updated successfully'}), 200
+
 #To delete the specific role and jd
 @app.route('/delete_job', methods=['POST'])
 def delete_job():
@@ -444,7 +505,10 @@ def upload_resume():
     data = request.form
     role = data.get('role')
     jd = data.get('jd')
-
+    
+    folder_path=os.path.join(resume_folder,role)
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
     if role and jd:
         # Check if the job exists in the database
         with app.app_context():
@@ -459,8 +523,9 @@ def upload_resume():
             
             # Generate a unique filename
             resume_filename = secure_filename(resume_file.filename)
+
             # Save the resume file to the resume folder
-            resume_path = os.path.join(resume_folder, resume_filename)
+            resume_path = os.path.join(folder_path, resume_filename)
             resume_file.save(resume_path)
 
             # Associate the resume file with the job in the database
@@ -482,15 +547,15 @@ def extract_resume_info():
     # Get job ID and folder containing resume PDFs from the request
     data = request.get_json()
     job_id = data.get('job_id')
-    resumes_folder = data.get('resumes_folder')
-
+    role_folder = data.get('role')
+    
     # Initialize an empty string to store extracted text from all resumes
     text_resume = ""
-
+    path=os.path.join(resume_folder,role_folder)
     # Iterate through each file in the resumes folder
-    for filename in os.listdir(resumes_folder):
+    for filename in os.listdir(path):
         if filename.endswith(".pdf"):  # Check if the file is a PDF
-            file_path = os.path.join(resumes_folder, filename)  # Get the full file path
+            file_path = os.path.join(path, filename)  # Get the full file path
             reader = PyPDF2.PdfReader(file_path)
             
             # Add a separator with the filename before extracting text from each PDF
@@ -509,13 +574,14 @@ def extract_resume_info():
             {"role": "system", "content":
              """You act like as ATS tool, where you get {text_resume}resume of candidate,You will get multiple resumes or single resume that will vary,each resume will be differentiated by "Text extracted from: {filename}",so from that resume
              extract the inforamtion like candiate name, date of birth,work experience in years , phone number ,address, email id , linkedin link, github link ,techincal skills, soft skills.
-             IF total year of experience is not given , then you do analysis of total years the candiate did in diifferent company , and say total years of experince, not the company name details ,the extracted information should be in josn format like below example:
+             IF total year of experience is not given , then you do analysis of total years the candiate worked in diifferent company , and say total years of experince, not the company name details,Always avoid hallucination-problem,the extracted information should be in josn format like below example:
              IF any key values is not there , mentionis as "NIL", dont need explanation , just the json details like below
              {
-                 "resume_details":{
-                    "candiate_name":"KEERTHI",
+                 "resume_details":[
+                 {
+                    "candidate_name":"KEERTHI GANESH",
                     "work_exp":"3 YEARS",
-                    "phone_numner":"78787878787",
+                    "phone_number":"78787878787",
                     "address":"KAIALSH NAGAR TRICHY , TAMIL NADU",
                     "email_id":"KEERTHI@GMAIL.COM",
                     "linkedin_id":,
@@ -526,9 +592,9 @@ def extract_resume_info():
                     "nationality":"Indian"
                     },
                 {
-                    "candiate_name":"kishore",
+                    "candidate_name":"kishore",
                     "work_exp":"1 YEARS",
-                    "phone_numner":"345678983",
+                    "phone_number":"345678983",
                     "address":"balaji street,kerala",
                     "email_id":"kishore@GMAIL.COM",
                     "linkedin_id":"https://linkedin.com/kishore,
@@ -537,7 +603,7 @@ def extract_resume_info():
                     "soft_skills":["COMMUNICATION","CRITICAL THINKER"]
                     "date_of_birth":"20-11-2000",
                     "nationality":"Indian"
-                    }
+                    }]
 
              } """
 },
@@ -548,7 +614,7 @@ def extract_resume_info():
 
     client = OpenAI()
     # Set up OpenAI API key
-    api_key = os.getenv("OPENAI_API_KEY")
+    client.api_key = os.getenv("OPENAI_API_KEY")
 
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
@@ -563,31 +629,241 @@ def extract_resume_info():
     # Remove extra spaces
     response_data = ' '.join(response_data.split())
     print(response_data)
-
+    # Remove unwanted characters from the response data
+    response_data = response_data.strip().strip('```json').strip().strip('```')
+    print("before josn load")
     # Parse the JSON data containing extracted details
     extracted_info = json.loads(response_data)
-
+    print("After josn load")
     # Iterate through each resume detail extracted by OpenAI and save it to the database
-    for resume_detail in extracted_info['resume_details']:
-        extracted_record = ExtractedInfo(
+    try:
+        for resume_detail in extracted_info['resume_details']:
+            # Check if a record with the same resume details already exists in the database
+            existing_record = ExtractedInfo.query.filter_by(
             job_id=job_id,
-            resume_id=resume_detail['candiate_name'],  # Use candidate name as resume ID
-            name=resume_detail.get('candiate_name', 'NIL'),
-            total_experience=resume_detail.get('work_exp', 'NIL'),
-            phone_number=resume_detail.get('phone_numner', 'NIL'),
-            address=resume_detail.get('address', 'NIL'),
-            linkedin_id=resume_detail.get('linkedin_id', 'NIL'),
-            github_id=resume_detail.get('github_id', 'NIL'),
-            nationality=resume_detail.get('nationality', 'NIL'),
-            tech_skill=resume_detail.get('technical_skills', []),
-            behaviour_skill=resume_detail.get('soft_skills', [])
+            resume_id=resume_detail['candidate_name']
+        ).first()
+            if existing_record:
+            # Update the existing record if needed
+                existing_record.name = resume_detail.get('candidate_name', 'NIL')
+                existing_record.total_experience = resume_detail.get('work_exp', 'NIL')
+                existing_record.phone_number = resume_detail.get('phone_number', 'NIL')
+                existing_record.email_id=resume_detail.get('email_id', 'NIL')
+                existing_record.address = resume_detail.get('address', 'NIL')
+                existing_record.linkedin_id = resume_detail.get('linkedin_id', 'NIL')
+                existing_record.github_id = resume_detail.get('github_id', 'NIL')
+                existing_record.nationality = resume_detail.get('nationality', 'NIL')
+                existing_record.tech_skill = resume_detail.get('technical_skills', [])
+                existing_record.behaviour_skill = resume_detail.get('soft_skills', [])
+                existing_record.date_of_birth=resume_detail.get('date_of_birth','NIL')
+        else:
+            # Add a new record if it doesn't already exist
+            extracted_record = ExtractedInfo(
+                job_id=job_id,
+                resume_id=resume_detail['candidate_name'],  # Use candidate name as resume ID
+                name=resume_detail.get('candidate_name', 'NIL'),
+                total_experience=resume_detail.get('work_exp', 'NIL'),
+                phone_number=resume_detail.get('phone_number', 'NIL'),
+                email_id=resume_detail.get('email_id'),
+                address=resume_detail.get('address', 'NIL'),
+                linkedin_id=resume_detail.get('linkedin_id', 'NIL'),
+                github_id=resume_detail.get('github_id', 'NIL'),
+                nationality=resume_detail.get('nationality', 'NIL'),
+                tech_skill=resume_detail.get('technical_skills', []),
+                behaviour_skill=resume_detail.get('soft_skills', []),
+                date_of_birth=resume_detail.get('date_of_birth','NIL')
+            )
+            """
+            >>>>>>>
+            extracted_record = ExtractedInfo(
+                job_id=job_id,
+                resume_id=resume_detail['candidate_name'],  # Use candidate name as resume ID
+                name=resume_detail.get('candiate_name', 'NIL'),
+                total_experience=resume_detail.get('work_exp', 'NIL'),
+                phone_number=resume_detail.get('phone_number', 'NIL'),
+                email_id=resume_detail.get('email_id'),
+                address=resume_detail.get('address', 'NIL'),
+                linkedin_id=resume_detail.get('linkedin_id', 'NIL'),
+                github_id=resume_detail.get('github_id', 'NIL'),
+                nationality=resume_detail.get('nationality', 'NIL'),
+                tech_skill=resume_detail.get('technical_skills', []),
+                behaviour_skill=resume_detail.get('soft_skills', []),
+                date_of_birth=resume_detail.get('date_of_birth','NIL')
+            )"""
+            db.session.add(extracted_record)
+
+        # Commit changes to the database
+        db.session.commit()
+
+        return jsonify({'message': 'Information extracted and saved successfully.'}), 200
+    
+    except Exception as e:
+        return str(e)
+    
+#After INFO FROM RESUME IS EXTRACTED , DIRECT TO NEW PAGE ASSOCIATED WITH THAT JOB.
+# API endpoint to fetch filenames of resumes associated with a job and role
+@app.route('/jobs/<int:job_id>/resumes/filenames', methods=['GET'])
+def get_resume_filenames(job_id):
+    # Fetch job details from the database
+    job = Job.query.get(job_id)
+    if not job:
+        return jsonify({'message': 'Job not found'}), 404
+
+    # Get the folder path for the specified job and role
+    resume_folder_path = os.path.join(resume_folder, job.role)
+
+    # Check if the folder exists
+    if not os.path.exists(resume_folder_path):
+        return jsonify({'message': 'No resumes found for this job and role'}), 404
+
+    # List all files in the folder (resumes)
+    resume_filenames = [os.path.splitext(filename)[0] for filename in os.listdir(resume_folder_path) if filename.endswith('.pdf')]
+    # List all files in the folder (resumes)
+    #resume_filenames = [filename for filename in os.listdir(resume_folder_path) if filename.endswith('.pdf')]
+
+     # Include role and JD in the response
+    response_data_jobspecifc = {
+        'role': job.role,
+        'jd': job.jd,
+        'job_id':job.id,
+        'resume_filenames': resume_filenames
+    }
+
+    return jsonify(response_data_jobspecifc), 200
+    
+def chatgpt_message(jd,job_role,text_resume):
+
+    messages=[
+{
+    "role":'system',
+    "content":"""
+    Hey Act like a skilled or very experience ATS(Application Tracking System) 
+with a deep understanding of this field {job_role}.Your task is to evaluate the resume based on the given job description.
+Also for jd match % look deeply/ analaysis/ come to conclusion with respective to {job_role}, {jd} and {text_resume}.
+The match percentage should reflect the degree of alignment between the resume and the job description, considering both the presence and relevance of key qualifications and experiences.
+Assign the percentage Matching based on Job Description and resume , Always give top 5 missing skills and matching skills key words with high accuracy.Also for "Match Status", say if job match % is below 50 % then "Rejected", if it is greater or equal to 50 % but below 80% then "ON HOLD",if job match is greater than or equal to 80% then say "SELECTED FOR REVIEW".
+resume:{text_resume}
+description:{jd}
+you will get multiple resume content in a single variable {text_resume}, each resume is separeted by "Text extracted from:filename", so do analysis separatelyand give a
+result for each result score and other details which is asked below.Always avoid hallucination-problem.
+The response should be in a JSON having the structure like below example:
+{
+score:[
+{
+    "resume_filename": "devops-engineer-resume-example",
+    "JD_MATCH":"%",
+    "MATCH_STATUS":"",
+    "Matching_Skills":[],
+    Missing_Skills":[]
+},
+{
+    "resume_filename": "python-resume",
+    "JD_MATCH":"%",
+    "MATCH_STATUS":"",
+    "Matching_Skills":[],
+    Missing_Skills":[]
+}
+}"""},
+{"role":"user",
+ "content":text_resume}
+]
+    
+
+
+    client = OpenAI()
+    client.api_key = os.getenv("OPENAI_API_KEY")
+    response1 = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=messages,
+            temperature=0,
+            max_tokens=1000,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0
         )
-        db.session.add(extracted_record)
+    print(response1.choices[0].message)
+    response1= dict(response1)
+    response_data = dict(dict(response1['choices'][0])['message'])[
+            'content'].replace("\n", " ")
+
+    print("knfdklfn")
+ 
+    return (response_data)
+
+def extract_rsume_info(role):
+   
+
+    # Define the directory containing your PDF files
+    directory = os.path.join(resume_folder,role)
+
+    # Initialize an empty string to store extracted text
+    text_resume = ""
+    print("keerthi")
+    # Iterate through each file in the directory
+    for filename in os.listdir(directory):
+        if filename.endswith(".pdf"):  # Check if the file is a PDF
+            file_path = os.path.join(directory, filename)  # Get the full file path
+            reader = PyPDF2.PdfReader(file_path)
+            
+            # Add a separator with the filename before extracting text from each PDF
+            text_resume += f"Text extracted from: {filename}\n"
+            
+            # Iterate through each page of the PDF and extract text
+            for page in reader.pages:
+                text_resume += page.extract_text()
+                text_resume += "\n"  # Add a newline after each page
+            
+            # Add a separator between different PDFs
+            text_resume += "\n---\n"
+            
+    # Print the extracted text
+    return (text_resume)
+
+@app.route('/calculate_resume_scores', methods=['POST'])
+def calculate_resume_scores():
+    # Get job details and resumes from the request
+    data = request.get_json()
+    jd = data.get('jd')
+    role = data.get('role')
+    job_id=data.get('job_id')
+    # Call user defined fucntion for resume extract and call open ai to score
+    text_resume=extract_rsume_info(role)
+    AI_score_response=chatgpt_message(jd,role,text_resume)
+    # Convert AI_score_response string to dictionary
+    AI_score_response_dict = json.loads(AI_score_response)
+    # Parse AI score response and extract relevant information
+    scores = []
+    for resume_info in AI_score_response_dict['score']:
+        resume_filename = resume_info['resume_filename']
+        jd_match = resume_info['JD_MATCH']
+        match_status = resume_info['MATCH_STATUS']
+        matching_skills = resume_info['Matching_Skills']
+        missing_skills = resume_info['Missing_Skills']
+        
+        # Store the calculated scores into your Resume_score table
+        new_score = ResumeScore(
+            resume_filename=resume_filename,
+            job_id=job_id,  # Add job ID here if available
+            jd_match=jd_match,
+            match_status=match_status,
+            matching_skills=matching_skills,
+            missing_skills=missing_skills
+        )
+        db.session.add(new_score)
+        
+        # Append the score details to the response
+        scores.append({
+            "resume_filename": resume_filename,
+            "JD_MATCH": jd_match,
+            "MATCH_STATUS": match_status,
+            "Matching_Skills": matching_skills,
+            "Missing_Skills": missing_skills
+        })
 
     # Commit changes to the database
     db.session.commit()
 
-    return jsonify({'message': 'Information extracted and saved successfully.'}), 200
+    return jsonify({'scores': scores}), 200
 
 
 if __name__ == '__main__':
@@ -595,3 +871,4 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+  
