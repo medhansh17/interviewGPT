@@ -3,7 +3,23 @@ import Table from "./components/Table";
 import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import Image from "./assets/loader.gif";
+import Modal from "react-modal";
 
+Modal.setAppElement("#root");
+const customStyles = {
+  content: {
+    top: '50%',
+    left: '50%',
+    right: 'auto',
+    bottom: 'auto',
+    marginRight: '0%',
+    transform: 'translate(-50%, -50%)',
+    // width:"52%",
+    borderRadius:"5px",
+    // boxShadow:'0 2px 9px grey',
+    fontFamily:"sans-serif"
+  },
+};
 
 // import html2canvas from 'html2canvas';
 import axios from "axios";
@@ -11,16 +27,19 @@ import ErrorAlert from "./components/Alerts/ErrorAlert";
 import TechSkillTable from "./components/TechSkillTable";
 import { FetchSkillsData } from "./types";
 import api from './components/customAxios/Axios';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AddJd from "./components/AddJd";
 import TextArea2 from "./components/TextArea2";
 
 function Application() {
-	const [mainData, setMainData] = useState<any | null>(null);
-	const [mainTextArea, setMainTextArea] = useState<any | null>("sdawdawd");
 
+	const [modalIsOpen, setModalIsOpen] = useState(false);
+
+	const [mainData, setMainData] = useState<any | null>(null);
+	const [mainTextArea, setMainTextArea] = useState<any | null>("");
+const [load,setLoad]=useState(false)
 	const [mainData2, setMainData2] = useState<any | null>(null);
-	const [mainTextArea2, setMainTextArea2] = useState<any | null>("sdawdawd");
+	const [mainTextArea2, setMainTextArea2] = useState<any | null>("");
 	// const [mainSkill, setMainSkill] = useState<any | null>(null);
 	// const [softSkill, setSoftSkill] = useState<any | null>(null);
 	// const [techSkill, setTechSkill] = useState<any | null>(null);
@@ -32,13 +51,16 @@ function Application() {
 	const [isHidden, setIsHidden] = useState(false);
 
 	const [fetchSkill, setFetchSkill] = useState<FetchSkillsData & { timestamp: number }>();
-
+console.log(mainData,mainTextArea)
 	const [error, setError] = useState<string | null>(null);
 
-	const [isLoading, setIsLoading] = useState(false);
-   
+	const [isLoading, setIsLoading] = useState(true);
+   const [role,setRole]=useState<string | null>(null)
 	const [doc,setDoc]=useState(false);
-	const [manual,setManual]=useState(false)
+	const [manual,setManual]=useState(true);
+
+	const navigate=useNavigate();
+
 	useEffect(() => {
 		const clearLocalStorage = () => {
 			localStorage.clear();
@@ -50,14 +72,42 @@ function Application() {
 			window.removeEventListener("beforeunload", clearLocalStorage);
 		};
 	}, []);
-
+const uploadJD=async()=>{
+	console.log("kk")
+	setIsLoading(true);
+	setModalIsOpen(true)
+	try{
+		const response = await api.post(
+			"/upload_job",
+			{
+				role: mainData?.role || mainData2?.role|| role|| "",
+				jd: mainData?.jd ||mainData2?.jd || mainTextArea ||mainTextArea2,
+			},
+		);
+		
+		if(response.statusText=='OK'){
+			setIsLoading(false);
+			setModalIsOpen(false)
+			navigate('/dashboard')
+		}
+console.log("rr",response)
+	}catch (error: any) {
+		console.error("Error uploading jd data:", error);
+		console.error("API Error:", error);
+		setError(error);
+		setTimeout(() => {
+			setError(null);
+		}, 3000);
+	}
+}
 	const fetchDataFetchSkill = async () => {
 		setIsLoading(true);
+		setModalIsOpen(true)
 		try {
 			const response = await api.post<FetchSkillsData>(
 				"/fetch_skills",
 				{
-					name: mainData?.role || "",
+					role: mainData?.role || "",
 					job_description: mainData?.jd || mainTextArea,
 				},
 			);
@@ -207,10 +257,14 @@ function Application() {
 	// }
 	const docHanler=()=>{
 setManual(false);
-setDoc(true)}
+setDoc(true);
+setLoad(false)
+}
 	const manualHandler=()=>{
 		setDoc(false);
 		setManual(true);
+		setLoad(false);
+		setMainData(null);
 	}
 	return (
 		<main id="main-content">
@@ -233,32 +287,32 @@ setDoc(true)}
 								<button onClick={docHanler} className="  mt-[1rem]  py-2 w-[7rem] font-medium tracking-wide text-white text-center capitalize transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80">Document</button>
 								<button onClick={manualHandler} className=" ml-[2rem] mt-[1rem]  py-2 w-[8rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80">Type Manually</button></div>
 							
-							{doc && <>
-								<input type="text" className="border my-4 border-zinc-300 shadow-sm w-full px-3 py-2 placeholder-zinc-400 text-zinc-700 bg-white rounded-lg focus:outline-none focus:shadow-outline" placeholder="Enter Role"/>
+								
+							{doc && load==false&& <>
+								<input type="text" onChange={(e)=>setRole(e.target.value)} className="border my-4 border-zinc-300 shadow-sm w-full px-3 py-2 placeholder-zinc-400 text-zinc-700 bg-white rounded-lg focus:outline-none focus:shadow-outline" placeholder="Enter Role"/>
 							
 							<AddJd/>
 							</>}
-							{manual && <>
-								<input type="text" className="border my-4 border-zinc-300 shadow-sm w-full px-3 py-2 placeholder-zinc-400 text-zinc-700 bg-white rounded-lg focus:outline-none focus:shadow-outline" placeholder="Enter Role"/>
+							{manual==true  && load==false && <>
+								<input type="text" onChange={(e)=>setRole(e.target.value)} className="border my-4 border-zinc-300 shadow-sm w-full px-3 py-2 placeholder-zinc-400 text-zinc-700 bg-white rounded-lg focus:outline-none focus:shadow-outline" placeholder="Enter Role"/>
 							
 							<TextArea2 setMainTextArea2={setMainTextArea2} mainData2={mainData2} />
 							</>}	
-                     {doc==false && manual==false && <TextArea setMainTextArea={setMainTextArea} mainData={mainData} />}
-						</div>
-						<div className="mt-[2rem]">
-							<button
-								className={`mb-[0.5rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${mainData || mainTextArea
+                     {load && <TextArea setMainTextArea={setMainTextArea} mainData={mainData} />}
+					 <div className="mt-[2rem]">
+							<button type="submit"
+								className={`mb-[0.5rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${(mainData || mainTextArea || mainData2 || mainTextArea2) 
 									? "bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80"
 									: "bg-gray-400 cursor-not-allowed"
 									} rounded-lg focus:outline-none`}
-								onClick={fetchDataFetchSkill}
-							// disabled={!mainData || !mainTextArea}
+								onClick={uploadJD}
+							// disabled={!mainData || !mainTextArea || !mainData2 || !mainTextArea2}
 							>
 								Submit
 							</button>
 
 							<button
-								className={`ml-[1rem] mt-[1rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${mainData || mainTextArea
+								className={`ml-[1rem] mt-[1rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${(mainData || mainTextArea || mainData2 || mainTextArea2)
 									? "bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80"
 									: "bg-gray-400 cursor-not-allowed"
 									} rounded-lg focus:outline-none`}
@@ -268,28 +322,42 @@ setDoc(true)}
 								Reset
 							</button>
 						</div>
+						
+						</div>
+						
+						
 					</div>
 				</div>
 
 				<div className="">
-					<Table setMainData={setMainData} />
+					<Table setMainData={setMainData} setLoad={setLoad} manual={manual} doc={doc}/>
 				</div>
 			</div>
-			{isLoading && (
-				<div
-					style={{
-						position: "relative",
-						display: "flex",
-						justifyContent: "center",
-						alignItems: "center",
-					}}
+
+			{/* {isLoading &&  */}
+			<Modal
+        
+			isOpen={modalIsOpen}
+			style={customStyles}
+      >
+        {/* <div className="modal-overlay">
+		
+		 ( */}
+				<div className=""
+					// style={{
+					// 	position: "relative",
+					// 	display: "flex",
+					// 	justifyContent: "center",
+					// 	alignItems: "center",
+					// }}
 				>
 					<div>
 					<img src={Image} className="" alt="logo" />
-						<h1 className="text-center">Estimated time: 5 mins <span className="block mt-2 ">For faster result - <Link className="text-sky-600 underline underline-offset-2" to='https://www.bluetickconsultants.com/contact-us.html'>Here</Link></span></h1>
+						{/* <h1 className="text-center">Estimated time: 5 mins <span className="block mt-2 ">For faster result - <Link className="text-sky-600 underline underline-offset-2" to='https://www.bluetickconsultants.com/contact-us.html'>Here</Link></span></h1> */}
 					</div>
 				</div>
-			)}
+			</Modal>
+			
 
 			<div style={{ display: isHidden ? "block" : "none" }}>
 				<div className="flex  w-full flex-wrap">

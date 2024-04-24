@@ -1,10 +1,28 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link,useNavigate } from "react-router-dom";
+
+import api from './components/customAxios/Axios';
 
 const Login: React.FC = () => {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const navigate=useNavigate();
+  const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+  const handleSubmit =async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // Add your form submission logic here
+   
+    try {
+      console.log(email,password)
+      const res = await api.post("/login", {'email':email,'password':password});
+      
+      if(res.statusText=="OK"){
+        navigate('/app')
+      }else alert(res.data.message)
+     
+    } catch (err) {
+      
+      
+    }
   };
 
   const handleGoogleSignIn = () => {
@@ -100,22 +118,22 @@ const Login: React.FC = () => {
         </div>
       </div> */}
       <div className="flex items-center justify-center h-screen w-[500px] bg-zinc-100 dark:bg-zinc-800">
-          <div className="bg-white dark:bg-zinc-700 rounded-lg shadow p-8 m-4  w-full">
+          <form onSubmit={handleSubmit} className="bg-white dark:bg-zinc-700 rounded-lg shadow p-8 m-4  w-full">
             <h2 className="text-2xl font-bold mb-8 text-center text-zinc-800 dark:text-white">Login</h2>
             <div className="mb-4">
               <label htmlFor="email" className="block text-zinc-700 dark:text-zinc-200 text-sm font-bold mb-2">Email</label>
-              <input type="email" id="email" className="shadow appearance-none border rounded w-full py-2 px-3 text-zinc-700 dark:text-zinc-300 leading-tight focus:outline-none focus:shadow-outline" placeholder="Email"/>
+              <input type="email" id="email" onChange={(e)=>setEmail(e.target.value)} className="shadow appearance-none border rounded w-full py-2 px-3 text-zinc-700 dark:text-zinc-300 leading-tight focus:outline-none focus:shadow-outline" placeholder="Email"/>
             </div>
             <div className="mb-6">
               <label htmlFor="password" className="block text-zinc-700 dark:text-zinc-200 text-sm font-bold mb-2">Password</label>
-              <input type="password" id="password" className="shadow appearance-none border rounded w-full py-2 px-3 text-zinc-700 dark:text-zinc-300 leading-tight focus:outline-none focus:shadow-outline" placeholder="Password"/>
+              <input type="password" id="password" onChange={(e)=>setPassword(e.target.value)} className="shadow appearance-none border rounded w-full py-2 px-3 text-zinc-700 dark:text-zinc-300 leading-tight focus:outline-none focus:shadow-outline" placeholder="Password"/>
               
             </div>
             <div className="mb-6 flex items-center justify-center">
             <Link to="/forget-password" className="  font-bold text-sm text-blue-500 hover:text-blue-800 dark:hover:text-blue-300 float-right mt-2">Forgot password?</Link>
             </div>
             <div className="mb-8">
-              <button className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Login</button>
+              <button className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type='submit'>Login</button>
             </div>
             <div className="text-center">
               <p className="text-zinc-600 dark:text-zinc-300 text-sm">Don't have an account? <Link to="/register" className="text-blue-500 hover:text-blue-800 dark:hover:text-blue-300">Signup</Link></p>
@@ -133,7 +151,7 @@ const Login: React.FC = () => {
                 <img src="https://placehold.co/20x20" alt="Google" className="inline mr-2"/> Login with Google
               </button>
       </div> */}
-      </div>          
+      </form>          
     </div>
     </div>
   );

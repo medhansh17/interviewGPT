@@ -216,3 +216,70 @@
   .hover-style{
     margin-bottom:1rem !important ;
   }
+
+  .custom-file-input {
+    opacity: 0;
+    position: absolute;
+    width: 0.1px;
+    height: 0.1px;
+    overflow: hidden;
+    z-index: -1;
+  }
+  
+  .custom-file-label {
+    
+    color: white;
+    padding: 5px 15px;
+    border-radius: 30px;
+    cursor: pointer;
+    display: inline-block;
+
+  }
+  .cfl {
+    background-color: #4a90e2;
+  }
+  .cfl3{
+    background-color: #198e26c2;
+  }
+  
+  .cfl2{
+    background-color: #198e26c2;
+    display: none;
+  }
+  .custom-file-label:hover {
+    background-color: #357ae8;
+  }
+  .cfl3:hover{
+    background-color: #37a343c2;
+  }
+.other-container{
+  top: 4px;
+    left: 33px;
+    width: 92px;
+    height: 68px;
+}
+  .other-options-div{
+    padding: 2px;
+    text-align: center;
+    
+  }
+  .ood{
+    border-bottom: 1px solid lightgrey;
+  }
+
+  .desc{
+    
+      /* height: 200px;
+      width: 300px;
+     white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis; */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 250px;
+  
+  
+  }

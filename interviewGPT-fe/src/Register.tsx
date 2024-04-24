@@ -1,10 +1,27 @@
-import React from "react";
-import { Link } from "react-router-dom";
-
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import api from './components/customAxios/Axios';
 const Register: React.FC = () => {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+
+  let navigate=useNavigate()
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [first_name, setUsername] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+const last_name=""
+  const handleSubmit = async(event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // Add your form submission logic here
+    try {
+      const res = await api.post("/register", {first_name,email,password,last_name});
+      
+      if(res.statusText=="OK"){
+        navigate('/app')
+      }else alert(res.data.message)
+    } catch (err) {
+      
+      
+    }
   };
 
   const handleGoogleSignUp = () => {
@@ -30,7 +47,7 @@ const Register: React.FC = () => {
                 Username
               </label>
               <div className="mt-1">
-                <input
+                <input onChange={(e)=>setUsername(e.target.value)}
                   name="username"
                   type="text"
                   required
@@ -47,7 +64,7 @@ const Register: React.FC = () => {
                 Email
               </label>
               <div className="mt-1">
-                <input
+                <input onChange={(e)=>setEmail(e.target.value)}
                   name="email"
                   type="email"
                   autoComplete="email"
@@ -65,7 +82,7 @@ const Register: React.FC = () => {
                 Password
               </label>
               <div className="mt-1">
-                <input
+                <input onChange={(e)=>setPassword(e.target.value)}
                   name="password"
                   type="password"
                   autoComplete="new-password"
@@ -83,7 +100,7 @@ const Register: React.FC = () => {
                 Confirm Password
               </label>
               <div className="mt-1">
-                <input
+                <input onChange={(e)=>setConfirmPassword(e.target.value)}
                   name="confirm_password"
                   type="password"
                   autoComplete="confirm-password"

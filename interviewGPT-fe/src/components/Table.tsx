@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface DataItem {
   id: number;
@@ -7,6 +7,10 @@ interface DataItem {
 }
 interface TableProps {
   setMainData: React.Dispatch<React.SetStateAction<any>>;
+  setLoad: React.Dispatch<React.SetStateAction<any>>;
+  manual:boolean;
+  doc: boolean;
+
 }
 
 const truncateText = (text: string, wordCount: number) => {
@@ -17,7 +21,7 @@ const truncateText = (text: string, wordCount: number) => {
   return words.slice(0, wordCount).join(" ") + "...";
 };
 
-const Table: React.FC<TableProps> = ({ setMainData }: any) => {
+const Table: React.FC<TableProps> = ({ setMainData,setLoad,doc,manual }: any) => {
   const [selectedJd, setSelectedJd] = useState<DataItem | null>(null);
 
   const data: DataItem[] = [
@@ -45,8 +49,12 @@ const Table: React.FC<TableProps> = ({ setMainData }: any) => {
   const handleLoadClick = () => {
     if (selectedJd) {
       setMainData(selectedJd);
+      setLoad(true)
     }
   };
+  useEffect(()=>{
+setSelectedJd(null)
+  },[doc,manual])
 
   return (
     <section className="mx-[1rem] md:mx-[0rem] mt-[2rem]">
