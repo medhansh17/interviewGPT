@@ -819,13 +819,13 @@ def extract_rsume_info(role):
     # Print the extracted text
     return (text_resume)
 
-@app.route('/calculate_resume_scores', methods=['POST'])
+@app.route('/calculate_resume_scores/<int:job_id>', methods=['POST'])
 def calculate_resume_scores():
     # Get job details and resumes from the request
     data = request.get_json()
     jd = data.get('jd')
     role = data.get('role')
-    job_id=data.get('job_id')
+    #job_id=data.get('job_id')
     # Call user defined fucntion for resume extract and call open ai to score
     text_resume=extract_rsume_info(role)
     AI_score_response=chatgpt_message(jd,role,text_resume)
