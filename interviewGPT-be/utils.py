@@ -176,7 +176,7 @@ def create_reset_password_body(link):
 def create_verification_email_body(link):
     return generate_email_template(
         "Email Verification",
-        "Thank you for registering with BluetickPDF. To complete the registration process, please click the 'Verify Email' button below:",
+        "Thank you for registering with InterviewGPT. To complete the registration process, please click the 'Verify Email' button below:",
         link,
         "Verify Email"
     )
