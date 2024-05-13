@@ -12,7 +12,7 @@ interface SideProps {
 const SideBar: React.FC<SideProps> = ({questions,setCurrentIndex,currentIndex }: any) => {
 
   return (
-    <div className="w-64 bg-zinc-100 p-3">
+    <div className="w-64 bg-zinc-100 p-3" style={{display:"none"}}>
         <div className='pb-3 text-center border-b-2 border-zinc-400 py-[2rem] pb-[1.1rem]'>Problems</div>
             <ul className='mt-3'>
               {questions.map((item:any,index:number)=>{

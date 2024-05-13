@@ -6,20 +6,7 @@ import Image from "./assets/loader.gif";
 import Modal from "react-modal";
 
 Modal.setAppElement("#root");
-const customStyles = {
-  content: {
-    top: '50%',
-    left: '50%',
-    right: 'auto',
-    bottom: 'auto',
-    marginRight: '0%',
-    transform: 'translate(-50%, -50%)',
-    // width:"52%",
-    borderRadius:"5px",
-    // boxShadow:'0 2px 9px grey',
-    fontFamily:"sans-serif"
-  },
-};
+
 
 // import html2canvas from 'html2canvas';
 import axios from "axios";
@@ -30,11 +17,14 @@ import api from './components/customAxios/Axios';
 import { Link, useNavigate } from "react-router-dom";
 import AddJd from "./components/AddJd";
 import TextArea2 from "./components/TextArea2";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheckCircle,faTimesCircle } from "@fortawesome/free-solid-svg-icons";
+
 
 function Application() {
-
+	const [file,setFile]=useState<any | null>(null);
 	const [modalIsOpen, setModalIsOpen] = useState(false);
-
+const [success,setSuccess]=useState(false)
 	const [mainData, setMainData] = useState<any | null>(null);
 	const [mainTextArea, setMainTextArea] = useState<any | null>("");
 const [load,setLoad]=useState(false)
@@ -49,13 +39,16 @@ const [load,setLoad]=useState(false)
 	// );
 	// const [isReportGenerated, setIsReportGenerated] = useState(false);
 	const [isHidden, setIsHidden] = useState(false);
-
+	const [empty,setEmpty]= useState<boolean>(false);
+	const [showModal, setShowModal] = useState<boolean>(false);
+    const [modalMessage, setModalMessage] = useState<string>('');
 	const [fetchSkill, setFetchSkill] = useState<FetchSkillsData & { timestamp: number }>();
 console.log(mainData,mainTextArea)
 	const [error, setError] = useState<string | null>(null);
 
-	const [isLoading, setIsLoading] = useState(true);
-   const [role,setRole]=useState<string | null>(null)
+	const [isLoading, setIsLoading] = useState(false);
+	const [role, setRole] = useState<string>("");
+   const [role2,setRole2]=useState<string>("")
 	const [doc,setDoc]=useState(false);
 	const [manual,setManual]=useState(true);
 
@@ -72,10 +65,45 @@ console.log(mainData,mainTextArea)
 			window.removeEventListener("beforeunload", clearLocalStorage);
 		};
 	}, []);
+
+	const customStyles = {
+		content: {
+		  top: '20%',
+		  left: '50%',
+		  right: 'auto',
+		  bottom: 'auto',
+		  marginRight: '0%',
+		  transform: 'translate(-50%, -50%)',
+		  // width:"52%",
+		  borderRadius:"5px",
+		  // boxShadow:'0 2px 9px grey',
+		  fontFamily:"sans-serif",
+		  
+		  borderBottom: success ? '2px solid green' : '2px solid red'
+		},
+	  };
+
 const uploadJD=async()=>{
-	console.log("kk")
+	setIsHidden(true);
+	console.log(mainTextArea2,mainTextArea)
+	const wordCountRegex = /\S+/g; // Regular expression to match non-whitespace characters
+    const wordCount = (mainTextArea2.match(wordCountRegex) || []).length || (mainTextArea.match(wordCountRegex) || []).length;
+    if (load==false && wordCount < 50 || wordCount > 10000) {
+        // If word count is not within the specified range, display an error message
+        setError(wordCount);
+        setTimeout(() => {
+            setError(null);
+        }, 10000);
+        return;
+    }
+	
 	setIsLoading(true);
-	setModalIsOpen(true)
+	setModalIsOpen(true);
+	console.log("kere")
+	console.log("hhh",{
+		role: mainData?.role || mainData2?.role|| role|| "",
+		jd: mainData?.jd ||mainData2?.jd || mainTextArea ||mainTextArea2,
+	},)
 	try{
 		const response = await api.post(
 			"/upload_job",
@@ -84,20 +112,46 @@ const uploadJD=async()=>{
 				jd: mainData?.jd ||mainData2?.jd || mainTextArea ||mainTextArea2,
 			},
 		);
-		
-		if(response.statusText=='OK'){
-			setIsLoading(false);
-			setModalIsOpen(false)
-			navigate('/dashboard')
+		console.log("kkkkk",response)
+		if (response.data.message === 'Job uploaded successfully.') {
+			setIsLoading(false)
+			// Display modal for 3 seconds
+			setSuccess(true)
+			setModalMessage("Successfully added JD");
+			setShowModal(true);
+			setMainTextArea(null);
+			setMainTextArea2(null);
+			setMainData("");
+			setMainData2("");
+			setEmpty(true)
+			setRole("")
+			setRole2("")
+			setTimeout(() => {
+				setShowModal(false);
+			}, 5000);
+		}else if(response.data.message=='Job JD already exists.') {
+			setIsLoading(false)
+			setSuccess(false)
+			setEmpty(true)
+			setModalMessage("Job JD already exists.");
+			setShowModal(true);
+			setMainTextArea(null);
+			setMainTextArea2(null);
+			setMainData(null);
+			setRole("")
+			setRole2("")
+			setTimeout(() => {
+				setShowModal(false);
+			}, 5000);
 		}
 console.log("rr",response)
 	}catch (error: any) {
 		console.error("Error uploading jd data:", error);
 		console.error("API Error:", error);
-		setError(error);
-		setTimeout(() => {
-			setError(null);
-		}, 3000);
+		// setError(error);
+		// setTimeout(() => {
+		// 	setError(null);
+		// }, 3000);
 	}
 }
 	const fetchDataFetchSkill = async () => {
@@ -130,6 +184,51 @@ console.log("rr",response)
 		}
 		setIsLoading(false);
 	};
+
+	const uploadDoc = async () => {
+		if (!file || !role2) {
+		  console.log("ree")
+		  return;
+		}
+	
+		const newResume = new FormData();
+	    newResume.append("role", role2);
+		newResume.append("jd_file", file);
+		
+	
+		try {
+		  const response = await api.post("/file_upload_jd", 
+			newResume
+		  );
+	
+		  if (response.statusText === 'OK') {
+			// Display modal for 3 seconds
+			setSuccess(true)
+			setModalMessage("Successfully added JD");
+			setShowModal(true);
+			setMainTextArea(null);
+			setMainTextArea2(null);
+			setMainData(null);
+			setRole("")
+			setRole2("")
+			setTimeout(() => {
+				setShowModal(false);
+			}, 5000);
+		}else {
+			setSuccess(false)
+			setModalMessage("Error Uploading JD");
+			setShowModal(true);
+			setTimeout(() => {
+				setShowModal(false);
+			}, 5000);
+		}
+		  
+		  console.log("Response:", response);
+		} catch (error) {
+		  console.error("Error uploading jd:", error);
+		  // Handle error and display appropriate message
+		}
+	  };
 	// const generateQuestion=async ()=>{
 	//   try {
 	//     const response = await axios.post(
@@ -266,15 +365,19 @@ setLoad(false)
 		setLoad(false);
 		setMainData(null);
 	}
+	
 	return (
 		<main id="main-content">
 			<Header />
 			<div className="flex justify-end">
-				{error && <ErrorAlert message={"asda"} />}
+				
 			</div>
+			<div onClick={()=>navigate("/dashboard")} className="w-[10rem] text-center bg-gray-200 px-4 py-2 rounded-md shadow-md hover:bg-gray-300 cursor-pointer mt-[-3rem] mb-[2rem] ml-[3rem] font-bold">JD Dashboard</div>
 			<div className="md:flex md:justify-center md:items-center 2xl:gap-8 xl:gap-0 gap-2">
 				<div className="">
+				
 					<div className="mx-[3rem]">
+						
 						<div>
 							<p className="flex justify-left items-center mb-2 font-bold md:text-[2rem] text-[1rem]">
 								Add Job Description
@@ -287,32 +390,32 @@ setLoad(false)
 								<button onClick={docHanler} className="  mt-[1rem]  py-2 w-[7rem] font-medium tracking-wide text-white text-center capitalize transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80">Document</button>
 								<button onClick={manualHandler} className=" ml-[2rem] mt-[1rem]  py-2 w-[8rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80">Type Manually</button></div>
 							
-								
+							<form onSubmit={doc?uploadDoc:uploadJD}>	
 							{doc && load==false&& <>
-								<input type="text" onChange={(e)=>setRole(e.target.value)} className="border my-4 border-zinc-300 shadow-sm w-full px-3 py-2 placeholder-zinc-400 text-zinc-700 bg-white rounded-lg focus:outline-none focus:shadow-outline" placeholder="Enter Role"/>
+								<input required  type="text" onChange={(e)=>setRole2(e.target.value)} value={role2} className="border my-4 border-zinc-300 shadow-sm w-[700px] px-3 py-2 placeholder-zinc-400 text-zinc-700 bg-white rounded-lg focus:outline-none focus:shadow-outline" placeholder="Enter Role"/>
 							
-							<AddJd/>
+							<AddJd file={file} setFile={setFile}/>
 							</>}
-							{manual==true  && load==false && <>
-								<input type="text" onChange={(e)=>setRole(e.target.value)} className="border my-4 border-zinc-300 shadow-sm w-full px-3 py-2 placeholder-zinc-400 text-zinc-700 bg-white rounded-lg focus:outline-none focus:shadow-outline" placeholder="Enter Role"/>
-							
-							<TextArea2 setMainTextArea2={setMainTextArea2} mainData2={mainData2} />
+							{doc ==false && manual==true  && load==false && <>
+								<input required type="text" onChange={(e)=>setRole(e.target.value)} value={role} className="border my-4 border-zinc-300 shadow-sm w-full px-3 py-2 placeholder-zinc-400 text-zinc-700 bg-white rounded-lg focus:outline-none focus:shadow-outline" placeholder="Enter Role"/>
+								{error && <span style={{fontSize:"0.9rem"}}><span style={{color:"red",fontSize:"1rem"}}>*</span>{error}</span>}
+							<TextArea2 setEmpty={setEmpty} empty={empty} setMainTextArea2={setMainTextArea2} mainData2={mainData2} />
 							</>}	
-                     {load && <TextArea setMainTextArea={setMainTextArea} mainData={mainData} />}
+                     {load && doc== false && <TextArea setMainTextArea={setMainTextArea} mainData={mainData} />}
 					 <div className="mt-[2rem]">
 							<button type="submit"
-								className={`mb-[0.5rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${(mainData || mainTextArea || mainData2 || mainTextArea2) 
+								className={`h-[40px] mb-[0.5rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${(mainData || mainTextArea || mainData2 || mainTextArea2 || file) 
 									? "bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80"
 									: "bg-gray-400 cursor-not-allowed"
-									} rounded-lg focus:outline-none`}
-								onClick={uploadJD}
+									} rounded-lg focus:outline-none `}
+								// onClick={doc?uploadDoc:uploadJD}
 							// disabled={!mainData || !mainTextArea || !mainData2 || !mainTextArea2}
 							>
-								Submit
+								{isLoading?<span className="loader"></span>:'Submit'}
 							</button>
 
 							<button
-								className={`ml-[1rem] mt-[1rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${(mainData || mainTextArea || mainData2 || mainTextArea2)
+								className={`h-[40px] ml-[1rem] mt-[1rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${(mainData || mainTextArea || mainData2 || mainTextArea2 || file)
 									? "bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80"
 									: "bg-gray-400 cursor-not-allowed"
 									} rounded-lg focus:outline-none`}
@@ -322,7 +425,7 @@ setLoad(false)
 								Reset
 							</button>
 						</div>
-						
+						</form>
 						</div>
 						
 						
@@ -333,30 +436,17 @@ setLoad(false)
 					<Table setMainData={setMainData} setLoad={setLoad} manual={manual} doc={doc}/>
 				</div>
 			</div>
+			{showModal && (
+        <Modal isOpen={showModal} onRequestClose={() => setShowModal(false)} style={customStyles} >
+          <div style={{ display: "flex", alignItems: "center" }}>
+		  {success?<FontAwesomeIcon icon={faCheckCircle} style={{ color: "green",fontSize:"1.2rem", marginRight: "10px" }} />:<FontAwesomeIcon icon={faTimesCircle} style={{ color: "red",fontSize:"1.2rem", marginRight: "10px" }} />}
+        <span style={{ marginRight: "10px" }}>{modalMessage}</span>
+      </div>
+        </Modal>
+      )}
 
 			{/* {isLoading &&  */}
-			<Modal
-        
-			isOpen={modalIsOpen}
-			style={customStyles}
-      >
-        {/* <div className="modal-overlay">
-		
-		 ( */}
-				<div className=""
-					// style={{
-					// 	position: "relative",
-					// 	display: "flex",
-					// 	justifyContent: "center",
-					// 	alignItems: "center",
-					// }}
-				>
-					<div>
-					<img src={Image} className="" alt="logo" />
-						{/* <h1 className="text-center">Estimated time: 5 mins <span className="block mt-2 ">For faster result - <Link className="text-sky-600 underline underline-offset-2" to='https://www.bluetickconsultants.com/contact-us.html'>Here</Link></span></h1> */}
-					</div>
-				</div>
-			</Modal>
+			
 			
 
 			<div style={{ display: isHidden ? "block" : "none" }}>

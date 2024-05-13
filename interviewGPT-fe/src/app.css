@@ -101,7 +101,9 @@
   transform: translateY(-50%);
   border: 2px solid #9251ac;
 }
-
+.ReactModal__Overlay{
+  background-color: transparent !important;
+}
 .timeline__event--type2:before {
   background: #87bbfe;
   border-color: #555ac0;
@@ -199,16 +201,16 @@
   }
 
   .loader {
-    border: 6px solid #f3f3f3;
+    border: 3px solid #f3f3f3;
     border-radius: 50%;
-    border-top: 6px solid #3498db;
-    width: 50px;
-    height: 50px;
+    border-top: 3px solid #3498db;
+    width: 25px;
+    height: 25px;
     -webkit-animation: spin 2s linear infinite; /* Safari */
     animation: spin 2s linear infinite;
     position: absolute;
-    top: 40%;
-    left: 48%;
+    top: 14%;
+    left: 39%;
   }
   ul li a{
     padding-top: 0 !important;
@@ -282,4 +284,44 @@
     max-width: 250px;
   
   
+  }
+  .inp-pop{
+    flex:1
+  }
+  .inp-pop2{
+    flex: 0.7;
+  }
+  .resp-btn{
+    font-size: 13px;
+    width: 92px;
+border: 1px solid grey;
+color: black;
+background-color: #eeeeee;
+border-radius: 4px;
+border: none;
+padding: 0 3px;
+  }
+  .gen{
+    color: orange;
+   
+   
+  }
+  .mtk1{
+    color: black !important;
+  }
+  .monaco-editor .margin{
+    background-color: white !important;
+  }
+  .monaco-editor-background{
+    background-color: white !important;
+  }
+  .no-data{
+    height: 30vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5rem;
+    color: #cdcdcd;
+    width: 100%;
+
   }

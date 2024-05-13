@@ -11,6 +11,14 @@ import Dashboard from "./components/Dashboard";
 import OnlineCode from "./components/OnlineComp/OnlineCode";
 import AudioRecorder from "./components/AudioQuestions/AudioRecorder";
 import RespJdDash from "./components/RespJdDash";
+import InstructionPage from "./components/OnlineComp/Intruction";
+import IntroScreen from "./components/OnlineComp/OnlineCode";
+import McqComp from "./components/McqComp/McqComp";
+// import Audio from "./components/Test/VideoRecorder";
+import Mcq from "./components/McqComp/Mcq";
+import Code from "./components/OnlineComp/Code";
+import MainAssessment from "./components/MainAssessment";
+import Success from "./components/OnlineComp/Sucess";
 
 function App() {
   return (
@@ -26,10 +34,20 @@ function App() {
             <Route path="/dashboard" element={<Dashboard/>}/>
             <Route path="/forget-password" element={<ForgetPass />} />
             <Route path="/test" element={<Sample/>} />
-            <Route path="online-code" element={<OnlineCode/>}/>
-            <Route path="/online-audio-assesment" element={<AudioRecorder/>}/>
-            <Route path="/respective-dashboard" element={<RespJdDash/>}/>
+            <Route path="/mcq" element={<McqComp/>} />
+            <Route path="/online-assess" element={<IntroScreen/>}/>
+            <Route path="/instruction" element={<InstructionPage/>}/>
+            <Route path="/success" element={<Success/>}/>
+            <Route path="/mcq-main" element={<Mcq/>}/>
+            <Route path="/code" element={<Code/>}/>
+            <Route path="/respective-dashboard/:id" element={<RespJdDash/>}/>
+            <Route path="/assess-main" element={<MainAssessment/>}>
+            <Route path="audio-ques" element={<Sample />}/>
+            <Route path="mcq-main" element={<Mcq/>}/>
+            <Route path="code" element={<Code/>}/>
+            </Route>
           </Routes>
+          
         </div>
       </Router>
     </main>

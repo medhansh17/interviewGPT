@@ -33,3 +33,18 @@ pre {
     margin-right: .5em;
     color: #888;
   }
+
+
+  .int-page{
+    border: 1px solid black;
+    outline: none;
+    width: 76%;
+    height: 55px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 3px;
+  }
+
+  
