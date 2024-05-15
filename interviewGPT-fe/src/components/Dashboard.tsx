@@ -122,9 +122,7 @@ console.log(response)
               <div className="container mx-auto mt-[-2rem] p-6" style={{ paddingTop: 0 }}>
                 <div className="mb-4">
                   <h1 className="text-2xl font-semibold mb-1">Dashboard</h1>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    A descriptive body text comes here
-                  </p>
+                  
                 </div>
                 <div className="flex justify-between items-center mb-4">
                 <div className="flex space-x-2">

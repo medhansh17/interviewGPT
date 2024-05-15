@@ -21,7 +21,7 @@ const AddJd: React.FC<AddJdProps> = ({ file,setFile })=> {
       <div className="border-dashed border-2 border-blue-200 rounded-lg p-4 mb-4">
         {/* <h3 className="text-lg mb-2 font-semibold text-zinc-700">Add file(s)</h3> */}
         <p className="text-zinc-500 mb-3">Choose from computer</p>
-        <input required type='file' ref={fileInputRef} className="hidden" onChange={(e) => setFile(e.target.files[0])}  />
+        <input required type='file' ref={fileInputRef} className="hidden" onChange={(e) => setFile(e.target.files[0])} accept=".doc,.docx,.txt,.pdf" />
         <button  onClick={handleBrowseClick} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
           Browse
         </button>

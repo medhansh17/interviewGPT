@@ -5,7 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { UserContext } from '../context/JobContext';
 import { setCandList,addCandidate, deleteCandidateByName } from '../context/JobContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-        import { faTrash, faEdit,faTimes,faArrowRight ,faChevronUp,faChevronDown} from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faEdit,faTimes,faArrowRight ,faChevronUp,faChevronDown} from '@fortawesome/free-solid-svg-icons';
 
 interface MyObjectType {
   jd: string |null;
@@ -56,8 +56,8 @@ const [showFullJobDesc, setShowFullJobDesc] = useState(false);
   const [candidateDetails, setCandidateDetails] = useState<any>(null);
 const {id} =useParams();
 const [approval,setApproval]=useState(false)
-const [numMCQ, setNumMCQ] = useState<number>(0);
-  const [numBehavioral, setNumBehavioral] = useState<number>(0);
+const [numMCQ, setNumMCQ] = useState<number>(1);
+  const [numBehavioral, setNumBehavioral] = useState<number>(1);
   const [numCoding, setNumCoding] = useState<number>(0);
   const [showPopup, setShowPopup] = useState(false);
 const [candName,setCanName]=useState("")
@@ -302,8 +302,14 @@ const popHandle=()=>{
   
 }
 
-const showResult=()=>{
-  
+const showResult=async(itemName:string)=>{
+  console.log("here i result")
+  try{
+const resp=await api.post("/fetch_user_responses",{candidate_name:itemName,job_id:jobDetails?.job_id})
+console.log(resp)
+  }catch(error:unknown){
+    console.log(error)
+  }
 }
    // Get current jobs for the current page
    const indexOfLastItem = currentPage * itemsPerPage;
@@ -358,7 +364,7 @@ const showResult=()=>{
                 <th className="p-3 text-left">Skills Missing</th>
                 
                 <th className="p-3 text-left">Score</th>
-                <th className="p-3 text-left">Result</th>
+                <th className="p-3 text-left">Status</th>
                 <th className="p-3 text-left">Select</th>
                 <th className="p-3 w-[150px] text-left">Action</th>
                 {/* <th className="p-3 text-left">Edit</th> */}
@@ -403,11 +409,14 @@ const showResult=()=>{
       {index !== item.Missing_Skills.length - 1 && ', '}
     </span>
   ))}</p></td>
-        <td className="p-3">{item.JD_MATCH}</td>
-        <td className="p-3">
-          <span className={`text-green-700 py-1 px-3 rounded-full text-xs ${item.MATCH_STATUS === 'SELECTED FOR REVIEW' ? 'bg-green-200' : (item.MATCH_STATUS === 'ON HOLD' ? 'bg-yellow-200' : 'bg-red-200')}`}>
+        <td className="p-3 text-center">
+        <p>{item.JD_MATCH}</p>
+        <span className={`text-green-700 py-1 px-3 rounded-full text-xs ${item.MATCH_STATUS === 'SELECTED FOR REVIEW' ? 'bg-green-200' : (item.MATCH_STATUS === 'ON HOLD' ? 'bg-yellow-200' : 'bg-red-200')}`}>
             {item.MATCH_STATUS == 'SELECTED FOR REVIEW' ? 'Selected' : (item.MATCH_STATUS === 'ON HOLD' ? 'On Hold' : 'Rejected')}
           </span>
+        </td>
+        <td className="p-3 text-center">
+   status
         </td>
         <td>
         <input 
@@ -432,7 +441,7 @@ const showResult=()=>{
     )}
     {
       item.assessment_status==1 && (
-        <button className="resp-btn" onClick={showResult} >Result </button>
+        <button className="resp-btn" onClick={()=>showResult(item.candidate_name)} >Result </button>
       )
     }
           </div>
@@ -510,49 +519,123 @@ const showResult=()=>{
       </div>
     </div></div></div> } */}
     {approval && 
-  <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+  // <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+  // <div className="absolute bg-white dark:bg-zinc-700 rounded-lg shadow p-6 mt-6 w-full" style={{ maxWidth: "63rem", overflow: 'auto', msOverflowStyle: 'none', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', paddingBottom: '5px', maxHeight: 'calc(100vh - 1rem)' }}>
+  //   <button  style={{top:"0rem",right:"0rem"}} className="absolute  text-white rounded-full p-2 w-10 h-10 flex items-center justify-center" onClick={()=>setApproval(false)}>
+  //     <FontAwesomeIcon icon={faTimes} style={{color:"black"}}/>
+  //   </button>
+  //     <div className="mb-8">
+  //       <h2 className="text-xl font-semibold mb-2">Behavioural Questions:</h2>
+  //       <ul className="list-disc pl-4">
+  //         {behavioralQuestions.map((question) => (
+  //           <li key={question.b_question_id}>{question.b_question_text}</li>
+  //         ))}
+  //       </ul>
+  //     </div>
+  //     <div>
+  //       <h2 className="text-xl font-semibold mb-2">Technical Questions:</h2>
+  //       {technicalQuestions.map((question, index) => (
+  //         <div key={index} className="mb-4">
+  //           <p><span className="font-semibold">Question:</span> {question.question}</p>
+  //           <ul className="list-disc pl-4">
+  //             {Object.entries(question.options).map(([key, value]) => (
+  //               <li key={key}>{key}. {value}</li>
+  //             ))}
+  //           </ul>
+  //           <p><span className="font-semibold">Answer:</span> {question.answer}</p>
+  //         </div>
+  //       ))}
+  //     </div>
+  //     {codingQuestion && (
+  //       <div className="mb-8">
+  //         <h2 className="text-xl font-semibold mb-2">Coding Question:</h2>
+  //         <p><span className="font-semibold">Question:</span> {codingQuestion.question}</p>
+  //         <p><span className="font-semibold">Sample Input:</span> {codingQuestion.sample_input}</p>
+  //         <p><span className="font-semibold">Sample Output:</span> {codingQuestion.sample_output}</p>
+  //       </div>
+  //     )}
+
+      
+  //     <div className="flex justify-between mt-4">
+  //       <button className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 focus:outline-none" onClick={()=>navigate("/online-assess")}>Approve</button>
+  //       <button className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 focus:outline-none"onClick={()=>setApproval(false)}>Cancel</button>
+  //     </div>
+  //   </div>
+  // </div>
+<div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
   <div className="absolute bg-white dark:bg-zinc-700 rounded-lg shadow p-6 mt-6 w-full" style={{ maxWidth: "63rem", overflow: 'auto', msOverflowStyle: 'none', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', paddingBottom: '5px', maxHeight: 'calc(100vh - 1rem)' }}>
-    <button  style={{top:"0rem",right:"0rem"}} className="absolute  text-white rounded-full p-2 w-10 h-10 flex items-center justify-center" onClick={()=>setApproval(false)}>
-      <FontAwesomeIcon icon={faTimes} style={{color:"black"}}/>
+    <button style={{ top: "0rem", right: "0rem" }} className="absolute text-white rounded-full p-2 w-10 h-10 flex items-center justify-center" onClick={() => setApproval(false)}>
+      <FontAwesomeIcon icon={faTimes} style={{ color: "black" }} />
     </button>
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-2">Behavioural Questions:</h2>
-        <ul className="list-disc pl-4">
-          {behavioralQuestions.map((question) => (
-            <li key={question.b_question_id}>{question.b_question_text}</li>
-          ))}
-        </ul>
-      </div>
-
-      {codingQuestion && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-2">Coding Question:</h2>
-          <p><span className="font-semibold">Question:</span> {codingQuestion.question}</p>
-          <p><span className="font-semibold">Sample Input:</span> {codingQuestion.sample_input}</p>
-          <p><span className="font-semibold">Sample Output:</span> {codingQuestion.sample_output}</p>
-        </div>
-      )}
-
-      <div>
-        <h2 className="text-xl font-semibold mb-2">Technical Questions:</h2>
-        {technicalQuestions.map((question, index) => (
-          <div key={index} className="mb-4">
-            <p><span className="font-semibold">Question:</span> {question.question}</p>
-            <ul className="list-disc pl-4">
-              {Object.entries(question.options).map(([key, value]) => (
-                <li key={key}>{key}. {value}</li>
-              ))}
-            </ul>
-            <p><span className="font-semibold">Answer:</span> {question.answer}</p>
-          </div>
+    <div className="mb-8">
+      <h2 className="text-xl font-semibold mb-2">Behavioural Questions:</h2>
+      <ul className="list-disc pl-4">
+        {behavioralQuestions.map((question, index) => (
+          <li key={index} className="relative group flex items-center">
+            <span className="flex-grow">{question.b_question_text}</span>
+            <div className="flex items-center  absolute right-0">
+              <button className="text-gray-300 mr-2">
+                <FontAwesomeIcon icon={faEdit} />
+              </button>
+              <button className="text-gray-300">
+                <FontAwesomeIcon icon={faTrash} />
+              </button>
+            </div>
+          </li>
         ))}
+      </ul>
+    </div>
+    <div>
+      <h2 className="text-xl font-semibold mb-2">Technical Questions:</h2>
+      {technicalQuestions.map((question, index) => (
+        <div key={index} className="mb-4 relative group">
+          <div className="flex justify-between items-center mb-2">
+            <p><span className="font-semibold">Question:</span> {question.question}</p>
+            <div className="flex items-center  absolute right-0">
+              <button className="text-gray-300 hover:text-grey-700 mr-2">
+                <FontAwesomeIcon icon={faEdit} />
+              </button>
+              <button className="text-gray-300 hover:text-grey-700">
+                <FontAwesomeIcon icon={faTrash} />
+              </button>
+            </div>
+          </div>
+          <ul className="list-disc pl-4">
+            {Object.entries(question.options).map(([key, value]) => (
+              <li key={key}>{key}. {value}</li>
+            ))}
+          </ul>
+          <p><span className="font-semibold">Answer:</span> {question.answer}</p>
+        </div>
+      ))}
+    </div>
+    {codingQuestion && (
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-2">Coding Question:</h2>
+        <p><span className="font-semibold">Question:</span> {codingQuestion.question}</p>
+        <div className="flex items-center  absolute right-0">
+          <button className="text-gray-300 hover:text-grey-700 mr-2">
+            <FontAwesomeIcon icon={faEdit} />
+          </button>
+          <button className="text-gray-300 hover:text-grey-700">
+            <FontAwesomeIcon icon={faTrash} />
+          </button>
+        </div>
+        <p><span className="font-semibold">Sample Input:</span> {codingQuestion.sample_input}</p>
+        <p><span className="font-semibold">Sample Output:</span> {codingQuestion.sample_output}</p>
       </div>
-      <div className="flex justify-between mt-4">
-        <button className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 focus:outline-none" onClick={()=>navigate("/online-assess")}>Approve</button>
-        <button className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 focus:outline-none"onClick={()=>setApproval(false)}>Cancel</button>
-      </div>
+    )}
+
+
+    <div className="flex justify-between mt-4">
+      <button className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 focus:outline-none" onClick={() => navigate("/online-assess")}>Approve</button>
+      <button className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 focus:outline-none" onClick={() => setApproval(false)}>Cancel</button>
     </div>
   </div>
+</div>
+
+
+
 }
 
       {showSelectCandidatePopup && (

@@ -129,6 +129,7 @@ const uploadJD=async()=>{
 			setTimeout(() => {
 				setShowModal(false);
 			}, 5000);
+			navigate("/dashboard")
 		}else if(response.data.message=='Job JD already exists.') {
 			setIsLoading(false)
 			setSuccess(false)
@@ -214,6 +215,7 @@ console.log("rr",response)
 			setTimeout(() => {
 				setShowModal(false);
 			}, 5000);
+			navigate("/dashboard")
 		}else {
 			setSuccess(false)
 			setModalMessage("Error Uploading JD");
@@ -401,7 +403,10 @@ setLoad(false)
 								{error && <span style={{fontSize:"0.9rem"}}><span style={{color:"red",fontSize:"1rem"}}>*</span>{error}</span>}
 							<TextArea2 setEmpty={setEmpty} empty={empty} setMainTextArea2={setMainTextArea2} mainData2={mainData2} />
 							</>}	
-                     {load && doc== false && <TextArea setMainTextArea={setMainTextArea} mainData={mainData} />}
+                     {load && doc== false && 
+					 <>
+					 <input type="text" value={mainData.role} className="border mt-4 border-zinc-300 shadow-sm w-full px-3 py-2 placeholder-zinc-400 text-zinc-700 bg-white rounded-lg focus:outline-none focus:shadow-outline"/>
+					 <TextArea setMainTextArea={setMainTextArea} mainData={mainData} /></>}
 					 <div className="mt-[2rem]">
 							<button type="submit"
 								className={`h-[40px] mb-[0.5rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${(mainData || mainTextArea || mainData2 || mainTextArea2 || file) 
