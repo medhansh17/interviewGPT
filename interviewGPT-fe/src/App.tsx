@@ -5,7 +5,7 @@ import MainPage from "./MainPage";
 import "tw-elements-react/dist/css/tw-elements-react.min.css";
 import Register from "./Register";
 import Login from "./Login";
-import Sample from "./components/Test/Sample"
+import Sample from "./components/Test/Sample";
 import ForgetPass from "./ForgetPass";
 import Dashboard from "./components/Dashboard";
 import OnlineCode from "./components/OnlineComp/OnlineCode";
@@ -31,23 +31,22 @@ function App() {
             <Route path="/app-submit" element={<MainPage />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<Dashboard/>}/>
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/forget-password" element={<ForgetPass />} />
-            <Route path="/test" element={<Sample/>} />
-            <Route path="/mcq" element={<McqComp/>} />
-            <Route path="/online-assess" element={<IntroScreen/>}/>
-            <Route path="/instruction" element={<InstructionPage/>}/>
-            <Route path="/success" element={<Success/>}/>
-            <Route path="/mcq-main" element={<Mcq/>}/>
-            <Route path="/code" element={<Code/>}/>
-            <Route path="/respective-dashboard/:id" element={<RespJdDash/>}/>
-            <Route path="/assess-main" element={<MainAssessment/>}>
-            <Route path="audio-ques" element={<Sample />}/>
-            <Route path="mcq-main" element={<Mcq/>}/>
-            <Route path="code" element={<Code/>}/>
+            <Route path="/test" element={<Sample />} />
+            <Route path="/mcq" element={<McqComp />} />
+            <Route path="/online-assess" element={<IntroScreen />} />
+            <Route path="/instruction" element={<InstructionPage />} />
+            <Route path="/success" element={<Success />} />
+            <Route path="/mcq-main" element={<Mcq />} />
+            <Route path="/code" element={<Code />} />
+            <Route path="/respective-dashboard/:id" element={<RespJdDash />} />
+            <Route path="/assess-main" element={<MainAssessment />}>
+              <Route path="audio-ques" element={<Sample />} />
+              <Route path="mcq-main" element={<Mcq />} />
+              <Route path="code" element={<Code />} />
             </Route>
           </Routes>
-          
         </div>
       </Router>
     </main>
