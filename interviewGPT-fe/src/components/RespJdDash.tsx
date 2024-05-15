@@ -287,12 +287,13 @@ console.log("here")
 
 useEffect(()=>{
   const genQuestions=async()=>{
-    console.log({ job_id:jobDetails?.job_id,candidate_name:candName})
+    // console.log({ job_id:jobDetails?.job_id,candidate_name:candName})
+    if(jobDetails?.job_id){
     const resp=await api.post("/fetch_candidate_questions_after_selected",{ "job_id":jobDetails?.job_id,"candidate_name":candName});
     console.log("question",resp);
      setBehavioralQuestions(resp.data.Behaviour_q);
         setCodingQuestion(resp.data.coding_question);
-        setTechnicalQuestions(resp.data.tech_questions);
+        setTechnicalQuestions(resp.data.tech_questions);}
   }
 genQuestions()
 },[approval])

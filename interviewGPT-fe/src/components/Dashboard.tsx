@@ -15,6 +15,7 @@
           id: number;
           jd: string;
           role: string;
+          status:string;
         }
         
         const Dashboard = () => {
@@ -61,8 +62,12 @@ const [currentPage, setCurrentPage] = useState(1);
           };
         
           const saveEditedRow = async(item:any) => {
+            let status=1
+            if (item.status=="Active"){
+               status=1
+            }else status=0
             try{
-const response = await api.put(`/edit_job/${item.id}`,{role:item.role,jd:item.jd});
+const response = await api.put(`/edit_job/${item.id}`,{role:item.role,jd:item.jd,status:status});
 console.log(response)
             }catch(error:unknown){
               console.log(error)
@@ -99,7 +104,16 @@ console.log(response)
             });
             setData(newData);
           };
-        
+
+          const statusChange = (event: React.ChangeEvent<HTMLSelectElement>, id: number) => {
+            const newData = data.map(item => {
+              if (item.id === id) {
+                return { ...item, status: event.target.value };
+              }
+              return item;
+            });
+            setData(newData);
+          };
           const toggleDescription = (id: number) => {
             setFullDescriptionId(id);
             setFullDescription((prevState) => prevState && fullDescriptionId === id ? false : true);
@@ -184,11 +198,23 @@ console.log(response)
                     )}
                     
                   </td>
-                          <td className="p-3">
+                          {/* <td className="p-3">
                             <span className="bg-green-200 text-green-700 py-1 px-3 rounded-full text-xs">
                               Active
                             </span>
-                          </td>
+                          </td> */}
+                          <td className="p-3">
+  {editableRow === item.id ? (
+    <select className="bg-green-200 text-green-700 py-1 px-3 rounded-full text-xs" onChange={(e) => statusChange(e, item.id)}>
+      <option value="Active">Active</option>
+      <option value="Inactive">Inactive</option>
+    </select>
+  ) : (
+    <span className="bg-green-200 text-green-700 py-1 px-3 rounded-full text-xs">
+      Active
+    </span>
+  )}
+</td>
                           <td className="p-3 text-zinc-500 dark:text-zinc-400 relative">
                             {editableRow === item.id ? (
                               <div className='flex items-center justify-around text-lg'>
