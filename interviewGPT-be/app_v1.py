@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timezone
 from sqlalchemy.exc import IntegrityError
 import os
@@ -10,7 +11,7 @@ from openai import OpenAI
 from werkzeug.utils import secure_filename
 from sqlalchemy import func,desc
 ## for login page
-
+import lancedb
 import os
 import jwt
 from utils import *
@@ -29,6 +30,7 @@ from openai import OpenAI
 from threading import Thread
 import shutil
 from datetime import datetime
+import uuid
 
 app = Flask(__name__)
 CORS(app)
@@ -53,24 +55,26 @@ jd_folder=os.path.join(current_directory,"jd_file_folder")
 if not os.path.exists(jd_folder):
     os.makedirs(jd_folder)
 
-# Specify the folder location where you want to store the database file
-db_folder=os.path.join(current_directory,"Database")
-if not os.path.exists(db_folder):
-    os.makedirs(db_folder)
-
 #Create the folder to store candidate audio file 
 audio_folder=os.path.join(current_directory,"audio_file_folder")
 if not os.path.exists(audio_folder):
     os.makedirs(audio_folder)
 
+# Specify the folder location where you want to store the database file
+db_folder=os.path.join(current_directory,"Database")
+if not os.path.exists(db_folder):
+    os.makedirs(db_folder)
+
+
 # Specify the SQLite database URI with the folder location
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(db_folder, "jobs.db")}'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(db_folder, "jobsv3.db")}'
 
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///jobs.db'
 db = SQLAlchemy(app)
 
 class Job(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    #id = db.Column(db.Integer, primary_key=True)
     role = db.Column(db.String(100), nullable=False)
     jd = db.Column(db.Text, nullable=False)
     resumes = db.relationship('Resume', backref='job', lazy=True)
@@ -84,7 +88,8 @@ class Job(db.Model):
     
 # Resume model
 class Resume(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id=db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    #id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(100), nullable=False)
     job_id = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
 
@@ -92,9 +97,10 @@ class Resume(db.Model):
         return f'<Resume {self.filename}>'
 # ExtractedInfo table:
 class ExtractedInfo(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    job_id = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
-    resume_id = db.Column(db.Integer, db.ForeignKey('resume.id'), nullable=False)
+    id=db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    #id = db.Column(db.Integer, primary_key=True)
+    job_id = db.Column(db.String, db.ForeignKey('job.id'), nullable=False)
+    resume_id = db.Column(db.String, db.ForeignKey('resume.id'), nullable=False)
     name = db.Column(db.String(100))
     total_experience = db.Column(db.String(50))
     phone_number = db.Column(db.String(30))
@@ -108,8 +114,9 @@ class ExtractedInfo(db.Model):
     date_of_birth = db.Column(db.Text)
 
 class ResumeScore(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    job_id = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
+    id=db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    #id = db.Column(db.Integer, primary_key=True)
+    job_id = db.Column(db.String, db.ForeignKey('job.id'), nullable=False)
     #resume_id = db.Column(db.Integer, db.ForeignKey('resume.id'), nullable=False)
     resume_filename=db.Column(db.Text)
     name = db.Column(db.String(100))
@@ -119,6 +126,7 @@ class ResumeScore(db.Model):
     missing_skills = db.Column(db.JSON, nullable=True)
     selected_status = db.Column(db.Boolean, default=False, nullable=False)
     assessment_status = db.Column(db.Integer, nullable=False, default=0)
+    experience_match = db.Column(db.Integer, nullable=False)
 
     def __repr__(self):
         return f'<ResumeScore {self.id}>'
@@ -126,75 +134,85 @@ class ResumeScore(db.Model):
 
 # tabes for quesition store
 class Candidate(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id=db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    #id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
-    job_id = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
+    job_id = db.Column(db.String, db.ForeignKey('job.id'), nullable=False)
     job = db.relationship('Job', backref=db.backref('candidates', lazy=True))
     version_number = db.Column(db.Integer, default=1, nullable=False)  # Add this column and set default to 1
  
 class TechnicalQuestion(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id=db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    #id = db.Column(db.Integer, primary_key=True)
     question_text = db.Column(db.Text, nullable=False)
     options = db.Column(db.Text, nullable=False)
     correct_answer = db.Column(db.String(255), nullable=False)
-    job_id = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
+    job_id = db.Column(db.String, db.ForeignKey('job.id'), nullable=False)
     job = db.relationship('Job', backref=db.backref('technical_questions', lazy=True))
     version_number = db.Column(db.Integer, default=1, nullable=False)  # Add this column and set default to 1
     name = db.Column(db.String(255), nullable=False)
 
 class BehaviouralQuestion(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id=db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    #id = db.Column(db.Integer, primary_key=True)
     question_text = db.Column(db.Text, nullable=False)
-    job_id = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
+    job_id = db.Column(db.String, db.ForeignKey('job.id'), nullable=False)
     job = db.relationship('Job', backref=db.backref('behavioural_questions', lazy=True))
     version_number = db.Column(db.Integer, default=1, nullable=False)  # Add this column and set default to 1
     name = db.Column(db.String(255), nullable=False)
 
 class CodingQuestion(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id=db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    #id = db.Column(db.Integer, primary_key=True)
     question_text = db.Column(db.Text, nullable=False)
     sample_input = db.Column(db.Text, nullable=False)
     sample_output = db.Column(db.Text, nullable=False)
-    job_id = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
+    job_id = db.Column(db.String, db.ForeignKey('job.id'), nullable=False)
     job = db.relationship('Job', backref=db.backref('coding_questions', lazy=True))
     version_number = db.Column(db.Integer, default=1, nullable=False)  # Add this column and set default to 1
     name = db.Column(db.String(255), nullable=False)
 
 class CandidateQuestion(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    candidate_id = db.Column(db.Integer, db.ForeignKey('candidate.id'), nullable=False)
+    id=db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    #id = db.Column(db.Integer, primary_key=True)
+    candidate_id = db.Column(db.String, db.ForeignKey('candidate.id'), nullable=False)
     question_type = db.Column(db.String(50), nullable=False)
     question_id = db.Column(db.Integer, nullable=False)
-    job_id = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
+    job_id = db.Column(db.String, db.ForeignKey('job.id'), nullable=False)
     job = db.relationship('Job', backref=db.backref('candidate_questions', lazy=True))
     version_number = db.Column(db.Integer, default=1, nullable=False)  # Add this column and set default to 1
     name = db.Column(db.String(255), nullable=False)
 
 class AssessmentAttempt(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    candidate_id = db.Column(db.Integer, db.ForeignKey('candidate.id'), nullable=False)
-    job_id = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
+    id=db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    #id = db.Column(db.Integer, primary_key=True)
+    candidate_id = db.Column(db.String, db.ForeignKey('candidate.id'), nullable=False)
+    job_id = db.Column(db.String, db.ForeignKey('job.id'), nullable=False)
     job = db.relationship('Job', backref=db.backref('assessment_attempts', lazy=True))
     version_number = db.Column(db.Integer, default=1, nullable=False)  # Add this column and set default to 1
 
 class AudioTranscription(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id=db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    #id = db.Column(db.Integer, primary_key=True)
     question = db.Column(db.String(255))
     name = db.Column(db.String(255), nullable=False)
-    job_id = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
+    job_id = db.Column(db.String, db.ForeignKey('job.id'), nullable=False)
     audio_transcript = db.Column(db.Text)
 
 class CodeResponse(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id=db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    #id = db.Column(db.Integer, primary_key=True)
     code_response = db.Column(db.JSON, nullable=False)
-    job_id = db.Column(db.Integer, nullable=False)
+    job_id = db.Column(db.String, nullable=False)
     name = db.Column(db.String(255), nullable=False)
 
 class TechResponse(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id=db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    #id = db.Column(db.Integer, primary_key=True)
     tech_response = db.Column(db.JSON, nullable=False)
-    job_id = db.Column(db.Integer, nullable=False)
+    job_id = db.Column(db.String, nullable=False)
     name = db.Column(db.String(255), nullable=False)
+
 
 """
 # Create the database tables
@@ -797,7 +815,8 @@ def extract_resume_info(job_id, role):
             }
             """
             },
-            {"role": "user", "content": f"use the {text_resume} resume and give the details as per instructed"}
+            {"role": "user", "content": f"""use the {text_resume} resume to details which are stated like name, work experience,phone number,address,email id, linkedin id and github id
+             fetch all the techincal skills and soft skills separtely dont mix it from the resume {text_resume}  and give the details as per instructed.If years of experience are not explicitly mentioned in the {text_resume}, calculate the total years of experience based on the dates provided in the candidate's employment history and use it for work_exp """}
 
         ]
 
@@ -887,16 +906,20 @@ def resume_details_extract(role,job_id):
             
     # Print the extracted text
     return (text_resume)
-def chatgpt_message(jd,job_role,text_resume):
+def chatgpt_message(jd,job_role,text_resume,mandatory_skills):
+
+
     prompt12= """
-    Hey Act like a skilled or very experience ATS(Application Tracking System)
+    Hey Act like a skilled or very experience ATS(Application Tracking System) 
 with a deep understanding of the field .Your task is to evaluate the resume based on the given job description.
 Also for jd match look deeply/ analaysis/ come to conclusion with respective to job role, job description and resume.correct varation in score should be seen  in mutplie resume,also score should not always be in round numbers.
-Assign the percentage Matching based on Job Description and resume , Always give top 5 missing skills and matching skills key words with high accuracy.Also for "Match Status", say if job match % is below 50 % then "Rejected", if it is greater or equal to 50 % but below 80% then "ON HOLD",if job match is greater than or equal to 80% then say "SELECTED FOR REVIEW".
-resume:text resume
-description:job description
-you will get multiple resume content in a single variable resume input , each resume is separeted by "Text extracted from:filename", so do analysis separatelyand give a
-result for each result score and other details which is asked below.Always avoid hallucination-problem.
+JD Match Scoring:
+
+Calculate the jd_match score based on the proportion of matching_skills relative to the total skills required by the jd and mandatory_skills.
+Consider the experience_match value in the final score calculation.
+The score should reflect the relevance and completeness of the resumes in fulfilling the job requirements. Ensure that the scoring differentiates between resumes based on the presence of critical skills and required experience.
+For "Match Status", say if job match % is below 50 % then "Rejected", if it is greater or equal to 50 % but below 80% then "ON HOLD",if job match is greater than or equal to 80% then say "SELECTED FOR REVIEW".
+
 The response should be in a JSON having the structure like below example:
 {
 "score":[
@@ -906,7 +929,8 @@ The response should be in a JSON having the structure like below example:
     "JD_MATCH":"%",
     "MATCH_STATUS":"",
     "Matching_Skills":[],
-    "Missing_Skills":[]
+    "Missing_Skills":[],
+    "experience_match":
 },
 {
     "resume_filename": "python-resume",
@@ -914,18 +938,75 @@ The response should be in a JSON having the structure like below example:
     "JD_MATCH":"%",
     "MATCH_STATUS":"",
     "Matching_Skills":[],
-    "Missing_Skills":[]
+    "Missing_Skills":[],
+    "experience_match":
 }]
 }
 """
+    
     messages=[
 {
     "role":'system',
     "content":prompt12},
 {"role":"user",
- "content":f""" use {text_resume},{job_role} and {jd} to give score to the jd_match by acting as ATS TOOL, score should differentiate the mutiple resumes, also if not even single matching skills then give score jd match score as 0, also matching skills which are common to both {jd} and {text_resume} should only be given other unrelevant should not be given ,that to maximum 5 skills not more than that,if not even single matching skills are there then give as NIL
- also look for skillS which is asked in {jd} but not present in resume {text_resume} , find those and use it in missing skills that too max 5 skills is enough.Also if not even 1 missing skills is there hten give it as NIL """ }
+ "content":f"""
+Use the given {text_resume}, {job_role}, and {jd} (job description) to evaluate the jd_match score by acting as an ATS (Applicant Tracking System) tool. The score should be able to differentiate between multiple resumes.
+
+Resume Extraction:
+
+Only use the resumes provided in the {text_resume} input. Each resume is separated by the text "Text extracted from:filename".
+Do not generate any new candidate details or any JSON objects that were not part of the original input.
+
+Matching Skills Evaluation:
+
+Identify and list skills that are common between {jd} and {text_resume}.
+Additionally, identify skills that are common between {mandatory_skills} ie mandatory_skills and {text_resume} text_resume.
+Ensure that all mandatory_skills provided by the user are included in the evaluation:
+  If a {mandatory_skills} ie mandatory skill is found in text_resume, include it in matching_skills.
+  If a {mandatory_skills} ie mandatory skill is not found in text_resume, include it in missing_skills.
+Include these matching skills in the evaluation, ensuring a maximum of 20 skills. If there are fewer than 20 matching skills, include as many as are available, with a minimum of 1 skill.
+If no matching skills are found, set the jd_match score to 0 and list the matching skills as "NIL".
+After identifying the given mandatory_skills in jd, include them in the matching skills.
+
+Missing Skills Evaluation:
+
+Identify skills mentioned in the jd and {mandatory_skills} that are not present in {text_resume}.
+Ensure that skills from {mandatory_skills} which are not present in {text_resume} are always included in the missing skills, along with other missing skills from jd.
+Limit the list of missing skills to a maximum of 20. If there are fewer than 20 missing skills, include as many as are identified.
+If no missing skills are found, list the missing skills as "NIL".
+
+Experience Check:
+
+Identify the years of experience required in the {jd} (e.g., "5+ years of experience").
+Check if the {text_resume} mentions the relevant years of experience explicitly.
+If years of experience are not explicitly mentioned in the {text_resume}, infer the total years of experience from the employment history dates provided in the resume. Calculate the total duration by summing up the periods from each employment entry.
+Ensure that the calculated or explicitly mentioned years of experience match the requirement in the jd.
+If the required experience is met, set experience_match to 1. If not, set experience_match to 0.
+
+JD Match Scoring:
+
+Calculate the jd_match JD Match score based on the proportion of matching_skills relative to the total skills required by the {jd} and {mandatory_skills}.
+The score should reflect the relevance and completeness of the resume in fulfilling the job requirements. Ensure that the scoring differentiates between resumes based on the presence of critical skills.
+
+text_resume: The resume text provided by the candidate.
+job_role: The job role for which the candidate is applying.
+jd: The job description provided by the employer.
+mandatory_skills: A list of mandatory skills required for the job.
+
+Important Considerations:
+
+Matching Skills: Skills common between {jd} and {text_resume} or {mandatory_skills} and {text_resume}, with a cap of 20 skills.
+Mandatory Skills Inclusion: Ensure mandatory skills provided by the user are included in either matching_skills or missing_skills.
+Missing Skills: Skills from {jd} not found in {text_resume}, with a cap of 20 skills.
+Minimum and Maximum Skills: Ensure at least 1 matching skill, if possible, and list up to 20 matching and missing skills.
+NIL for No Skills: Clearly specify "NIL" if no matching or missing skills are found.
+
+The response should only be in a JSON having the structure like above.
+""" }
 ]
+    
+
+
     client = OpenAI()
     client.api_key = os.getenv("OPENAI_API_KEY")
     response1 = client.chat.completions.create(
@@ -941,10 +1022,12 @@ The response should be in a JSON having the structure like below example:
     response1= dict(response1)
     response_data = dict(dict(response1['choices'][0])['message'])[
             'content'].replace("\n", " ")
+
     print("knfdklfn")
-    return (response_data) 
-    
-def calculate_resume_scores(job_id):
+ 
+    return (response_data)
+
+def calculate_resume_scores(job_id,mandatory_skills):
     with app.app_context():
         # Get job details from the database using job_id
         job = Job.query.filter_by(id=job_id).first()
@@ -957,11 +1040,11 @@ def calculate_resume_scores(job_id):
 
         # Call user defined function for resume extract and call OpenAI to score
         text_resume = resume_details_extract(role,job_id)
-        AI_score_response = chatgpt_message(jd, role, text_resume)
+        AI_score_response = chatgpt_message(jd, role, text_resume,mandatory_skills)
 
         # Convert AI_score_response string to dictionary
         AI_score_response_dict = json.loads(AI_score_response)
-
+        print(AI_score_response_dict)
         # Parse AI score response and extract relevant information
         scores = []
         for resume_info in AI_score_response_dict['score']:
@@ -971,6 +1054,7 @@ def calculate_resume_scores(job_id):
             matching_skills = resume_info['Matching_Skills']
             missing_skills = resume_info['Missing_Skills']
             candidate_name = resume_info['candidate_name']
+            experience_match=resume_info['experience_match']
 
             # Store the calculated scores into your Resume_score table
             new_score = ResumeScore(
@@ -980,7 +1064,8 @@ def calculate_resume_scores(job_id):
                 jd_match=jd_match,
                 match_status=match_status,
                 matching_skills=matching_skills,
-                missing_skills=missing_skills
+                missing_skills=missing_skills,
+                experience_match=experience_match
             )
             db.session.add(new_score)
 
@@ -993,7 +1078,8 @@ def calculate_resume_scores(job_id):
                 "Matching_Skills": matching_skills,
                 "Missing_Skills": missing_skills,
                 "role": role,
-                "jd": jd
+                "jd": jd,
+                "experience_match":experience_match
             })
 
         # Commit changes to the database
@@ -1007,7 +1093,7 @@ def upload_resume_to_job():
     data = request.form
     role = data.get('role')
     id = data.get('id')
-    
+    mandatory_skills=data.get('mandatory_skills')
     # Check if both role and JD are provided
     if not role or not id:
         return jsonify({'message': 'Role and JD are required fields.'}), 400
@@ -1044,7 +1130,7 @@ def upload_resume_to_job():
         extract_thread.start()
 
         # Then, start another thread to execute the calculate_resume_scores function
-        score_thread = Thread(target=calculate_resume_scores, args=(job.id,))
+        score_thread = Thread(target=calculate_resume_scores, args=(job.id,mandatory_skills))
         score_thread.start()
 
         return jsonify({'message': 'Resumes uploaded successfully and processing started.'}), 200
@@ -1053,10 +1139,10 @@ def upload_resume_to_job():
         return jsonify({'error': str(e)}), 500
     
 #After the resume is uploaded or before resume is uploaded , this api should be called every 1 minute  
-@app.route('/get_resume_scores/<int:job_id>', methods=['GET'])
-def get_resume_scores(job_id):
+@app.route('/get_resume_scores', methods=['GET'])
+def get_resume_scores():
     
-
+    job_id = request.args.get('job_id')
     # Check if job_id and role are provided
     if not job_id:
         return jsonify({'error': 'Job ID and role are required parameters.'}), 400
@@ -1076,19 +1162,23 @@ def get_resume_scores(job_id):
             "Missing_Skills": score.missing_skills,
             "selected_status":score.selected_status,
             "assessment_status":score.assessment_status,
-            "job_id":job_id
+            "experience_match":score.experience_match
         })
 
     return jsonify({'resume_scores': scores_fetch}), 200
 
 
 
-@app.route('/delete_resume', methods=['DELETE'])
+@app.route('/delete_resume', methods=['GET'])
 def delete_resume():
     # Get candidate name and job_id from the request JSON data
-    data = request.get_json()
-    candidate_name = data.get('candidate_name')
-    job_id = data.get('job_id')
+    #data = request.get_json()
+    #candidate_name = data.get('candidate_name')
+    #job_id = data.get('job_id')
+
+    candidate_name = request.args.get('candidate_name')
+    job_id = request.args.get('job_id')
+    
     job = Job.query.filter_by(id=job_id).first()
     role = job.role
     
@@ -1150,7 +1240,7 @@ def update_resume_status():
         status_bool = True
     elif status.lower() == 'false':
         status_bool = False
-    else:
+    else: 
         return jsonify({'error': 'Invalid value for status. Must be "True" or "False".'}), 400
     
 
@@ -1173,7 +1263,7 @@ def update_resume_status():
     return jsonify({'message': f'Resume status updated to {status_bool} for candidate {name}.'}), 200
 
 ##QUESTION GENERATION 
-##user defined fucntion for each type of question 
+##user defined function for each type of question 
 
 def tech_question_mcq(jd13,no_tech_questions,Tech_skills):
 
@@ -1554,7 +1644,25 @@ def Auto_assessment():
             role = job.role
             
 
-            
+            # Delete from TechnicalQuestion
+            TechnicalQuestion.query.filter(
+                func.lower(func.replace(TechnicalQuestion.name, " ", "")) == candidate_name_formatted,
+                TechnicalQuestion.job_id == job_id
+            ).delete()
+
+            # Delete from BehaviouralQuestion
+            BehaviouralQuestion.query.filter(
+                func.lower(func.replace(BehaviouralQuestion.name, " ", "")) == candidate_name_formatted,
+                BehaviouralQuestion.job_id == job_id
+            ).delete()
+
+            # Delete from CodingQuestion
+            CodingQuestion.query.filter(
+                func.lower(func.replace(CodingQuestion.name, " ", "")) == candidate_name_formatted,
+                CodingQuestion.job_id == job_id
+            ).delete()
+
+            db.session.commit()
 
             # Query the database to find the candidate's technical and behavioral skills
             candidate_info = ExtractedInfo.query.filter_by(job_id=job_id).filter(func.lower(func.replace(ExtractedInfo.name, " ", "")) == candidate_name_formatted).first()
@@ -1641,7 +1749,8 @@ def fetch_candidate_questions():
             technical_questions.append({
                 'question': question.question_text,
                 'options': json.loads(question.options),
-                'answer': question.correct_answer
+                'answer': question.correct_answer,
+                'tech_ques_id':question.id
             })
 
     # Fetch behavioural questions
@@ -1661,7 +1770,8 @@ def fetch_candidate_questions():
                 coding_question = {
                     'question': coding_question_data.question_text,
                     'sample_input': coding_question_data.sample_input,
-                    'sample_output': coding_question_data.sample_output
+                    'sample_output': coding_question_data.sample_output,
+                    'coding_ques_id':coding_question_data.id
                 }
                 break  # Stop searching once the correct version is found
     return jsonify({
@@ -1670,6 +1780,140 @@ def fetch_candidate_questions():
         'coding_question': coding_question
     }), 200
 
+## To edit the questions in approval screen
+
+@app.route('/edit_candidate_question', methods=['POST'])
+def edit_candidate_question():
+    data = request.get_json()
+    question_id = data.get('question_id')
+    candidate_name=data.get('candidate_name')
+    job_id = data.get('job_id')
+    question_type = data.get('question_type')  # 'technical', 'behavioral', 'coding'
+    question_data = data.get('question_data')  # Contains the updated details of the question
+
+    # Normalize candidate name for consistency
+    # Convert to lowercase and remove extra spaces
+    normalized_candidate_name=candidate_name.replace(" ", "").lower().strip()
+
+    if not question_id or not question_type or not question_data:
+        return jsonify({'error': 'question_id, question_type, and question_data are required parameters.'}), 400
+    question_type=question_type.lower()
+    try:
+        if question_type == 'technical':
+
+            question=TechnicalQuestion.query.filter(
+                func.lower(func.replace(TechnicalQuestion.name, " ", "")) == normalized_candidate_name,
+                TechnicalQuestion.id == question_id,
+                TechnicalQuestion.job_id == job_id).first()
+            
+            if question:
+                question.question_text = question_data['question']
+                question.options = json.dumps(question_data['options'])
+                question.correct_answer = question_data['answer']
+            else:
+                return jsonify({'error': 'Technical question not found.'}), 404
+
+        elif question_type == 'behavioral':
+
+            question=BehaviouralQuestion.query.filter(
+                func.lower(func.replace(BehaviouralQuestion.name, " ", "")) == normalized_candidate_name,
+                BehaviouralQuestion.id == question_id,
+                BehaviouralQuestion.job_id == job_id).first()
+            
+            if question: 
+                question.question_text = question_data['b_question_text']
+            else:
+                return jsonify({'error': 'Behavioral question not found.'}), 404
+
+        elif question_type == 'coding':
+
+            question=CodingQuestion.query.filter(
+                func.lower(func.replace(CodingQuestion.name, " ", "")) == normalized_candidate_name,
+                CodingQuestion.id == question_id,
+                CodingQuestion.job_id == job_id).first()
+            
+            if question:
+                question.question_text = question_data['question']
+                question.sample_input = question_data['sample_input']
+                question.sample_output = question_data['sample_output']
+            else:
+                return jsonify({'error': 'Coding question not found.'}), 404
+
+        else:
+            return jsonify({'error': 'Invalid question type.'}), 400
+
+        db.session.commit()
+        return jsonify({'status': 'Question updated successfully.'}), 200
+
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+## To delete the question in approval page
+
+@app.route('/delete_candidate_question', methods=['DELETE'])
+def delete_candidate_question():
+    data = request.get_json()
+    candidate_name=data.get('candidate_name')
+    job_id = data.get('job_id')
+    question_id = data.get('question_id')
+    question_type = data.get('question_type')  # 'technical', 'behavioral', 'coding'
+
+    # Normalize candidate name for consistency
+    # Convert to lowercase and remove extra spaces
+    normalized_candidate_name=candidate_name.replace(" ", "").lower().strip()
+
+    if not question_id or not question_type:
+        return jsonify({'error': 'question_id and question_type are required parameters.'}), 400
+
+    try:
+        if question_type == 'technical':
+            question=TechnicalQuestion.query.filter(
+                func.lower(func.replace(TechnicalQuestion.name, " ", "")) == normalized_candidate_name,
+                TechnicalQuestion.id == question_id,
+                TechnicalQuestion.job_id == job_id).first()
+            
+            if question:
+                db.session.delete(question)
+            else:
+                return jsonify({'error': 'Technical question not found.'}), 404
+
+        elif question_type == 'behavioral':
+            question=BehaviouralQuestion.query.filter(
+                func.lower(func.replace(BehaviouralQuestion.name, " ", "")) == normalized_candidate_name,
+                BehaviouralQuestion.id == question_id,
+                BehaviouralQuestion.job_id == job_id).first()
+            
+            if question:
+                db.session.delete(question)
+            else:
+                return jsonify({'error': 'Behavioral question not found.'}), 404
+
+        elif question_type == 'coding':
+            question=CodingQuestion.query.filter(
+                func.lower(func.replace(CodingQuestion.name, " ", "")) == normalized_candidate_name,
+                CodingQuestion.id == question_id,
+                CodingQuestion.job_id == job_id).first()
+            
+            if question:
+                db.session.delete(question)
+            else:
+                return jsonify({'error': 'Coding question not found.'}), 404
+
+        else:
+            return jsonify({'error': 'Invalid question type.'}), 400
+
+        db.session.commit()
+        return jsonify({'status': 'Question deleted successfully.'}), 200
+
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+
+
+### To show the question in assessment sheet page 
 @app.route('/fetch_behavioural_questions', methods=['POST'])
 def fetch_behavioural_questions():
     # Get candidate name and job_id in Json
@@ -1732,28 +1976,6 @@ def fetch_technical_questions():
 
     return jsonify({'tech_questions': technical_questions}), 200
 
-@app.route('/upload_job', methods=['POST'])
-def upload_job():
-    data = request.get_json()
-    role = data.get('role')
-    jd = data.get('jd')
-
-    if role and jd:
-        # Check if the job already exists
-        with app.app_context():
-            existing_job = Job.query.filter_by(role=role, jd=jd).first()
-        if existing_job:
-            return jsonify({'message': 'Job JD already exists.'}), 200
-
-        # Save the job to the database
-        new_job = Job(role=role, jd=jd)
-        with app.app_context():
-            db.session.add(new_job)
-            db.session.commit()
-        #return jsonify({'message': 'Job uploaded successfully.','timestamp': new_job.timestamp}), 200
-        return jsonify({'message': 'Job uploaded successfully.'}), 200
-    else:
-        return jsonify({'message': 'Role and JD are required fields.'}), 400
 
 @app.route('/fetch_coding_question', methods=['POST'])
 def fetch_coding_question():
@@ -1789,7 +2011,8 @@ def fetch_coding_question():
     
     return jsonify({'coding_question': coding_question}), 200
 
-  ## 4 Screen 
+
+## 4 Screen 
 ## To process the audio generated for behav questions
 # API endpoint for processing audio
 @app.route('/process_audio', methods=['POST'])
@@ -1835,7 +2058,6 @@ def process_audio():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
-
 ###
 ## Code score api 
 
@@ -1951,7 +2173,17 @@ def store_code_response():
         if existing_entry:
             db.session.delete(existing_entry)
             db.session.commit()
- # Normalize the candidate name for consistency
+
+        # Create a new entry in the CodeResponse table
+        new_response = CodeResponse(
+            job_id=job_id,
+            name=name,
+            code_response=assessment_response
+        )
+        db.session.add(new_response)
+        db.session.commit()
+
+        # Normalize the candidate name for consistency
         normalized_name = name.replace(" ", "").lower().strip()
 
         # Update assessment_status in ResumeScore table
@@ -1964,20 +2196,11 @@ def store_code_response():
             resume_score_entry.assessment_status = 1
             db.session.commit()
 
-        # Create a new entry in the CodeResponse table
-        new_response = CodeResponse(
-            job_id=job_id,
-            name=name,
-            code_response=assessment_response
-        )
-        db.session.add(new_response)
-        db.session.commit()
-
         return jsonify({'status': 'Code response evaluated and stored successfully.'}), 200
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
-        
+        return jsonify({'error': str(e)}), 500    
+
 ## To evaluate the techincal question and score it 
 
 # user defined fucntion to ask open ai to evaluate
@@ -1996,7 +2219,7 @@ def perform_techmcq_assessment(mcq_question):
                 Always the repsone should only be in JSON format like below structure no other string should be added.and in correct and user answer option variable like a or b or c should not be there ,the enitre choice should be there for both.
 
                 {
-                "tech_report":
+                'tech_report':
                 {
                 "Total_score": correct answer  /number of question  ie 12/20,
                 }
@@ -2035,7 +2258,6 @@ def perform_techmcq_assessment(mcq_question):
     return (tech_assessment_response)
         
 ## API to store and do tech_msq evaluate 
-
 @app.route('/store_tech_response', methods=['POST'])
 def store_tech_response():
     # Extract inputs from request JSON
@@ -2067,7 +2289,7 @@ def store_tech_response():
         db.session.add(new_response)
         db.session.commit()
 
-   # Normalize the candidate name for consistency
+        # Normalize the candidate name for consistency
         normalized_name = name.replace(" ", "").lower().strip()
 
         # Update assessment_status in ResumeScore table
@@ -2080,14 +2302,12 @@ def store_tech_response():
             resume_score_entry.assessment_status = 1
             db.session.commit()
 
-
         return jsonify({'status': 'Tech response stored successfully.'}), 200
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
- ## To fetch the user response after the assessment
-
+## To fetch the user response after the assessment 
 @app.route('/fetch_user_responses', methods=['POST'])
 def fetch_user_responses():
     data = request.get_json()
@@ -2146,10 +2366,14 @@ def fetch_user_responses():
         'audio_transcript':formatted_audio_transcriptions
     }
 
-    return jsonify(formatted_data), 200   
+    return jsonify(formatted_data), 200
+
 
 if __name__ == '__main__':
     # Create the database tables
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+
+
+
