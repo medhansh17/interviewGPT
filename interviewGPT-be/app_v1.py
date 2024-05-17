@@ -926,7 +926,7 @@ The response should be in a JSON having the structure like below example:
 "score":[
 {
     "resume_filename": "devops-engineer-resume-example",
-    "candidate_name":,
+    "candidate_name":"keerthi ganesh m",
     "JD_MATCH":"%",
     "MATCH_STATUS":"",
     "Matching_Skills":[],
@@ -935,7 +935,7 @@ The response should be in a JSON having the structure like below example:
 },
 {
     "resume_filename": "python-resume",
-    "candidate_name":,
+    "candidate_name":"Kishore Kumar M",
     "JD_MATCH":"%",
     "MATCH_STATUS":"",
     "Matching_Skills":[],
@@ -952,7 +952,7 @@ The response should be in a JSON having the structure like below example:
 {"role":"user",
  "content":f"""
 Use the given {text_resume}, {job_role}, and {jd} (job description) to evaluate the jd_match score by acting as an ATS (Applicant Tracking System) tool. The score should be able to differentiate between multiple resumes.
-
+Candidate name should be full name with inital if it is there, if inital is not there in resume then fine.
 Resume Extraction:
 
 Only use the resumes provided in the {text_resume} input. Each resume is separated by the text "Text extracted from:filename".
