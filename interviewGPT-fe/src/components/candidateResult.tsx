@@ -1,10 +1,12 @@
-
-const InterviewDataDisplay = ({ data }) => {
+const InterviewDataDisplay = ({ data, onClick }) => {
   const { audio_transcript, candidate_name, code_response, tech_response } =
     data;
 
   return (
-    <div className="absolute z-10 p-4">
+    <div className="absolute z-10 p-4 bg-white border-2 border-black flex justify-center flex-col">
+      <button onClick={onClick}>
+        <p className="font-bold">Close</p>
+      </button>
       <h1>Interview Data for {candidate_name}</h1>
 
       <section>
@@ -28,7 +30,7 @@ const InterviewDataDisplay = ({ data }) => {
 
       <section>
         <h2>Technical Response</h2>
-        <pre>{JSON.stringify(tech_response, null, 2)}</pre>
+        <p>{JSON.stringify(tech_response, null, 2)}</p>
       </section>
     </div>
   );

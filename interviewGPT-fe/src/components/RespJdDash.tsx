@@ -356,6 +356,14 @@ const RespJdDash = () => {
       className="bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white"
       style={{ backgroundColor: "#fff" }}
     >
+      {show_Result && (
+        <InterviewDataDisplay
+          data={Resultdata}
+          onClick={() => {
+            setshow_Result(!show_Result);
+          }}
+        />
+      )}
       <p className="w-[93%] mx-auto">
         <Header />
       </p>
@@ -626,7 +634,7 @@ const RespJdDash = () => {
           <div className="no-data">No Candidate</div>
         )}
       </div>
-      {show_Result && <InterviewDataDisplay data={Resultdata} />}
+
       {approval && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
           <div
