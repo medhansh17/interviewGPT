@@ -1974,7 +1974,11 @@ def generate_technical_question(prompt):
         max_tokens=1000
     )
 
-    response_content = response['choices'][0]['message']['content']
+    response_content=dict(response)
+    response_content=dict(dict(response_content['choices'][0])['message']['content'])[
+        'content'].replace("\n", " ")
+        # Remove extra spaces
+    response_content = ' '.join(response_content.split())
     new_question = json.loads(response_content)
     return new_question
 
@@ -1997,7 +2001,11 @@ def generate_behavioural_question(prompt):
         max_tokens=1000
     )
 
-    response_content = response['choices'][0]['message']['content']
+    response_content=dict(response)
+    response_content=dict(dict(response_content['choices'][0])['message']['content'])[
+        'content'].replace("\n", " ")
+        # Remove extra spaces
+    response_content = ' '.join(response_content.split())
     new_question = json.loads(response_content)
     return new_question
 
@@ -2021,7 +2029,11 @@ def generate_coding_question(prompt):
         max_tokens=1000
     )
 
-    response_content = response['choices'][0]['message']['content']
+    response_content=dict(response)
+    response_content=dict(dict(response_content['choices'][0])['message']['content'])[
+        'content'].replace("\n", " ")
+        # Remove extra spaces
+    response_content = ' '.join(response_content.split())
     new_question = json.loads(response_content)
     return new_question
 
