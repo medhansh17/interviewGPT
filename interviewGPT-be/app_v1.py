@@ -127,6 +127,7 @@ class ResumeScore(db.Model):
     selected_status = db.Column(db.Boolean, default=False, nullable=False)
     assessment_status = db.Column(db.Integer, nullable=False, default=0)
     experience_match = db.Column(db.Integer, nullable=False)
+    status = db.Column(db.String(100))
 
     def __repr__(self):
         return f'<ResumeScore {self.id}>'
@@ -561,12 +562,13 @@ def export_jobs_json():
     return jsonify(jobs_list)
 
 #API to edit the jd, role and status of the job
-@app.route('/edit_job/<int:job_id>', methods=['PUT'])
+@app.route('/edit_job/<string:job_id>', methods=['PUT'])
 def edit_job(job_id):
     # Get the new role, job description, and status from the request
     new_role = request.json.get('role')
     new_jd = request.json.get('jd')
     new_status_str = request.json.get('status')
+    
     
     # Validate if at least one of role, job description, or status is provided
     if new_role is None and new_jd is None and new_status_str is None:
@@ -958,21 +960,21 @@ Only use the resumes provided in the {text_resume} input. Each resume is separat
 Do not generate any new candidate details or any JSON objects that were not part of the original input.
 
 Matching Skills Evaluation:
+Extract and list skills that are present in both the {jd} and the {text_resume}.
+Extract and list skills that are present in both the {mandatory_skills} and the {text_resume}.
+Combine both the list of skills from above list and use it for matching_skills.
+Ensure that every skill from the {mandatory_skills} is checked:
+If a mandatory skill is found in the {text_resume}, include it in the matching_skills.
+If a mandatory skill is not found in the {text_resume}, include it in the missing_skills.
+The matching_skills should contain a maximum of 20 skills, prioritizing mandatory skills if the limit is reached. Include at least 1 skill, if possible. If no skills match, set jd_match to 0 and list matching skills as "NIL".
 
-Identify and list skills that are common between {jd} and {text_resume}.
-Additionally, identify skills that are common between {mandatory_skills} ie mandatory_skills and {text_resume} text_resume.
-Ensure that all mandatory_skills provided by the user are included in the evaluation:
-  If a {mandatory_skills} ie mandatory skill is found in text_resume, include it in matching_skills.
-  If a {mandatory_skills} ie mandatory skill is not found in text_resume, include it in missing_skills.
-Include these matching skills in the evaluation, ensuring a maximum of 20 skills. If there are fewer than 20 matching skills, include as many as are available, with a minimum of 1 skill.
-If no matching skills are found, set the jd_match score to 0 and list the matching skills as "NIL".
-After identifying the given mandatory_skills in jd, include them in the matching skills.
+
 
 Missing Skills Evaluation:
 
 Identify skills mentioned in the jd and {mandatory_skills} that are not present in {text_resume}.
 Ensure that skills from {mandatory_skills} which are not present in {text_resume} are always included in the missing skills, along with other missing skills from jd.
-Limit the list of missing skills to a maximum of 20. If there are fewer than 20 missing skills, include as many as are identified.
+Limit the list of missing skills to a maximum of 8. If there are fewer than 8 missing skills, include as many as are identified.
 If no missing skills are found, list the missing skills as "NIL".
 
 Experience Check:
@@ -985,8 +987,8 @@ If the required experience is met, set experience_match to 1. If not, set experi
 
 JD Match Scoring:
 
-Calculate the jd_match JD Match score based on the proportion of matching_skills relative to the total skills required by the {jd} and {mandatory_skills}.
-The score should reflect the relevance and completeness of the resume in fulfilling the job requirements. Ensure that the scoring differentiates between resumes based on the presence of critical skills.
+Calculate the jd_match JD Match score based on the proportion of matching_skills relative to the total skills required by the {jd} and {mandatory_skills} common with {text_resume}.
+The score should reflect the relevance and completeness of the resumes in fulfilling the job requirements. Ensure that the scoring differentiates between resumes based on the presence of critical skills and required experience
 
 text_resume: The resume text provided by the candidate.
 job_role: The job role for which the candidate is applying.
@@ -995,12 +997,13 @@ mandatory_skills: A list of mandatory skills required for the job.
 
 Important Considerations:
 
-Matching Skills: Skills common between {jd} and {text_resume} or {mandatory_skills} and {text_resume}, with a cap of 20 skills.
+Matching Skills: Skills which are common between {jd} and {text_resume} ,along with that find common between  {mandatory_skills} and {text_resume}, with a cap of 8 skills.
 Mandatory Skills Inclusion: Ensure mandatory skills provided by the user are included in either matching_skills or missing_skills.
-Missing Skills: Skills from {jd} not found in {text_resume}, with a cap of 20 skills.
-Minimum and Maximum Skills: Ensure at least 1 matching skill, if possible, and list up to 20 matching and missing skills.
+Missing Skills: Skills from {jd} not found in {text_resume}, with a cap of 8 skills.
+Minimum and Maximum Skills: Ensure at least 1 matching skill, if possible, and list up to 8 matching and missing skills.
 NIL for No Skills: Clearly specify "NIL" if no matching or missing skills are found.
 
+Dont generate exaple response by your own unless you get resume details in {text_resume} variable.
 The response should only be in a JSON having the structure like above.
 """ }
 ]
@@ -1345,7 +1348,7 @@ def behaviour_questions(no_behav_questions,behav_skills):
     this is how the response should be from you !!
 
     """},
-                {"role": "user", "content":f"always manadotry to Generate {no_behav_questions} behaivour question,and based on behaviour skills which candidate have {behav_skills}, if they dont have,give a question by your choice.ie soft skill question"}
+                {"role": "user", "content":f"always manadotry to Generate {no_behav_questions} behaivour questions not more than that,and based on behaviour skills which candidate have {behav_skills}, if they dont have,give a question by your choice.ie soft skill question"}
                 
             ]
 
@@ -1482,7 +1485,7 @@ def behaviour_questions(no_behav_questions,behav_skills):
     this is how the response should be from you !!
 
     """},
-                {"role": "user", "content":f"always manadotry to Generate {no_behav_questions} behaivour question,and based on behaviour skills which candidate have {behav_skills}, if they dont have,give a question by your choice.ie soft skill question"}
+                {"role": "user", "content":f"always manadotry to Generate {no_behav_questions} number of behaivour questions,and based on behaviour skills which candidate have {behav_skills}, if they dont have,give a question by your choice.ie soft skill question"}
                 
             ]
 
@@ -1910,9 +1913,156 @@ def delete_candidate_question():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+## to prompt the question topic and generate question for each one
+#Generate and display the question based on the user’s prompt
+## Update the Question in the Database after generation question based on user prompt
 
+@app.route('/update_candidate_question', methods=['POST'])
+def update_candidate_question():
+    data = request.get_json()
+    candidate_name = data.get('candidate_name')
+    job_id = data.get('job_id')
+    question_id = data.get('question_id')
+    question_type = data.get('question_type')  # 'technical', 'behavioural', or 'coding'
+    topic_prompt = data.get('topic_prompt')
 
+    if not candidate_name or not job_id or not question_type or not topic_prompt:
+        return jsonify({'error': 'Candidate name, job_id, question_type, and topic_prompt are required parameters.'}), 400
 
+    # Normalize candidate name for consistency
+    normalized_candidate_name = candidate_name.replace(" ", "").lower().strip()
+
+    if question_type == 'technical':
+        new_question = generate_technical_question(topic_prompt)
+        update_technical_question(question_id, new_question, job_id, normalized_candidate_name)
+
+    elif question_type == 'behavioural':
+        new_question = generate_behavioural_question(topic_prompt)
+        update_behavioural_question(question_id, new_question, job_id, normalized_candidate_name)
+
+    elif question_type == 'coding':
+        new_question = generate_coding_question(topic_prompt)
+        update_coding_question(question_id, new_question, job_id, normalized_candidate_name)
+
+    else:
+        return jsonify({'error': 'Invalid question type.'}), 400
+
+    return jsonify({'message': 'Question updated successfully.'}), 200
+
+def generate_technical_question(prompt):
+    # Generate a new technical question based on the prompt
+    message = [
+        {"role": "system", "content": """
+            You act as a technical Recruitment Professional with several years of experience ie more than 10+ years working in the tech industry. With all your years of expertise in interviewing candidates, always follow the output format, it should always be in JSON like:
+            {
+                "question": "What is the purpose of a firewall in a network?",
+                "options": {
+                    "A": "Prevents hacker attacks",
+                    "B": "Reduces network traffic",
+                    "C": "Increases network speed",
+                    "D": "Bypass security protocols"
+                },
+                "answer": "A"
+            }
+        """},
+        {"role": "user", "content": f"Generate a technical question on the following topic: {prompt}"}
+    ]
+
+    response = client.chat.completions.create(
+        model="gpt-4-turbo",
+        messages=message,
+        max_tokens=1000
+    )
+
+    response_content = response['choices'][0]['message']['content']
+    new_question = json.loads(response_content)
+    return new_question
+
+def generate_behavioural_question(prompt):
+    # Generate a new behavioural question based on the prompt
+    message = [
+        {"role": "system", "content": """
+            You act as a Recruitment Professional with several years of experience ie more than 10+ years working in the tech industry. With all your years of expertise in interviewing candidates, always follow the output format, it should always be in JSON like:
+            {
+                "b_question_id": "1",
+                "b_question_text": "Tell me about yourself?"
+            }
+        """},
+        {"role": "user", "content": f"Generate a behavioural question on the following topic: {prompt}"}
+    ]
+
+    response = client.chat.completions.create(
+        model="gpt-4-turbo",
+        messages=message,
+        max_tokens=1000
+    )
+
+    response_content = response['choices'][0]['message']['content']
+    new_question = json.loads(response_content)
+    return new_question
+
+def generate_coding_question(prompt):
+    # Generate a new coding question based on the prompt
+    message = [
+        {"role": "system", "content": """
+            You act as a hackerrank application. With all your years of expertise in interviewing candidates, generate a coding question. Follow the format, this is how the result should look like:
+            {
+                "question": "An array is a type of data structure that stores elements of the same type in a contiguous block of memory. Reverse an array of integers.",
+                "sample_input": "4\n1 4 3 2",
+                "sample_output": "2 3 4 1"
+            }
+        """},
+        {"role": "user", "content": f"Generate a coding question on the following topic: {prompt}"}
+    ]
+
+    response = client.chat.completions.create(
+        model="gpt-4-turbo",
+        messages=message,
+        max_tokens=1000
+    )
+
+    response_content = response['choices'][0]['message']['content']
+    new_question = json.loads(response_content)
+    return new_question
+
+def update_technical_question(question_id, new_question, job_id, candidate_name):
+    tech_question = TechnicalQuestion.query.filter(
+        func.lower(func.replace(TechnicalQuestion.name, " ", "")) == candidate_name,
+        TechnicalQuestion.id == question_id,
+        TechnicalQuestion.job_id == job_id
+    ).first()
+
+    if tech_question:
+        tech_question.question_text = new_question['question']
+        tech_question.options = json.dumps(new_question['options'])
+        tech_question.correct_answer = new_question['answer']
+        db.session.commit()
+
+def update_behavioural_question(question_id, new_question, job_id, candidate_name):
+    behav_question = BehaviouralQuestion.query.filter(
+        func.lower(func.replace(BehaviouralQuestion.name, " ", "")) == candidate_name,
+        BehaviouralQuestion.id == question_id,
+        BehaviouralQuestion.job_id == job_id
+    ).first()
+
+    if behav_question:
+        behav_question.question_text = new_question['b_question_text']
+        db.session.commit()
+
+def update_coding_question(question_id, new_question, job_id, candidate_name):
+    coding_question = CodingQuestion.query.filter(
+        func.lower(func.replace(CodingQuestion.name, " ", "")) == candidate_name,
+        CodingQuestion.id == question_id,
+        CodingQuestion.job_id == job_id
+    ).first()
+
+    if coding_question:
+        coding_question.question_text = new_question['question']
+        coding_question.sample_input = new_question['sample_input']
+        coding_question.sample_output = new_question['sample_output']
+        db.session.commit()
+
+### Assessment sheet API's
 ### To show the question in assessment sheet page 
 @app.route('/fetch_behavioural_questions', methods=['POST'])
 def fetch_behavioural_questions():
@@ -2241,7 +2391,7 @@ def perform_techmcq_assessment(mcq_question):
                 }
 
     """},
-    {"role":"user","content":f"for the given mcq questions along with options and user selected options in {response_data89}, evaluate it as explained , agaist correct option and user selcted option , give each question 1 mark if it is correct or else 0 mark ofrwrong answer,finally the total score should be obtained"
+    {"role":"user","content":f"for the given mcq questions along with options and user selected options in {response_data89}, evaluate it as explained , agaist correct option and user selcted option , give each question 1 mark if it is correct or else 0 mark ofrwrong answer,finally the total score should be obtained.Make sure to give the response only in josn format in key value pairs, dont add unwanted string in the response"
     }]
     response10 = client.chat.completions.create(
             model="gpt-4",
@@ -2368,12 +2518,148 @@ def fetch_user_responses():
 
     return jsonify(formatted_data), 200
 
+## SAMPLE THREAD FOR AUTO ASSESSMT USING THREAD
+def generate_and_save_assessment(job_id, candidate_name, no_tech_questions, no_behav_questions, resume_score_id):
+    with app.app_context():
+        try:
+            resume_score = ResumeScore.query.get(resume_score_id)
+
+            if resume_score is None:
+                raise ValueError("ResumeScore not found")
+            
+            print("thread_started")
+            # Query the ResumeScore table to find the selected status of the candidate
+            selected_status = resume_score.selected_status
+
+            if not selected_status:
+                # If the candidate is in a rejected state, return an error message
+                #return jsonify({'error': 'Candidate is in a rejected state.'})
+                #print("error': 'Candidate is in a rejected state.")
+                resume_score.status = 'candidate_rejected'
+                db.session.commit()
+                return
+
+            # Proceed with generating assessment questions
+            job = Job.query.get(job_id)
+            jd = job.jd
+            role = job.role
+
+            # Convert candidate name to lowercase without spaces for comparison
+            candidate_name_formatted = candidate_name.lower().replace(" ", "")
+            # Delete from TechnicalQuestion
+            TechnicalQuestion.query.filter(
+                    func.lower(func.replace(TechnicalQuestion.name, " ", "")) == candidate_name_formatted,
+                    TechnicalQuestion.job_id == job_id
+                ).delete()
+
+            # Delete from BehaviouralQuestion
+            BehaviouralQuestion.query.filter(
+                    func.lower(func.replace(BehaviouralQuestion.name, " ", "")) == candidate_name_formatted,
+                    BehaviouralQuestion.job_id == job_id
+                ).delete()
+
+            # Delete from CodingQuestion
+            CodingQuestion.query.filter(
+                    func.lower(func.replace(CodingQuestion.name, " ", "")) == candidate_name_formatted,
+                    CodingQuestion.job_id == job_id
+                ).delete()
+
+            db.session.commit()  
+            print("old question deleted")
+            # Query the database to find the candidate's technical and behavioral skills
+            candidate_name_formatted = candidate_name.lower().replace(" ", "")
+            # Query the database to find the candidate's technical and behavioral skills
+            candidate_info = ExtractedInfo.query.filter_by(job_id=job_id).filter(func.lower(func.replace(ExtractedInfo.name, " ", "")) == candidate_name_formatted).first()
+            # Check if candidate already has records for this job
+            # Version control code
+            existing_candidate = Candidate.query \
+                .filter(func.lower(func.replace(Candidate.name, " ", "")) == candidate_name_formatted) \
+                .filter_by(job_id=job_id) \
+                .first()
+
+            if existing_candidate:
+                # If candidate already has records, get the highest version number and increment it by 1
+                existing_version_number = db.session.query(func.max(Candidate.version_number)) \
+                    .filter_by(name=candidate_name, job_id=job_id) \
+                    .scalar()
+                if existing_version_number is None:
+                    version_number = 1
+                else:
+                    version_number = existing_version_number + 1
+            else:
+                # If it's the first time generating questions for the candidate and job, set version number to 1
+                version_number = 1
+
+            #till here version code
+
+            # If candidate_info exists, proceed with generating assessment questions
+            if candidate_info:
+                # Extract technical and behavioral skills
+                technical_skills = candidate_info.tech_skill
+                behavioral_skills = candidate_info.behaviour_skill
+
+                # Generate technical, behavioral, and coding questions
+                question_tech = tech_question_mcq(jd, no_tech_questions, technical_skills)
+                question_behav = behaviour_questions(no_behav_questions, behavioral_skills)
+                question_coding = coding_question_generate()
+                print("question genraion fucntion called")
+                # Convert questions to JSON format
+                tech_questions_json = json.loads(question_tech).get('tech_questions', [])
+                behaviour_questions_json = json.loads(question_behav).get('Behaviour_q', [])
+                coding_question_json = json.loads(question_coding).get('coding_question', {})
+
+                # Save assessment data to the database
+                save_assessment_to_db(job_id, role, candidate_name, tech_questions_json, behaviour_questions_json, coding_question_json, version_number)
+                print("question saved in")
+                # Update the status to "assessment_generated"
+                resume_score.status = 'assessment_generated'
+                db.session.commit()
+            else:
+                
+                #return jsonify({'error': 'Candidate information not found.'})
+                print("'error': 'Candidate information not found.'")
+                # Update the status to "candidate_info_not_found"
+                resume_score.status = 'candidate_info_not_found'
+                db.session.commit()
+    
+        except Exception as e:
+            resume_score.status = 'error'
+            db.session.commit()
+            raise e
+
+@app.route('/CHECK_Auto_assessment', methods=['POST'])
+def CHECK_Auto_assessment():
+    try:
+        data = request.get_json()
+        job_id = data.get('job_id')
+        candidate_name = data.get('candidate_name')
+        no_tech_questions = data.get('no_tech_questions')
+        no_behav_questions = data.get('no_behav_questions')
+
+        if not job_id or not candidate_name:
+            return jsonify({'error': 'Job ID and candidate name are required parameters.'}), 400
+
+        candidate_name_formatted = candidate_name.lower().replace(" ", "")
+        resume_score = ResumeScore.query.filter_by(job_id=job_id).filter(func.lower(func.replace(ResumeScore.name, " ", "")) == candidate_name_formatted).first()
+
+        if resume_score:
+            resume_score.status = 'generating_assessment'
+            db.session.commit()
+
+            thread = Thread(target=generate_and_save_assessment, args=(job_id, candidate_name, no_tech_questions, no_behav_questions, resume_score.id))
+            thread.start()
+
+            return jsonify({'message': 'Assessment generation started.'}), 200
+        else:
+            return jsonify({'error': 'Resume score record not found for the candidate.'}), 404
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 
 if __name__ == '__main__':
     # Create the database tables
     with app.app_context():
         db.create_all()
     app.run(debug=True)
-
-
-
