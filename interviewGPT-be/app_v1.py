@@ -1164,7 +1164,8 @@ def get_resume_scores():
             "Missing_Skills": score.missing_skills,
             "selected_status":score.selected_status,
             "assessment_status":score.assessment_status,
-            "experience_match":score.experience_match
+            "experience_match":score.experience_match,
+            "status":score.status
         })
 
     return jsonify({'resume_scores': scores_fetch}), 200
