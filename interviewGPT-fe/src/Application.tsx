@@ -99,6 +99,7 @@ function Application() {
       setTimeout(() => {
         setError(null);
       }, 10000);
+      navigate("/dashboard");
       return;
     }
 

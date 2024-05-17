@@ -83,7 +83,9 @@ const Sample: React.FC = () => {
           </div>
           <div className="flex justify-center items-center mt-4">
             <AudioRecorder
-              question="medhansh"
+              question={
+                behavioralQuestions[currentQuestionIndex]?.b_question_text
+              }
               canName={canName}
               jobId={localStorage?.getItem("job_id")}
             />

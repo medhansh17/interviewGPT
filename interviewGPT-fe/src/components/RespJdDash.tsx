@@ -301,7 +301,9 @@ const RespJdDash = () => {
       }
 
       console.log("here");
-      handleRefresh();
+      setTimeout(() => {
+        handleRefresh();
+      }, 1000);
     } catch (err: unknown) {
       console.log(err);
     }
@@ -526,7 +528,7 @@ const RespJdDash = () => {
                       <td>
                         <input
                           type="checkbox"
-                          checked={item.selected_status}
+                          // checked={item.selected_status}
                           onChange={(e) => {
                             handleCandidateSelect(
                               item.candidate_name,
