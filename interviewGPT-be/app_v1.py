@@ -769,7 +769,7 @@ def extract_resume_info(job_id, role):
             {
                 "resume_details": [
                     {
-                        "candidate_name": "KEERTHI GANESH",
+                        "candidate_name": "KEERTHI GANESH M",
                         "work_exp": "3 YEARS",
                         "phone_number": "78787878787",
                         "address": "KAIALSH NAGAR TRICHY, TAMIL NADU",
@@ -782,7 +782,7 @@ def extract_resume_info(job_id, role):
                         "nationality": "Indian"
                     },
                     {
-                        "candidate_name": "kishore",
+                        "candidate_name": "kishore M",
                         "work_exp": "1 YEARS",
                         "phone_number": "345678983",
                         "address": "balaji street,kerala",
@@ -800,7 +800,7 @@ def extract_resume_info(job_id, role):
             {
                 "resume_details": [
                     {
-                        "candidate_name": "KEERTHI GANESH",
+                        "candidate_name": "KEERTHI GANESH M",
                         "work_exp": "3 YEARS",
                         "phone_number": "78787878787",
                         "address": "KAIALSH NAGAR TRICHY , TAMIL NADU",
@@ -816,7 +816,7 @@ def extract_resume_info(job_id, role):
             }
             """
             },
-            {"role": "user", "content": f"""use the {text_resume} resume to details which are stated like name, work experience,phone number,address,email id, linkedin id and github id
+            {"role": "user", "content": f"""use the {text_resume} resume to get details which are stated like name (get full name with inital if it is there), work experience,phone number,address,email id, linkedin id and github id
              fetch all the techincal skills and soft skills separtely dont mix it from the resume {text_resume}  and give the details as per instructed.If years of experience are not explicitly mentioned in the {text_resume}, calculate the total years of experience based on the dates provided in the candidate's employment history and use it for work_exp """}
 
         ]
