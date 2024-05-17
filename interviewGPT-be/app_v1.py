@@ -2668,7 +2668,53 @@ def CHECK_Auto_assessment():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+##Audio (blob to webm to wav)
 
+
+# API endpoint for processing audio
+@app.route('/blob_process_audio', methods=['POST'])
+def blob_process_audio():
+    data = request.form
+    question = data.get('question')
+    candidate_name = data.get('candidate_name')
+    job_id = data.get('job_id')
+    audio_blob = request.files['audio']
+
+    if not question or not candidate_name or not job_id or not audio_blob:
+        return jsonify({'error': 'Missing required parameters.'}), 400
+
+    # Store audio file locally as WebM format
+    audio_folder = os.path.join('audio_file_folder', candidate_name)
+    if not os.path.exists(audio_folder):
+        os.makedirs(audio_folder)
+    
+    webm_file_path = os.path.join(audio_folder, 'temp_audio.wav')
+    audio_blob.save(webm_file_path)
+
+
+    # Transcribe audio from the WAV file
+    with open(webm_file_path, "rb") as wav_file:
+        transcript = client.audio.transcriptions.create(
+            model="whisper-1", 
+            file=wav_file,
+            response_format="text"
+        )
+    
+    try:
+        # Store transcription in the database
+        new_transcription = AudioTranscription(
+            question=question,
+            name=candidate_name,
+            job_id=job_id,
+            audio_transcript=transcript
+        )
+        db.session.add(new_transcription)
+        db.session.commit()
+        return jsonify({'status': 'transcripts saved successfully'}), 200
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     # Create the database tables
