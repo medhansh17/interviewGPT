@@ -567,11 +567,11 @@ def edit_job(job_id):
     # Get the new role, job description, and status from the request
     new_role = request.json.get('role')
     new_jd = request.json.get('jd')
-    new_status_str = request.json.get('status')
+    new_status = request.json.get('status') ## just send true or false , not as string
     
     
     # Validate if at least one of role, job description, or status is provided
-    if new_role is None and new_jd is None and new_status_str is None:
+    if new_role is None and new_jd is None and new_status is None:
         return jsonify({'message': 'Role, job description, or status not provided'}), 400
 
     # Get the job from the database
@@ -584,10 +584,9 @@ def edit_job(job_id):
         job.role = new_role
     if new_jd:
         job.jd = new_jd
-    if new_status_str:
-        # Map status string to boolean
-        new_status = True if new_status_str.lower() == 'active' else False
+    if new_status is not None:
         job.active = new_status
+    
 
     db.session.commit()
 
@@ -650,7 +649,7 @@ def delete_job():
 #3rd screen 
 
 #3nd screen to display job_id, jd and role 
-@app.route('/jobs/<int:job_id>', methods=['GET'])
+@app.route('/jobs/<string:job_id>', methods=['GET'])
 def get_job_details(job_id):
     # Get the job details from the database based on the provided job_id
     job = Job.query.get(job_id)
