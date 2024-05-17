@@ -2683,12 +2683,15 @@ def blob_process_audio():
     if not question or not candidate_name or not job_id or not audio_blob:
         return jsonify({'error': 'Missing required parameters.'}), 400
 
+    # Generate a unique filename for the audio file
+    unique_filename = f"{candidate_name}_{uuid.uuid4().hex}.wav"
+
     # Store audio file locally as WebM format
     audio_folder = os.path.join('audio_file_folder', candidate_name)
     if not os.path.exists(audio_folder):
         os.makedirs(audio_folder)
     
-    webm_file_path = os.path.join(audio_folder, 'temp_audio.wav')
+    webm_file_path = os.path.join(audio_folder, unique_filename)
     audio_blob.save(webm_file_path)
 
 
