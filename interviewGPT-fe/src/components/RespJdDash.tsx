@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { UserContext } from "../context/JobContext";
 import { setCandList, deleteCandidateByName } from "../context/JobContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import InterviewDataDisplay from "./candidateResult";
 import {
   faTrash,
   faEdit,
@@ -53,6 +54,7 @@ const RespJdDash = () => {
   const [behavioralQuestions, setBehavioralQuestions] = useState<
     BehavioralQuestion[]
   >([]);
+  const [show_Result, setshow_Result] = useState(false);
   const [codingQuestion, setCodingQuestion] = useState<CodingQuestion | null>(
     null
   );
@@ -78,6 +80,7 @@ const RespJdDash = () => {
   const [gen, setGen] = useState("");
   const [pop, setPop] = useState(false);
   const [updateStatus, setUpdateStatus] = useState(false);
+  const [Resultdata, setResultData] = useState<any>(null);
   // Function to handle candidate selection
   // const handleCandidateSelect = async (candidateName: string, checked: boolean) => {
   //   console.log("heeeee",candidateName)
@@ -333,13 +336,13 @@ const RespJdDash = () => {
   };
 
   const showResult = async (itemName: string) => {
-    console.log("here i result");
     try {
       const resp = await api.post("/fetch_user_responses", {
         candidate_name: itemName,
         job_id: jobDetails?.job_id,
       });
-      console.log(resp);
+      setResultData(resp.data);
+      setshow_Result(!show_Result);
     } catch (error: unknown) {
       console.log(error);
     }
@@ -623,6 +626,7 @@ const RespJdDash = () => {
           <div className="no-data">No Candidate</div>
         )}
       </div>
+      {show_Result && <InterviewDataDisplay data={Resultdata} />}
       {approval && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
           <div
