@@ -1973,14 +1973,14 @@ def generate_technical_question(prompt):
         messages=message,
         max_tokens=1000
     )
+    response= dict(response)
+    response_data = dict(dict(response['choices'][0])['message'])[
+            'content'].replace("\n", " ")
 
-    response_content=dict(response)
-    response_content=dict(dict(response_content['choices'][0])['message']['content'])[
-        'content'].replace("\n", " ")
-        # Remove extra spaces
-    response_content = ' '.join(response_content.split())
+    
+    response_content = ' '.join(response_data.split())
     new_question = json.loads(response_content)
-    return new_question
+    return (new_question)
 
 def generate_behavioural_question(prompt):
     # Generate a new behavioural question based on the prompt
@@ -2000,14 +2000,14 @@ def generate_behavioural_question(prompt):
         messages=message,
         max_tokens=1000
     )
+    response= dict(response)
+    response_data = dict(dict(response['choices'][0])['message'])[
+            'content'].replace("\n", " ")
 
-    response_content=dict(response)
-    response_content=dict(dict(response_content['choices'][0])['message']['content'])[
-        'content'].replace("\n", " ")
-        # Remove extra spaces
-    response_content = ' '.join(response_content.split())
+    
+    response_content = ' '.join(response_data.split())
     new_question = json.loads(response_content)
-    return new_question
+    return (new_question)
 
 def generate_coding_question(prompt):
     # Generate a new coding question based on the prompt
@@ -2028,14 +2028,14 @@ def generate_coding_question(prompt):
         messages=message,
         max_tokens=1000
     )
+    response= dict(response)
+    response_data = dict(dict(response['choices'][0])['message'])[
+            'content'].replace("\n", " ")
 
-    response_content=dict(response)
-    response_content=dict(dict(response_content['choices'][0])['message']['content'])[
-        'content'].replace("\n", " ")
-        # Remove extra spaces
-    response_content = ' '.join(response_content.split())
+    
+    response_content = ' '.join(response_data.split())
     new_question = json.loads(response_content)
-    return new_question
+    return (new_question)
 
 def update_technical_question(question_id, new_question, job_id, candidate_name):
     tech_question = TechnicalQuestion.query.filter(
