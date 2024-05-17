@@ -19,7 +19,7 @@ interface DataItem {
   id: number;
   jd: string;
   role: string;
-  active: boolean;
+  active: string;
 }
 
 const Dashboard = () => {
@@ -33,11 +33,13 @@ const Dashboard = () => {
   );
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+
   useEffect(() => {
     const getJobList = async () => {
       try {
         const response = await api.get("/export_jobs_json");
         dispatch(setJobList(response.data));
+        setData(response.data);
       } catch (error) {
         console.log(error);
       }
@@ -45,9 +47,9 @@ const Dashboard = () => {
     getJobList();
   }, [dispatch]);
 
-  useEffect(() => {
-    setData(state.job_list);
-  }, [state.job_list]);
+  // useEffect(() => {
+  //   setData(state.job_list);
+  // }, [state.job_list]);
 
   const deleteJobHandler = async (item: DataItem) => {
     try {
@@ -71,10 +73,10 @@ const Dashboard = () => {
   };
 
   const saveEditedRow = async (item: any) => {
-    let active = 1;
-    if (item.active) {
-      active = 1;
-    } else active = 0;
+    let active: boolean;
+    if (item.active === "true") {
+      active = true;
+    } else active = false;
     try {
       const response = await api.put(`/edit_job/${item.id}`, {
         role: item.role,
@@ -133,7 +135,7 @@ const Dashboard = () => {
         console.log(item);
         return {
           ...item,
-          active: event.target.value === "Active",
+          active: event.target.value === "true" ? "true" : "false",
         };
       }
       return item;
@@ -154,7 +156,6 @@ const Dashboard = () => {
   const handlePageClick = (selectedPage: number) => {
     setCurrentPage(selectedPage);
   };
-
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
@@ -164,25 +165,17 @@ const Dashboard = () => {
       className="bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white"
       style={{ backgroundColor: "#fff" }}
     >
-      <p className="w-[93%] mx-auto">
+      <p className="sm:w-[93%] w-full mx-auto">
         <Header />
       </p>
       <div
-        className="max-w-[1400px] mx-auto mt-[-2rem] p-6"
+        className="max-w-[1400px] min-w-fit mx-auto mt-[-2rem] sm:p-6 p-2"
         style={{ paddingTop: 0 }}
       >
         <div className="mb-4">
           <h1 className="text-2xl font-semibold mb-1">Dashboard</h1>
         </div>
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex space-x-2">
-            <button className="bg-white dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 p-2 rounded-lg shadow">
-              Delete
-            </button>
-            <button className="bg-white dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 p-2 rounded-lg shadow">
-              Filters
-            </button>
-          </div>
+        <div className="flex justify-end items-center mb-4">
           <div className="flex gap-[2rem]">
             <div
               className="flex w-[19rem] items-center bg-zinc-200 dark:bg-zinc-800 rounded-lg "
@@ -307,8 +300,8 @@ const Dashboard = () => {
                           className="bg-green-200 text-green-700 py-1 px-3 rounded-full text-xs"
                           onChange={(e) => statusChange(e, item.id)}
                         >
-                          <option value="Active">Active</option>
-                          <option value="Inactive">Inactive</option>
+                          <option value="true">Active</option>
+                          <option value="false">Inactive</option>
                         </select>
                       ) : (
                         <span
@@ -318,7 +311,7 @@ const Dashboard = () => {
                               : "bg-red-600 text-black"
                           }  py-1 px-3 rounded-full text-xs`}
                         >
-                          {item.active ? "Active" : "Inactive"}
+                          {item.active === "true" ? "Active" : "Inactive"}
                         </span>
                       )}
                     </td>

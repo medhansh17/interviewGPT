@@ -110,7 +110,7 @@ function Application() {
       jd: mainData?.jd || mainData2?.jd || mainTextArea || mainTextArea2,
     });
     try {
-      const response = await api.post("/upload_job", {
+      const response = await api.post("/Manual_upload_job", {
         role: mainData?.role || mainData2?.role || role || "",
         jd: mainData?.jd || mainData2?.jd || mainTextArea || mainTextArea2,
       });

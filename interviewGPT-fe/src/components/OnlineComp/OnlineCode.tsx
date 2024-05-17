@@ -15,7 +15,6 @@
 //       setCurrentIndex(0)
 //     }else setCurrentIndex(currentIndex+1)
 //   }
-  
 
 //   const questions=[
 //     {id:1,question:"What is blah blah1 nbgctxawsgom t eswa    nbgctxawsgom t eswa            u  yf xw fgyffswwrtrpmbcfedggyrrewd nbgctxawsgom t eswa            u  yf xw fgyffswwrtrpmbcfedggyrrewd nbgctxawsgom t eswa            u  yf xw fgyffswwrtrpmbcfedggyrrewd         u  yf xw fgyffswwrtrpmbcfedggyrrewd"},
@@ -29,14 +28,11 @@
 //           <SideBar questions={questions} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex}/>
 //           <Code questions={questions} setCurrentIndex={setCurrentIndex} currentIndex={currentIndex} />
 //         </div>
-        
 
 //   )
 // }
 
 // export default OnlineCode;
-
-
 
 // import React, { useState } from 'react';
 
@@ -244,34 +240,32 @@
 
 // export default IntroScreen;
 
-
-
-import React, { useState, useRef, useEffect } from 'react';
-import './online.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCamera, faMicrophone } from '@fortawesome/free-solid-svg-icons';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from "react";
+import "./online.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCamera, faMicrophone } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 
 const IntroScreen: React.FC = () => {
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
-  const [isMicrophoneAccessible, setIsMicrophoneAccessible] = useState<boolean>(false);
+  const [isMicrophoneAccessible, setIsMicrophoneAccessible] =
+    useState<boolean>(false);
   const [isCameraAccessible, setIsCameraAccessible] = useState<boolean>(false);
   const [isBrowserAccessible, setIsBrowserAccessible] = useState<boolean>(true);
   const [hasTakenSelfie, setHasTakenSelfie] = useState<boolean>(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
- const navigate=useNavigate()
+  const navigate = useNavigate();
   useEffect(() => {
     const checkMediaAccess = async () => {
-
-     
-
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         setIsBrowserAccessible(false);
       }
 
       try {
-        const cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+        });
         setIsCameraAccessible(true);
         if (videoRef.current) {
           videoRef.current.srcObject = cameraStream;
@@ -281,9 +275,11 @@ const IntroScreen: React.FC = () => {
       }
 
       try {
-        const microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const microphoneStream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
         setIsMicrophoneAccessible(true);
-        microphoneStream.getTracks().forEach(track => track.stop());
+        microphoneStream.getTracks().forEach((track) => track.stop());
       } catch (error) {
         setIsMicrophoneAccessible(false);
       }
@@ -298,9 +294,9 @@ const IntroScreen: React.FC = () => {
       const canvas = canvasRef.current;
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
       ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const photoData = canvas.toDataURL('image/png');
+      const photoData = canvas.toDataURL("image/png");
       setUserPhoto(photoData);
       setHasTakenSelfie(true);
     }
@@ -313,131 +309,231 @@ const IntroScreen: React.FC = () => {
 
   return (
     <div>
-      <h1 className='text-center font-semibold text-3xl p-[3rem]'>Welcom To Online Proctored Exam</h1>
-    <div className="w-[90%] mx-auto bg-white p-6 rounded-lg shadow">
-      <h2 className="text-lg ml-[5rem]  font-semibold mb-4" style={{fontSize:"1.3rem"}}>System Check & Verification Photo</h2>
-      <div className='flex items-center justify-center '>
-        <div className=" flex-1">
-          <div className="flex items-center mx-auto mb-8  int-page">
-            <div className='flex'>
-              <div><FontAwesomeIcon icon={faCamera} style={{ color:   'rgb(175 171 171)' }} /></div>
-              <div className="ml-3 text-sm text-zinc-700">Camera</div>
+      <h1 className="text-center font-semibold text-3xl p-[3rem]">
+        Welcom To Online Proctored Exam
+      </h1>
+      <div className="w-[90%] mx-auto bg-white p-6 rounded-lg shadow">
+        <h2
+          className="text-lg ml-[5rem]  font-semibold mb-4"
+          style={{ fontSize: "1.3rem" }}
+        >
+          System Check & Verification Photo
+        </h2>
+        <div className="flex items-center justify-center ">
+          <div className=" flex-1">
+            <div className="flex items-center mx-auto mb-8  int-page">
+              <div className="flex">
+                <div>
+                  <FontAwesomeIcon
+                    icon={faCamera}
+                    style={{ color: "rgb(175 171 171)" }}
+                  />
+                </div>
+                <div className="ml-3 text-sm text-zinc-700">Camera</div>
+              </div>
+              <div
+                className={`flex-shrink-0 w-6 h-6 rounded-full p-1 ${
+                  isCameraAccessible
+                    ? "bg-green-100 text-green-500"
+                    : "bg-red-100 text-red-500"
+                }`}
+              >
+                {isCameraAccessible ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                )}
+              </div>
             </div>
-            <div className={`flex-shrink-0 w-6 h-6 rounded-full p-1 ${isCameraAccessible ? 'bg-green-100 text-green-500' : 'bg-red-100 text-red-500'}`}>
-              {isCameraAccessible ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              )}
+            <div className="flex items-center mx-auto mb-8 int-page">
+              <div className="flex">
+                <div>
+                  <FontAwesomeIcon
+                    icon={faMicrophone}
+                    style={{ color: "rgb(175 171 171)" }}
+                  />
+                </div>
+                <div className="ml-3 text-sm text-zinc-700">Microphone</div>
+              </div>
+              <div
+                className={`flex-shrink-0 w-6 h-6 rounded-full p-1 ${
+                  isMicrophoneAccessible
+                    ? "bg-green-100 text-green-500"
+                    : "bg-red-100 text-red-500"
+                }`}
+              >
+                {isMicrophoneAccessible ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center mx-auto mb-8  int-page">
+              <div className="flex">
+                <div>
+                  <FontAwesomeIcon
+                    icon={faCamera}
+                    style={{ color: "rgb(175 171 171)" }}
+                  />
+                </div>
+                <div className="ml-3 text-sm text-zinc-700">Browser</div>
+              </div>
+              <div
+                className={`flex-shrink-0 w-6 h-6 rounded-full p-1 ${
+                  isBrowserAccessible
+                    ? "bg-green-100 text-green-500"
+                    : "bg-red-100 text-red-500"
+                }`}
+              >
+                {isBrowserAccessible ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                )}
+              </div>
+            </div>
+            <div className="text-xs text-red-500 ml-2">
+              {isMicrophoneAccessible
+                ? ""
+                : "Please speak louder or adjust microphone level"}
             </div>
           </div>
-          <div className="flex items-center mx-auto mb-8 int-page">
-            <div className='flex'>
-              <div><FontAwesomeIcon icon={faMicrophone} style={{ color:   'rgb(175 171 171)' }} /></div>
-              <div className="ml-3 text-sm text-zinc-700">Microphone</div>
-            </div>
-            <div className={`flex-shrink-0 w-6 h-6 rounded-full p-1 ${isMicrophoneAccessible ? 'bg-green-100 text-green-500' : 'bg-red-100 text-red-500'}`}>
-              {isMicrophoneAccessible ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center mx-auto mb-8  int-page">
-            <div className='flex'>
-              <div><FontAwesomeIcon icon={faCamera} style={{ color:   'rgb(175 171 171)' }} /></div>
-              <div className="ml-3 text-sm text-zinc-700">Browser</div>
-            </div>
-            <div className={`flex-shrink-0 w-6 h-6 rounded-full p-1 ${isBrowserAccessible ? 'bg-green-100 text-green-500' : 'bg-red-100 text-red-500'}`}>
-              {isBrowserAccessible ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              )}
-            </div>
-          </div>
-          <div className="text-xs text-red-500 ml-2">
-            {isMicrophoneAccessible ? '' : 'Please speak louder or adjust microphone level'}
-          </div>
-        </div>
-        <div className="mt-4 mb-2 flex-1">
-          <div className="border-2 border-red-500 w-[50%] h-[15rem] m-auto flex justify-center items-center relative">
-            <video
-              ref={videoRef}
-              className="absolute inset-0 w-full h-full object-cover"
-              autoPlay
-              playsInline
-              muted
-            ></video>
-            {userPhoto && (
-              <img
-                src={userPhoto}
-                alt="Selfie"
+          <div className="mt-4 mb-2 flex-1">
+            <div className="border-2 border-red-500 w-[50%] h-[15rem] m-auto flex justify-center items-center relative">
+              <video
+                ref={videoRef}
                 className="absolute inset-0 w-full h-full object-cover"
-              />
+                autoPlay
+                playsInline
+                muted
+              ></video>
+              {userPhoto && (
+                <img
+                  src={userPhoto}
+                  alt="Selfie"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              )}
+            </div>
+            <p className="text-sm text-zinc-600 text-center mt-2">
+              Please ensure your face is within this box and there is adequate
+              lighting
+            </p>
+            {hasTakenSelfie ? (
+              <button
+                style={{ width: "30%" }}
+                onClick={retakeSelfie}
+                className="block w-[33%] mx-auto bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded mt-4 w-full"
+              >
+                Retake Selfie
+              </button>
+            ) : (
+              <button
+                style={{ width: "30%" }}
+                onClick={takeSelfie}
+                className="block w-[33%] mx-auto bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded mt-4 w-full"
+              >
+                Click a Selfie
+              </button>
             )}
           </div>
-          <p className="text-sm text-zinc-600 text-center mt-2">Please ensure your face is within this box and there is adequate lighting</p>
-          {hasTakenSelfie ? (
-            <button style={{width:"30%"}} onClick={retakeSelfie} className="block w-[33%] mx-auto bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded mt-4 w-full">Retake Selfie</button>
-          ) : (
-            <button style={{width:"30%"}} onClick={takeSelfie} className="block w-[33%] mx-auto bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded mt-4 w-full">Click a Selfie</button>
-          )}
+        </div>
+        <div className="border-t border-solid border-lightgray mt-8">
+          <button
+            onClick={() => navigate("/instruction")}
+            style={{ width: "30%" }}
+            // disabled={
+            //   !isBrowserAccessible ||
+            //   !isCameraAccessible ||
+            //   !isMicrophoneAccessible
+            // }
+            // className={`w-[18%] ml-auto block ${
+            //   !isBrowserAccessible ||
+            //   !isCameraAccessible ||
+            //   !isMicrophoneAccessible
+            //     ? "bg-gray-300"
+            //     : "bg-green-500 hover:bg-green-600"
+            // } text-white py-2 px-4 rounded mt-4 w-full`}
+            className={`w-[18%] ml-auto block ${"bg-green-500 hover:bg-green-600"} text-white py-2 px-4 rounded mt-4 mx-auto`}
+          >
+            Proceed to test
+          </button>
+          <canvas ref={canvasRef} className="hidden"></canvas>
         </div>
       </div>
-      <div className='border-t border-solid border-lightgray mt-8'>
-        <button onClick={()=>navigate("/instruction")} style={{width:"30%"}}
-          disabled={!isBrowserAccessible || !isCameraAccessible || !isMicrophoneAccessible}
-          className={`w-[18%] ml-auto block ${(!isBrowserAccessible || !isCameraAccessible || !isMicrophoneAccessible) ? 'bg-gray-300' : 'bg-green-500 hover:bg-green-600'} text-white py-2 px-4 rounded mt-4 w-full`}
-        >
-          Proceed to test
-        </button>
-        <canvas ref={canvasRef} className="hidden"></canvas>
-      </div>
-    </div>
     </div>
   );
 };
