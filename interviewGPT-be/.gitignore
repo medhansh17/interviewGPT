@@ -2,3 +2,10 @@
 venv/
 instance/
 __pycache__/
+check_resume_folder_final/
+Database/
+audio_file_folder/
+ARCHIVE_FOLDER/
+hars/
+jd_file_folder/
+tmp/
