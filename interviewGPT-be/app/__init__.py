@@ -37,18 +37,16 @@ def create_app(config_class=Config):
 
         # Import blueprints
         from .job_routes import job_bp
-        # from .resume_routes import ats_bp
-        # from .assessment_generating_routes import assessment_bp
-        # from .question_management_routes import question_management_bp
-        # from .response_evaluate_routes import response_evaluate_bp
+        from .resume_routes import ats_bp
+        from .assessment_generating_routes import assessment_bp
+        from .question_management_routes import question_management_bp
+        from .response_evaluate_routes import response_evaluate_bp
 
         # Register blueprints
         app.register_blueprint(job_bp)
-        # app.register_blueprint(ats_bp, url_prefix='/ats')
-        # app.register_blueprint(assessment_bp, url_prefix='/assessment')
-        # app.register_blueprint(question_management_bp,
-        #                        url_prefix='/question_management')
-        # app.register_blueprint(response_evaluate_bp,
-        #                        url_prefix='/response_evaluate')
+        app.register_blueprint(ats_bp)
+        app.register_blueprint(assessment_bp)
+        app.register_blueprint(question_management_bp)
+        app.register_blueprint(response_evaluate_bp)
 
     return app
