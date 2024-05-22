@@ -21,3 +21,15 @@ folders = [RESUME_FOLDER, ARCHIVE_FOLDER, JD_FOLDER, AUDIO_FOLDER]
 for folder in folders:
     if not os.path.exists(folder):
         os.makedirs(folder)
+
+MODEL_NAME = "gpt-4-turbo"
+
+# Set up OpenAI API client
+client = None
+openai_api_key = os.getenv("OPENAI_API_KEY")
+if openai_api_key:
+    from openai import OpenAI
+    client = OpenAI(api_key=openai_api_key)
+    print(f"OpenAI API key loaded: {openai_api_key}")
+else:
+    print("OpenAI API key not found in environment variables")

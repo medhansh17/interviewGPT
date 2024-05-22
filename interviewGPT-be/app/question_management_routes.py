@@ -5,10 +5,11 @@ from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 from .models import db, Candidate, TechnicalQuestion, BehaviouralQuestion, CodingQuestion
 from openai import OpenAI
-from .question_management_prompts import generate_CRUD_tech_prompt,generate_CRUD_behav_prompt,generate_CRUD_code_prompt
+from .prompts.question_management_prompts import generate_CRUD_tech_prompt, generate_CRUD_behav_prompt, generate_CRUD_code_prompt
 question_management_bp = Blueprint('question_management', __name__)
 
-## To edit the questions in approval screen
+# To edit the questions in approval screen
+
 
 @question_management_bp.route('/edit_candidate_question', methods=['POST'])
 def edit_candidate_question():
@@ -16,8 +17,10 @@ def edit_candidate_question():
     question_id = data.get('question_id')
     candidate_name = data.get('candidate_name')
     job_id = data.get('job_id')
-    question_type = data.get('question_type').lower()  # 'technical', 'behavioural', or 'coding'
-    question_data = data.get('question_data') # Contains the updated details of the question
+    # 'technical', 'behavioural', or 'coding'
+    question_type = data.get('question_type').lower()
+    # Contains the updated details of the question
+    question_data = data.get('question_data')
 
     normalized_candidate_name = candidate_name.replace(" ", "").lower().strip()
 
@@ -27,7 +30,8 @@ def edit_candidate_question():
     try:
         if question_type == 'technical':
             question = TechnicalQuestion.query.filter(
-                func.lower(func.replace(TechnicalQuestion.name, " ", "")) == normalized_candidate_name,
+                func.lower(func.replace(TechnicalQuestion.name,
+                           " ", "")) == normalized_candidate_name,
                 TechnicalQuestion.id == question_id,
                 TechnicalQuestion.job_id == job_id
             ).first()
@@ -40,7 +44,8 @@ def edit_candidate_question():
 
         elif question_type == 'behavioral':
             question = BehaviouralQuestion.query.filter(
-                func.lower(func.replace(BehaviouralQuestion.name, " ", "")) == normalized_candidate_name,
+                func.lower(func.replace(BehaviouralQuestion.name,
+                           " ", "")) == normalized_candidate_name,
                 BehaviouralQuestion.id == question_id,
                 BehaviouralQuestion.job_id == job_id
             ).first()
@@ -51,7 +56,8 @@ def edit_candidate_question():
 
         elif question_type == 'coding':
             question = CodingQuestion.query.filter(
-                func.lower(func.replace(CodingQuestion.name, " ", "")) == normalized_candidate_name,
+                func.lower(func.replace(CodingQuestion.name, " ", "")
+                           ) == normalized_candidate_name,
                 CodingQuestion.id == question_id,
                 CodingQuestion.job_id == job_id
             ).first()
@@ -72,7 +78,8 @@ def edit_candidate_question():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-## To delete the question in approval page
+# To delete the question in approval page
+
 
 @question_management_bp.route('/delete_candidate_question', methods=['DELETE'])
 def delete_candidate_question():
@@ -80,7 +87,8 @@ def delete_candidate_question():
     candidate_name = data.get('candidate_name')
     job_id = data.get('job_id')
     question_id = data.get('question_id')
-    question_type = data.get('question_type').lower() # 'technical', 'behavioral', 'coding'
+    # 'technical', 'behavioral', 'coding'
+    question_type = data.get('question_type').lower()
 
     normalized_candidate_name = candidate_name.replace(" ", "").lower().strip()
 
@@ -90,7 +98,8 @@ def delete_candidate_question():
     try:
         if question_type == 'technical':
             question = TechnicalQuestion.query.filter(
-                func.lower(func.replace(TechnicalQuestion.name, " ", "")) == normalized_candidate_name,
+                func.lower(func.replace(TechnicalQuestion.name,
+                           " ", "")) == normalized_candidate_name,
                 TechnicalQuestion.id == question_id,
                 TechnicalQuestion.job_id == job_id
             ).first()
@@ -101,7 +110,8 @@ def delete_candidate_question():
 
         elif question_type == 'behavioral':
             question = BehaviouralQuestion.query.filter(
-                func.lower(func.replace(BehaviouralQuestion.name, " ", "")) == normalized_candidate_name,
+                func.lower(func.replace(BehaviouralQuestion.name,
+                           " ", "")) == normalized_candidate_name,
                 BehaviouralQuestion.id == question_id,
                 BehaviouralQuestion.job_id == job_id
             ).first()
@@ -112,7 +122,8 @@ def delete_candidate_question():
 
         elif question_type == 'coding':
             question = CodingQuestion.query.filter(
-                func.lower(func.replace(CodingQuestion.name, " ", "")) == normalized_candidate_name,
+                func.lower(func.replace(CodingQuestion.name, " ", "")
+                           ) == normalized_candidate_name,
                 CodingQuestion.id == question_id,
                 CodingQuestion.job_id == job_id
             ).first()
@@ -131,7 +142,8 @@ def delete_candidate_question():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-## to prompt the question topic and generate question for each one
+# to prompt the question topic and generate question for each one
+
 
 @question_management_bp.route('/update_candidate_question', methods=['POST'])
 def update_candidate_question():
@@ -139,7 +151,8 @@ def update_candidate_question():
     candidate_name = data.get('candidate_name')
     job_id = data.get('job_id')
     question_id = data.get('question_id')
-    question_type = data.get('question_type').lower()  # 'technical', 'behavioral', 'coding'
+    # 'technical', 'behavioral', 'coding'
+    question_type = data.get('question_type').lower()
     topic_prompt = data.get('topic_prompt')
 
     if not candidate_name or not job_id or not question_type or not topic_prompt:
@@ -149,20 +162,24 @@ def update_candidate_question():
 
     if question_type == 'technical':
         new_question = generate_technical_question(topic_prompt)
-        update_technical_question(question_id, new_question, job_id, normalized_candidate_name)
+        update_technical_question(
+            question_id, new_question, job_id, normalized_candidate_name)
 
     elif question_type == 'behavioral':
         new_question = generate_behavioural_question(topic_prompt)
-        update_behavioural_question(question_id, new_question, job_id, normalized_candidate_name)
+        update_behavioural_question(
+            question_id, new_question, job_id, normalized_candidate_name)
 
     elif question_type == 'coding':
         new_question = generate_coding_question(topic_prompt)
-        update_coding_question(question_id, new_question, job_id, normalized_candidate_name)
+        update_coding_question(question_id, new_question,
+                               job_id, normalized_candidate_name)
 
     else:
         return jsonify({'error': 'Invalid question type.'}), 400
 
     return jsonify({'message': 'Question updated successfully.'}), 200
+
 
 def generate_technical_question(prompt):
     message = [
@@ -179,11 +196,12 @@ def generate_technical_question(prompt):
 
     response = dict(response)
     response_data = dict(dict(response['choices'][0])['message'])[
-            'content'].replace("\n", " ")
-    
+        'content'].replace("\n", " ")
+
     response_content = ' '.join(response_data.split())
     new_question = json.loads(response_content)
     return new_question
+
 
 def generate_behavioural_question(prompt):
     message = [
@@ -197,14 +215,15 @@ def generate_behavioural_question(prompt):
         messages=message,
         max_tokens=1000
     )
-    
+
     response = dict(response)
     response_data = dict(dict(response['choices'][0])['message'])[
-            'content'].replace("\n", " ")
-    
+        'content'].replace("\n", " ")
+
     response_content = ' '.join(response_data.split())
     new_question = json.loads(response_content)
     return new_question
+
 
 def generate_coding_question(prompt):
     message = [
@@ -218,18 +237,20 @@ def generate_coding_question(prompt):
         messages=message,
         max_tokens=1000
     )
-    
+
     response = dict(response)
     response_data = dict(dict(response['choices'][0])['message'])[
-            'content'].replace("\n", " ")
-    
+        'content'].replace("\n", " ")
+
     response_content = ' '.join(response_data.split())
     new_question = json.loads(response_content)
     return new_question
 
+
 def update_technical_question(question_id, new_question, job_id, candidate_name):
     tech_question = TechnicalQuestion.query.filter(
-        func.lower(func.replace(TechnicalQuestion.name, " ", "")) == candidate_name,
+        func.lower(func.replace(TechnicalQuestion.name, " ", "")
+                   ) == candidate_name,
         TechnicalQuestion.id == question_id,
         TechnicalQuestion.job_id == job_id
     ).first()
@@ -240,9 +261,11 @@ def update_technical_question(question_id, new_question, job_id, candidate_name)
         tech_question.correct_answer = new_question['answer']
         db.session.commit()
 
+
 def update_behavioural_question(question_id, new_question, job_id, candidate_name):
     behav_question = BehaviouralQuestion.query.filter(
-        func.lower(func.replace(BehaviouralQuestion.name, " ", "")) == candidate_name,
+        func.lower(func.replace(BehaviouralQuestion.name, " ", "")
+                   ) == candidate_name,
         BehaviouralQuestion.id == question_id,
         BehaviouralQuestion.job_id == job_id
     ).first()
@@ -251,9 +274,11 @@ def update_behavioural_question(question_id, new_question, job_id, candidate_nam
         behav_question.question_text = new_question['b_question_text']
         db.session.commit()
 
+
 def update_coding_question(question_id, new_question, job_id, candidate_name):
     coding_question = CodingQuestion.query.filter(
-        func.lower(func.replace(CodingQuestion.name, " ", "")) == candidate_name,
+        func.lower(func.replace(CodingQuestion.name, " ", "")
+                   ) == candidate_name,
         CodingQuestion.id == question_id,
         CodingQuestion.job_id == job_id
     ).first()
@@ -264,8 +289,9 @@ def update_coding_question(question_id, new_question, job_id, candidate_name):
         coding_question.sample_output = new_question['sample_output']
         db.session.commit()
 
-### Assessment sheet API's
-### To show the question in assessment sheet page 
+# Assessment sheet API's
+# To show the question in assessment sheet page
+
 
 @question_management_bp.route('/fetch_behavioural_questions', methods=['POST'])
 def fetch_behavioural_questions():
@@ -275,9 +301,10 @@ def fetch_behavioural_questions():
 
     if not candidate_name or not job_id:
         return jsonify({'error': 'Candidate name and job_id are required parameters.'}), 400
-    
+
     normalized_candidate_name = candidate_name.replace(" ", "").lower().strip()
-    candidate = Candidate.query.filter(func.lower(func.replace(Candidate.name, " ", "")) == normalized_candidate_name, Candidate.job_id == job_id).order_by(Candidate.version_number.desc()).first()
+    candidate = Candidate.query.filter(func.lower(func.replace(Candidate.name, " ", "")) == normalized_candidate_name,
+                                       Candidate.job_id == job_id).order_by(Candidate.version_number.desc()).first()
 
     if not candidate:
         return jsonify({'error': 'Candidate not found for the given job_id.'}), 404
@@ -301,10 +328,11 @@ def fetch_technical_questions():
 
     if not candidate_name or not job_id:
         return jsonify({'error': 'Candidate name and job_id are required parameters.'}), 400
-    
+
     normalized_candidate_name = candidate_name.replace(" ", "").lower().strip()
-    candidate = Candidate.query.filter(func.lower(func.replace(Candidate.name, " ", "")) == normalized_candidate_name, Candidate.job_id == job_id).order_by(Candidate.version_number.desc()).first()
-    
+    candidate = Candidate.query.filter(func.lower(func.replace(Candidate.name, " ", "")) == normalized_candidate_name,
+                                       Candidate.job_id == job_id).order_by(Candidate.version_number.desc()).first()
+
     if not candidate:
         return jsonify({'error': 'Candidate not found for the given job_id.'}), 404
 
@@ -328,9 +356,10 @@ def fetch_coding_question():
 
     if not candidate_name or not job_id:
         return jsonify({'error': 'Candidate name and job_id are required parameters.'}), 400
-    
+
     normalized_candidate_name = candidate_name.replace(" ", "").lower().strip()
-    candidate = Candidate.query.filter(func.lower(func.replace(Candidate.name, " ", "")) == normalized_candidate_name, Candidate.job_id == job_id).order_by(Candidate.version_number.desc()).first()
+    candidate = Candidate.query.filter(func.lower(func.replace(Candidate.name, " ", "")) == normalized_candidate_name,
+                                       Candidate.job_id == job_id).order_by(Candidate.version_number.desc()).first()
 
     if not candidate:
         return jsonify({'error': 'Candidate not found for the given job_id.'}), 404
@@ -346,5 +375,5 @@ def fetch_coding_question():
                     'sample_output': coding_question_data.sample_output
                 }
                 break
-    
+
     return jsonify({'coding_question': coding_question}), 200
