@@ -6,7 +6,7 @@ from sqlalchemy import func
 from openai import OpenAI
 from .models import Job, Candidate, TechnicalQuestion, BehaviouralQuestion, CodingQuestion, CandidateQuestion, AssessmentAttempt, ResumeScore, ExtractedInfo
 from . import db
-from .prompts import tech_question_mcq_prompt, behaviour_question_prompt, coding_question_prompt,tech_question_mcq_prompt,behaviour_question_prompt,coding_question_prompt
+from .assessment_prompts import tech_question_mcq_prompt, behaviour_question_prompt, coding_question_prompt,tech_question_mcq_prompt,behaviour_question_prompt,coding_question_prompt
 
 assessment_bp = Blueprint('assessment', __name__)
 

@@ -5,7 +5,7 @@ from flask import Blueprint, request, jsonify
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 from .models import db, CodeResponse, TechResponse, AudioTranscription, ResumeScore
-from .prompts import (factors,evaluate_tech_prompt,evaluate_code_prompt)
+from .response_evaluate_prompts import (factors,evaluate_tech_prompt,evaluate_code_prompt)
 from openai import OpenAI
 from config import AUDIO_FOLDER
 response_evaluate_bp = Blueprint('response_evaluate', __name__)

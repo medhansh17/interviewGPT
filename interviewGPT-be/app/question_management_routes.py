@@ -5,7 +5,7 @@ from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 from .models import db, Candidate, TechnicalQuestion, BehaviouralQuestion, CodingQuestion
 from openai import OpenAI
-from .prompts import generate_CRUD_tech_prompt,generate_CRUD_behav_prompt,generate_CRUD_code_prompt
+from .question_management_prompts import generate_CRUD_tech_prompt,generate_CRUD_behav_prompt,generate_CRUD_code_prompt
 question_management_bp = Blueprint('question_management', __name__)
 
 ## To edit the questions in approval screen

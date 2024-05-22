@@ -13,7 +13,7 @@ from openai import OpenAI
 from .models import Job, Resume, ExtractedInfo, ResumeScore
 from . import db
 from .config import RESUME_FOLDER,ARCHIVE_FOLDER
-from .prompts import extract_resume_prompt, evaluate_resume_prompt,user_prompt_resume_evaluation  # Import the prompt messages
+from .resume_prompts import extract_resume_prompt, evaluate_resume_prompt,user_prompt_resume_evaluation  # Import the prompt messages
 
 ats_bp = Blueprint('ats', __name__)
 
