@@ -68,8 +68,75 @@ def search_jobs():
     else:
         return jsonify({'error': 'Job not found'}), 404
 
-
 def extract_resume_info(app, job_id, role, resume_list):
+    with app.app_context():
+        print("came into extract fucnt")
+        path = os.path.join(RESUME_FOLDER, role)
+        print("the filename of uploaded")
+        print(resume_list)
+        for filename in resume_list:
+            print("inside for loop to read the file name")
+            if filename.endswith(".pdf"):
+                file_path = os.path.join(path, filename)
+                reader = PdfReader(file_path)
+                text_resume = f"Text extracted from: {filename}\n"
+                for page in reader.pages:
+                    text_resume += page.extract_text()
+                    text_resume += "\n"
+                text_resume += "\n---\n"
+                print(f"Extracted text from {filename}")
+
+                # Prepare the message for LLM
+                message_resumefetch = [
+                    {"role": "system", "content": extract_resume_prompt},
+                    {"role": "user", "content": f"""use the {text_resume} resume to details which are stated like name (get full name with initial if it is there), work experience, phone number, address, email id, LinkedIn id and GitHub id
+                    fetch all the technical skills and soft skills separately don't mix it from the resume {text_resume} and give the details as per instructed. If years of experience are not explicitly mentioned in the {text_resume}, calculate the total years of experience based on the dates provided in the candidate's employment history and use it for work_exp """}
+                ]
+
+                # Call the LLM API
+                response = client.chat.completions.create(
+                    model=MODEL_NAME,
+                    messages=message_resumefetch,
+                    max_tokens=1000
+                )
+                response = dict(response)
+                response_data = dict(dict(response['choices'][0])['message'])[
+            'content'].replace("\n", " ")
+                # Remove extra spaces
+                response_data = ' '.join(response_data.split())
+
+                # Remove unwanted characters from the response data
+                response_data = response_data.strip().strip('```json').strip().strip('```')
+                
+                print(f"LLM response for {filename}: {response_data}")
+                
+                # Parse the JSON data containing extracted details
+                extracted_info = json.loads(response_data)
+
+                try:
+                    for resume_detail in extracted_info['resume_details']:
+                        extracted_record = ExtractedInfo(
+                            job_id=job_id,
+                            resume_id=resume_detail['candidate_name'],
+                            name=resume_detail.get('candidate_name', 'NIL'),
+                            total_experience=resume_detail.get('work_exp', 'NIL'),
+                            phone_number=resume_detail.get('phone_number', 'NIL'),
+                            email_id=resume_detail.get('email_id', 'NIL'),
+                            address=resume_detail.get('address', 'NIL'),
+                            linkedin_id=resume_detail.get('linkedin_id', 'NIL'),
+                            github_id=resume_detail.get('github_id', 'NIL'),
+                            nationality=resume_detail.get('nationality', 'NIL'),
+                            tech_skill=resume_detail.get('technical_skills', []),
+                            behaviour_skill=resume_detail.get('soft_skills', []),
+                            date_of_birth=resume_detail.get('date_of_birth', 'NIL')
+                        )
+                        db.session.add(extracted_record)
+                    db.session.commit()
+                    print(f"Information extracted and saved for {filename}")
+                except Exception as e:
+                    print(f"Error processing {filename}: {e}")
+
+def werextract_resume_info12(app, job_id, role, resume_list):
     with app.app_context():
         resume_scores_list = ResumeScore.query.filter_by(job_id=job_id).all()
         processed_filenames = [
@@ -98,8 +165,6 @@ def extract_resume_info(app, job_id, role, resume_list):
 
         ]
 
-        client = OpenAI()
-        client.api_key = os.getenv("OPENAI_API_KEY")
 
         response = client.chat.completions.create(
             model=MODEL_NAME,
@@ -272,7 +337,7 @@ def upload_resume_to_job():
 
     try:
         uploaded_files = request.files.getlist('resume')
-
+        print("try started")
         if len(uploaded_files) > MAX_FILES:
             return jsonify({'message': f'Exceeded maximum number of files ({MAX_FILES}) allowed for upload.'}), 400
 
@@ -282,8 +347,9 @@ def upload_resume_to_job():
                 return jsonify({'message': 'No selected file'}), 400
 
             resume_filename = secure_filename(resume_file.filename)
-            resume_path = os.path.join(RESUME_FOLDER, resume_filename)
+            resume_path = os.path.join(folder_path, resume_filename)
             resume_file.save(resume_path)
+            resume_list.append(resume_filename)
 
             job = Job.query.filter_by(role=role, id=id).first()
             if not job:
@@ -292,8 +358,8 @@ def upload_resume_to_job():
             new_resume = Resume(filename=resume_filename, job_id=job.id)
             db.session.add(new_resume)
             db.session.commit()
-            resume_list.append(resume_filename)
-
+            
+        print("threat joinng to start")
         app = current_app._get_current_object()
         extract_thread = Thread(
             target=extract_resume_info, args=(app, job.id, role, resume_list))
@@ -303,7 +369,7 @@ def upload_resume_to_job():
         score_thread = Thread(target=calculate_resume_scores,
                               args=(app, job.id, mandatory_skills))
         score_thread.start()
-        print('2ndthread started')
+        print('resume extracted and thread started')
         return jsonify({'message': 'Resumes uploaded successfully and processing started.'}), 200
 
     except Exception as e:
