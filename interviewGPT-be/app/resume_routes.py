@@ -136,102 +136,31 @@ def extract_resume_info(app, job_id, role, resume_list):
                 except Exception as e:
                     print(f"Error processing {filename}: {e}")
 
-def werextract_resume_info12(app, job_id, role, resume_list):
+
+
+def wresume_details_extractw(app, role, job_id,resume_list):
     with app.app_context():
-        resume_scores_list = ResumeScore.query.filter_by(job_id=job_id).all()
-        processed_filenames = [
-            resume.resume_filename for resume in resume_scores_list]
-        text_resume = ""
+        
+        print("came into RESUME DETAIL extract fucnt")
         path = os.path.join(RESUME_FOLDER, role)
-
+        print("the filename of uploaded")
+        print(resume_list)
         for filename in resume_list:
-            # akash, keerthi
-            # if filename.endswith(".pdf") and filename not in processed_filenames:
-            file_path = os.path.join(path, filename)
-            reader = PdfReader(file_path)
-            text_resume += f"Text extracted from: {filename}\n"
-            for page in reader.pages:
-                text_resume += page.extract_text()
-                text_resume += "\n"
-            text_resume += "\n---\n"
-            print("pdf content")
-            print(text_resume)
-
-        message_resumefetch = [
-            {"role": "system", "content": extract_resume_prompt
-             },
-            {"role": "user", "content": f"""use the {text_resume} resume to details which are stated like name (get full name with inital if it is there), work experience,phone number,address,email id, linkedin id and github id
-             fetch all the techincal skills and soft skills separtely dont mix it from the resume {text_resume}  and give the details as per instructed.If years of experience are not explicitly mentioned in the {text_resume}, calculate the total years of experience based on the dates provided in the candidate's employment history and use it for work_exp """}
-
-        ]
-
-
-        response = client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=message_resumefetch,
-            max_tokens=1000
-        )
-
-        response = dict(response)
-        response_data = dict(dict(response['choices'][0])['message'])[
-            'content'].replace("\n", " ")
-        # Remove extra spaces
-        response_data = ' '.join(response_data.split())
-
-        # Remove unwanted characters from the response data
-        response_data = response_data.strip().strip('```json').strip().strip('```')
-        print("response_data")
-        print(response_data)
-        # Parse the JSON data containing extracted details
-        extracted_info = json.loads(response_data)
-
-        try:
-            for resume_detail in extracted_info['resume_details']:
-                extracted_record = ExtractedInfo(
-                    job_id=job_id,
-                    resume_id=resume_detail['candidate_name'],
-                    name=resume_detail.get('candidate_name', 'NIL'),
-                    total_experience=resume_detail.get('work_exp', 'NIL'),
-                    phone_number=resume_detail.get('phone_number', 'NIL'),
-                    email_id=resume_detail.get('email_id', 'NIL'),
-                    address=resume_detail.get('address', 'NIL'),
-                    linkedin_id=resume_detail.get('linkedin_id', 'NIL'),
-                    github_id=resume_detail.get('github_id', 'NIL'),
-                    nationality=resume_detail.get('nationality', 'NIL'),
-                    tech_skill=resume_detail.get('technical_skills', []),
-                    behaviour_skill=resume_detail.get('soft_skills', []),
-                    date_of_birth=resume_detail.get('date_of_birth', 'NIL')
-                )
-                db.session.add(extracted_record)
-            db.session.commit()
-            return jsonify({'message': 'Information extracted and saved successfully.'}), 200
-
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-
-
-def resume_details_extract(app, role, job_id):
-    with app.app_context():
-        resume_scores = ResumeScore.query.filter_by(job_id=job_id).all()
-        processed_filenames = [
-            resume.resume_filename for resume in resume_scores]
-        directory = os.path.join(RESUME_FOLDER, role)
-        text_resume = ""
-
-        for filename in os.listdir(directory):
-            if filename.endswith(".pdf") and filename not in processed_filenames:
-                file_path = os.path.join(directory, filename)
+            print("inside for loop to read the file name")
+            if filename.endswith(".pdf"):
+                file_path = os.path.join(path, filename)
                 reader = PdfReader(file_path)
-                text_resume += f"Text extracted from: {filename}\n"
+                text_resume = f"Text extracted from: {filename}\n"
                 for page in reader.pages:
                     text_resume += page.extract_text()
                     text_resume += "\n"
                 text_resume += "\n---\n"
+                print(f"Extracted text from {filename}")
 
         return text_resume
 
 
-def chatgpt_message(app, jd, job_role, text_resume, mandatory_skills):
+def wchatgpt_messagew(app, jd, job_role, text_resume, mandatory_skills):
 
     with app.app_context():
         messages = [
@@ -244,10 +173,9 @@ def chatgpt_message(app, jd, job_role, text_resume, mandatory_skills):
                 "content": user_prompt_resume_evaluation.format(text_resume=text_resume, job_role=job_role, jd=jd, mandatory_skills=mandatory_skills)}
         ]
 
-        client = OpenAI()
-        client.api_key = os.getenv("OPENAI_API_KEY")
+        
         response1 = client.chat.completions.create(
-            model="gpt-4-turbo",
+            model=MODEL_NAME,
             messages=messages,
             temperature=0,
             max_tokens=1000,
@@ -265,7 +193,7 @@ def chatgpt_message(app, jd, job_role, text_resume, mandatory_skills):
         return response_data
 
 
-def calculate_resume_scores(app, job_id, mandatory_skills):
+def wcalculate_resume_scoresw(app, job_id, mandatory_skills):
     with app.app_context():
         job = Job.query.filter_by(id=job_id).first()
 
@@ -319,6 +247,110 @@ def calculate_resume_scores(app, job_id, mandatory_skills):
         print("calcu_done")
         return jsonify({'scores': scores}), 200
 
+def resume_details_extract(app, role, filename):
+    with app.app_context():
+        path = os.path.join(RESUME_FOLDER, role)
+        file_path = os.path.join(path, filename)
+        reader = PdfReader(file_path)
+        text_resume = f"Text extracted from: {filename}\n"
+        for page in reader.pages:
+            text_resume += page.extract_text()
+            text_resume += "\n"
+        text_resume += "\n---\n"
+        print(f"Extracted text from {filename}")
+        return text_resume
+
+
+def chatgpt_message(app, jd, job_role, text_resume, mandatory_skills):
+    with app.app_context():
+        messages = [
+            {
+                "role": 'system',
+                "content": evaluate_resume_prompt
+            },
+            {
+                "role": "user",
+                "content": user_prompt_resume_evaluation.format(text_resume=text_resume, job_role=job_role, jd=jd, mandatory_skills=mandatory_skills)
+            }
+        ]
+
+        response1 = client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=messages,
+            temperature=0,
+            max_tokens=1000,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0
+        )
+        print(response1.choices[0].message)
+        response1 = dict(response1)
+        response_data = dict(dict(response1['choices'][0])['message'])[
+            'content'].replace("\n", " ")
+
+        print("knfdklfn")
+        print("text resume sendded to llm")
+
+        return response_data
+
+
+def calculate_resume_scores(app, job_id, mandatory_skills, resume_list):
+    with app.app_context():
+        job = Job.query.filter_by(id=job_id).first()
+
+        if not job:
+            return jsonify({'error': 'Job not found.'}), 404
+
+        jd = job.jd
+        role = job.role
+
+        scores = []
+
+        for filename in resume_list:
+            text_resume = resume_details_extract(app, role, filename)
+            AI_score_response = chatgpt_message(app, jd, role, text_resume, mandatory_skills)
+            AI_score_response_dict = json.loads(AI_score_response)
+            print(AI_score_response_dict)
+            print("score of resumefter all functioncall")
+
+            for resume_info in AI_score_response_dict['score']:
+                resume_filename = resume_info['resume_filename']
+                jd_match = resume_info['JD_MATCH']
+                match_status = resume_info['MATCH_STATUS']
+                matching_skills = resume_info['Matching_Skills']
+                missing_skills = resume_info['Missing_Skills']
+                candidate_name = resume_info['candidate_name']
+                experience_match = resume_info['experience_match']
+
+                new_score = ResumeScore(
+                    resume_filename=resume_filename,
+                    name=candidate_name,
+                    job_id=job_id,
+                    jd_match=jd_match,
+                    match_status=match_status,
+                    matching_skills=matching_skills,
+                    missing_skills=missing_skills,
+                    experience_match=experience_match
+                )
+                db.session.add(new_score)
+
+                scores.append({
+                    "resume_filename": resume_filename,
+                    "candidate_name": candidate_name,
+                    "JD_MATCH": jd_match,
+                    "MATCH_STATUS": match_status,
+                    "Matching_Skills": matching_skills,
+                    "Missing_Skills": missing_skills,
+                    "role": role,
+                    "jd": jd,
+                    "experience_match": experience_match
+                })
+
+            db.session.commit()
+            print(f"Information extracted and saved for {filename}")
+
+        print("All resume processing done")
+        return jsonify({'scores': scores}), 200
 
 @ats_bp.route('/upload_resume_to_job', methods=['POST'])
 def upload_resume_to_job():
@@ -367,7 +399,7 @@ def upload_resume_to_job():
         print('1stthread started')
 
         score_thread = Thread(target=calculate_resume_scores,
-                              args=(app, job.id, mandatory_skills))
+                              args=(app, job.id, mandatory_skills,resume_list))
         score_thread.start()
         print('resume extracted and thread started')
         return jsonify({'message': 'Resumes uploaded successfully and processing started.'}), 200
