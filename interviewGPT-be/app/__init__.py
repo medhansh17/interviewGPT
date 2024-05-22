@@ -21,15 +21,6 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
     db.init_app(app)
 
-    # Set up OpenAI API client
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-    if openai_api_key:
-        from openai import OpenAI
-        client = OpenAI(api_key=openai_api_key)
-        print(f"OpenAI API key loaded: {openai_api_key}")
-    else:
-        print("OpenAI API key not found in environment variables")
-
     # Import models to register them with SQLAlchemy
     with app.app_context():
         from .models import Job, Resume, ExtractedInfo, ResumeScore, Candidate, TechnicalQuestion, BehaviouralQuestion, CodingQuestion, CandidateQuestion, AssessmentAttempt, AudioTranscription, CodeResponse, TechResponse
