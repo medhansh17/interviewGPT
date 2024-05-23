@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import Header from "./Header";
 import api from "./customAxios/Axios";
 import { useNavigate, useParams } from "react-router-dom";
@@ -6,14 +6,7 @@ import { UserContext } from "../context/JobContext";
 import { setCandList, deleteCandidateByName } from "../context/JobContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import InterviewDataDisplay from "./candidateResult";
-import {
-  faTrash,
-  faEdit,
-  faTimes,
-  faSave,
-  faRedo,
-} from "@fortawesome/free-solid-svg-icons";
-import { log } from "console";
+import { faTimes, faRedo } from "@fortawesome/free-solid-svg-icons";
 import UpdateQuestionPopup from "./updateQuestionPopup";
 
 interface MyObjectType {
@@ -51,16 +44,10 @@ const RespJdDash = () => {
   const [jobDetails, setJobDetails] = useState<MyObjectType | null>(null);
   const [file, setFile] = useState<any | null>(null);
   const [Data, setData] = useState<DataItem[]>([]);
-  const [behavioralQuestions, setBehavioralQuestions] = useState<
-    BehavioralQuestion[]
-  >([]);
+  const [behavioralQuestions, setBehavioralQuestions] = useState<BehavioralQuestion[]>([]);
   const [show_Result, setshow_Result] = useState(false);
-  const [codingQuestion, setCodingQuestion] = useState<CodingQuestion | null>(
-    null
-  );
-  const [technicalQuestions, setTechnicalQuestions] = useState<
-    TechnicalQuestion[]
-  >([]);
+  const [codingQuestion, setCodingQuestion] = useState<CodingQuestion | null>(null);
+  const [technicalQuestions, setTechnicalQuestions] = useState<TechnicalQuestion[]>([]);
   const [row, setRow] = useState<any | number>(0);
   const [showFullJobDesc, setShowFullJobDesc] = useState(false);
   const [action, setAction] = useState(false);
@@ -81,27 +68,6 @@ const RespJdDash = () => {
   const [pop, setPop] = useState(false);
   const [updateStatus, setUpdateStatus] = useState(false);
   const [Resultdata, setResultData] = useState<any>(null);
-  // Function to handle candidate selection
-  // const handleCandidateSelect = async (candidateName: string, checked: boolean) => {
-  //   console.log("heeeee",candidateName)
-  //   let check;
-  //   if (checked==true){
-  //      check="true";
-  //      setSelectedCandidates(candidateName)
-  //   }else{
-  //     check="false";
-  //     setSelectedCandidates("")
-  //   }
-  //   try {
-  //     console.log("here", { name: candidateName, status: check })
-  //     const resp = await api.post("/update_resume_status", { name: candidateName, status: check });
-  //     console.log(resp);
-  //     // Handle response as needed
-  //   } catch (error) {
-  //     console.log(error);
-  //     // Handle error
-  //   }
-  // };
 
   const handleCandidateSelect = async (
     candidateName: string,
@@ -158,12 +124,9 @@ const RespJdDash = () => {
     const getCandList = async () => {
       try {
         const res = await api.get(`/get_resume_scores?job_id=${id}`);
-        console.log("API Response:", res.data);
+
         const candidateData = res.data.resume_scores;
         dispatch(setCandList(candidateData));
-
-        console.log("Candidate List:", state.candidate_list);
-        console.log("res", res);
       } catch (err: any) {
         console.log(err);
       }
@@ -173,15 +136,12 @@ const RespJdDash = () => {
 
   useEffect(() => {
     setData(state.candidate_list);
-    console.log(state.candidate_list);
   }, [state.candidate_list]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5; // Number of items per page
   const navigate = useNavigate();
-
   const fileInputRef = useRef(null);
-
   const handleBrowseClick = () => {
     if (fileInputRef.current !== null && fileInputRef.current !== undefined) {
       (fileInputRef.current as HTMLInputElement).click();
@@ -193,13 +153,10 @@ const RespJdDash = () => {
     const getCandList = async () => {
       try {
         const res = await api.get(`/get_resume_scores?job_id=${id}`);
-        console.log("API Response:", res.data);
         const candidateData = res.data.resume_scores;
         dispatch(setCandList(candidateData));
-
-        console.log("Candidate List:", state.candidate_list);
-        console.log("res", res);
       } catch (err: any) {
+        alert("Error fetching data");
         console.log(err);
       }
     };
@@ -207,8 +164,8 @@ const RespJdDash = () => {
   };
   // Calculate total number of pages
   const totalPages = Math.ceil(Data.length / itemsPerPage);
-
   // Pagination logic
+
   const handlePageChange = (page: any) => {
     setCurrentPage(page);
   };
@@ -252,7 +209,6 @@ const RespJdDash = () => {
       const resp = await api.get(
         `/delete_resume?candidate_name=${item.candidate_name}&job_id=${jobDetails?.job_id}`
       );
-      console.log(resp);
       dispatch(deleteCandidateByName(item.candidate_name));
     } catch (error) {
       console.log(error);
@@ -296,14 +252,10 @@ const RespJdDash = () => {
         no_tech_questions: numMCQ,
         no_behav_questions: numBehavioral,
       });
-      console.log("proceed", resp);
-
       if (resp.statusText == "OK") {
         setPop(true);
         setGen("");
       }
-
-      console.log("here");
       setTimeout(() => {
         handleRefresh();
       }, 1000);
@@ -314,16 +266,12 @@ const RespJdDash = () => {
 
   useEffect(() => {
     const genQuestions = async () => {
-      // console.log({ job_id:jobDetails?.job_id,candidate_name:candName})
       if (jobDetails?.job_id) {
         const resp = await api.post(
           "/fetch_candidate_questions_after_selected",
           { job_id: jobDetails?.job_id, candidate_name: candName }
         );
-        console.log("question", resp);
         setBehavioralQuestions(resp.data.Behaviour_q);
-        console.log(resp.data.Behaviour_q);
-
         setCodingQuestion(resp.data.coding_question);
         setTechnicalQuestions(resp.data.tech_questions);
       }
@@ -347,7 +295,6 @@ const RespJdDash = () => {
       console.log(error);
     }
   };
-  // Get current jobs for the current page
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentJobs = Data.slice(indexOfFirstItem, indexOfLastItem);

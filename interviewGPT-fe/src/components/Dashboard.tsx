@@ -23,8 +23,8 @@ interface DataItem {
 }
 
 const Dashboard = () => {
-  const { state, dispatch } = useContext(UserContext)!;
   const [data, setData] = useState<DataItem[]>([]);
+  const { dispatch } = useContext(UserContext)!;
   const [editableRow, setEditableRow] = useState<number | null>(null);
   const navigate = useNavigate();
   const [fullDescription, setFullDescription] = useState<boolean>(false);
@@ -38,14 +38,13 @@ const Dashboard = () => {
     const getJobList = async () => {
       try {
         const response = await api.get("/export_jobs_json");
-        dispatch(setJobList(response.data));
         setData(response.data);
       } catch (error) {
         console.log(error);
       }
     };
     getJobList();
-  }, [dispatch]);
+  }, []);
 
   // useEffect(() => {
   //   setData(state.job_list);
@@ -57,12 +56,14 @@ const Dashboard = () => {
         role: item.role,
         id: item.id,
       });
-      console.log(resp);
-      dispatch(deleteJob(item.id));
     } catch (error) {
       console.log(error);
     }
   };
+
+  /*
+  ------------------- Edit Job  -------------------
+  */
 
   const toggleEditRow = (id: number) => {
     if (editableRow === id) {
@@ -83,7 +84,6 @@ const Dashboard = () => {
         jd: item.jd,
         active: active,
       });
-      console.log(response);
     } catch (error: unknown) {
       console.log(error);
     }
@@ -150,6 +150,10 @@ const Dashboard = () => {
       prevState && fullDescriptionId === id ? false : true
     );
   };
+
+  /**
+   * Pagination
+   */
 
   const totalPages = Math.ceil(data.length / itemsPerPage);
 
