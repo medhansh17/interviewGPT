@@ -56,6 +56,10 @@ const Dashboard = () => {
         role: item.role,
         id: item.id,
       });
+      if (resp.status === 200) {
+        dispatch(deleteJob(item.id));
+        setData(data.filter((job) => job.id !== item.id));
+      }
     } catch (error) {
       console.log(error);
     }
@@ -323,42 +327,47 @@ const Dashboard = () => {
                       {editableRow === item.id ? (
                         <div className="flex items-center justify-around text-lg">
                           <div>
-                            <FontAwesomeIcon
-                              icon={faSave}
+                            <button
                               onClick={() => saveEditedRow(item)}
-                              className="mr-2 cursor-pointer "
-                              title="Save"
+                              className="cursor-pointer resp-btn "
                               style={{ color: "green" }}
-                            />
+                              title="Save"
+                            >
+                              Save
+                            </button>
                           </div>
                           <div>
-                            <FontAwesomeIcon
-                              icon={faTimes}
+                            <button
                               onClick={() => cancelEditRow()}
-                              className="cursor-pointer "
-                              title="Cancel"
-                            />
+                              className="cursor-pointer resp-btn "
+                              style={{ color: "red" }}
+                              title="Save"
+                            >
+                              Cancel
+                            </button>
                           </div>
                         </div>
                       ) : (
                         <div className="flex items-center justify-around text-lg">
                           <div>
-                            <FontAwesomeIcon
-                              icon={faEdit}
+                            <button
                               onClick={() => toggleEditRow(item.id)}
-                              className="mr-2 cursor-pointer "
+                              className="cursor-pointer resp-btn "
+                              style={{ color: "green" }}
                               title="Edit"
-                              style={{ color: "blue" }}
-                            />
+                            >
+                              Edit
+                            </button>
                           </div>
                           <div>
-                            <FontAwesomeIcon
-                              icon={faTrash}
+                            <button
                               onClick={() => deleteJobHandler(item)}
-                              className="cursor-pointer "
-                              title="Delete"
+                              className="cursor-pointer resp-btn "
                               style={{ color: "red" }}
-                            />
+                              title="Delete"
+                            >
+                              Delete
+                            </button>
                           </div>
                         </div>
                       )}

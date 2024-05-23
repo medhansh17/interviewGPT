@@ -44,10 +44,16 @@ const RespJdDash = () => {
   const [jobDetails, setJobDetails] = useState<MyObjectType | null>(null);
   const [file, setFile] = useState<any | null>(null);
   const [Data, setData] = useState<DataItem[]>([]);
-  const [behavioralQuestions, setBehavioralQuestions] = useState<BehavioralQuestion[]>([]);
+  const [behavioralQuestions, setBehavioralQuestions] = useState<
+    BehavioralQuestion[]
+  >([]);
   const [show_Result, setshow_Result] = useState(false);
-  const [codingQuestion, setCodingQuestion] = useState<CodingQuestion | null>(null);
-  const [technicalQuestions, setTechnicalQuestions] = useState<TechnicalQuestion[]>([]);
+  const [codingQuestion, setCodingQuestion] = useState<CodingQuestion | null>(
+    null
+  );
+  const [technicalQuestions, setTechnicalQuestions] = useState<
+    TechnicalQuestion[]
+  >([]);
   const [row, setRow] = useState<any | number>(0);
   const [showFullJobDesc, setShowFullJobDesc] = useState(false);
   const [action, setAction] = useState(false);
@@ -315,7 +321,7 @@ const RespJdDash = () => {
         <Header />
       </p>
       <div
-        className="container mx-auto mt-[-2rem] p-6"
+        className="max-w-[1400px] w-[95%] mx-auto mt-[-2rem] p-6"
         style={{ paddingTop: 0 }}
       >
         <div className="mb-4">
@@ -395,7 +401,7 @@ const RespJdDash = () => {
         </div>
 
         {currentJobs.length > 0 ? (
-          <div className="bg-white dark:bg-zinc-700 rounded-lg shadow overflow-hidden">
+          <div className="max-w-[1400px] min-w-fit mx-auto shadow">
             <table className="w-full">
               <thead className="bg-zinc-200 dark:bg-zinc-600">
                 <tr>
@@ -845,6 +851,7 @@ const RespJdDash = () => {
                 <label htmlFor="numBehavioral">
                   Number of Behavioral Questions:
                 </label>
+                <p className="text-sm">*Max 5</p>
               </div>
               <div className="inp-pop2">
                 <input
@@ -866,6 +873,7 @@ const RespJdDash = () => {
             <div className="mb-4 flex">
               <div className="inp-pop">
                 <label htmlFor="numMCQ">Number of MCQ Questions:</label>
+                <p className="text-sm">*Max 5</p>
               </div>
               <div className="inp-pop2">
                 <input
@@ -887,11 +895,13 @@ const RespJdDash = () => {
             <div className="mb-4 flex">
               <div className="inp-pop">
                 <label htmlFor="numMCQ">Number of Coding Questions:</label>
+                <p className="text-sm">*Max 3</p>
               </div>
               <div className="inp-pop2">
                 <input
                   type="number"
                   id="numMCQ"
+                  defaultValue={0}
                   min={0}
                   max={3}
                   value={numCoding}
