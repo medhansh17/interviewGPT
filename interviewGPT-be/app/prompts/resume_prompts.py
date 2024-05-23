@@ -17,40 +17,10 @@ IF any key values are not there, mention as "NIL", don't need explanation, just 
             "soft_skills": ["GOOD COMMUNICATION", "TEAM PLAYER"],
             "date_of_birth": "04-09-1998",
             "nationality": "Indian"
-        },
-        {
-            "candidate_name": "kishore M",
-            "work_exp": "1 YEARS",
-            "phone_number": "345678983",
-            "address": "balaji street, kerala",
-            "email_id": "kishore@GMAIL.COM",
-            "linkedin_id": "https://linkedin.com/kishore",
-            "github_id": "",
-            "technical_skills": ["C++", "Springboot", "JAVA", "REACT"],
-            "soft_skills": ["COMMUNICATION", "CRITICAL THINKER"],
-            "date_of_birth": "20-11-2000",
-            "nationality": "Indian"
         }
     ]
 }
-If only one resume is given, then give the response like below:
-{
-    "resume_details": [
-        {
-            "candidate_name": "KEERTHI GANESH M",
-            "work_exp": "3 YEARS",
-            "phone_number": "78787878787",
-            "address": "KAIALSH NAGAR TRICHY, TAMIL NADU",
-            "email_id": "KEERTHI@GMAIL.COM",
-            "linkedin_id": "",
-            "github_id": "",
-            "technical_skills": ["PYTHON", "DEVOPS", "SQL", "AI"],
-            "soft_skills": ["GOOD COMMUNICATION", "TEAM PLAYER"],
-            "date_of_birth": "04-09-1998",
-            "nationality": "Indian"
-        }
-    ]
-}
+
 """
 # Prompt for evaluating resume scores
 evaluate_resume_prompt = """
