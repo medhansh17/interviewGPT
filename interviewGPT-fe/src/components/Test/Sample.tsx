@@ -5,6 +5,7 @@ import AudioRecorder from "../audio_recorder";
 import api from "../customAxios/Axios";
 import { useNavigate } from "react-router-dom";
 import MainAssessment from "../MainAssessment";
+import New_Sidebar from "../navbar.component";
 
 const Sample: React.FC = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
@@ -51,8 +52,8 @@ const Sample: React.FC = () => {
   };
 
   return (
-    <div className="flex">
-      <MainAssessment />
+    <div className="flex h-screen">
+      <New_Sidebar />
       <div style={{ width: "-webkit-fill-available" }}>
         <div className="bg-zinc-200 dark:bg-zinc-900 p-4">
           <div className="flex justify-between items-center">

@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import MonacoEditor from "react-monaco-editor";
 import api from "../customAxios/Axios";
 import { useNavigate } from "react-router-dom";
 import MainAssessment from "../MainAssessment";
 import Timer from "../McqComp/Timer";
+import New_Sidebar from "../navbar.component";
 
 interface CodingQuestion {
   question: string;
@@ -53,10 +54,10 @@ const Code = () => {
     }
   };
   return (
-    <div className="flex ">
-      <MainAssessment />
-
-      <div style={{ width: "fit-content" }}>
+    <div className="flex h-screen">
+      {/* <New_Sidebar /> */}
+      <New_Sidebar />
+      <div className="w-fit">
         <div className="bg-zinc-200 dark:bg-zinc-900 p-4">
           <div className="flex justify-between items-center">
             <div className="text-lg font-semibold text-zinc-800 dark:text-white">
@@ -70,7 +71,7 @@ const Code = () => {
           <div className="flex ">
             <div
               className="md:w-1/3 p-4 border-r border-zinc-300 dark:border-zinc-700"
-              style={{ height: "80vh", overflowY: "scroll" }}
+              style={{ height: "100%", overflowY: "scroll" }}
             >
               <h2 className="font-bold text-lg mb-2">Question</h2>
               <p className="mb-4">{codingQuestion.question}</p>
@@ -130,7 +131,7 @@ const Code = () => {
                     automaticLayout: true, // Adjust layout automatically
                     minimap: { enabled: false }, // Disable minimap
                   }}
-                  onChange={(newValue, e) => {
+                  onChange={(newValue) => {
                     setCode(newValue); // Handle code changes if needed
                   }}
                 />

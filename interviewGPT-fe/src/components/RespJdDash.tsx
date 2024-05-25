@@ -8,6 +8,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import InterviewDataDisplay from "./candidateResult";
 import { faTimes, faRedo } from "@fortawesome/free-solid-svg-icons";
 import UpdateQuestionPopup from "./updateQuestionPopup";
+import ExampleComponent from "./multipleFileUpload";
+import { getTestQuestion } from "@/api/question";
 
 interface MyObjectType {
   jd: string | null;
@@ -197,9 +199,6 @@ const RespJdDash = () => {
       if (response.statusText === "OK") {
         alert("Successfully added");
         window.location.reload();
-        // dispatch(addCandidate(response.data))
-        //     setData(response.data.scores);
-        // setJobsData(response.data.scores);
         setFile(null);
       }
 
@@ -239,7 +238,7 @@ const RespJdDash = () => {
   };
 
   const truncateJobDescription = (description: any) => {
-    const maxLines = 5; // Maximum number of lines to display
+    const maxLines = 5;
     if (!description) return "";
 
     const lines = description.split("\n");
@@ -273,13 +272,10 @@ const RespJdDash = () => {
   useEffect(() => {
     const genQuestions = async () => {
       if (jobDetails?.job_id) {
-        const resp = await api.post(
-          "/fetch_candidate_questions_after_selected",
-          { job_id: jobDetails?.job_id, candidate_name: candName }
-        );
-        setBehavioralQuestions(resp.data.Behaviour_q);
-        setCodingQuestion(resp.data.coding_question);
-        setTechnicalQuestions(resp.data.tech_questions);
+        const resp = await getTestQuestion(candName, jobDetails?.job_id);
+        setBehavioralQuestions(resp.Behaviour_q);
+        setCodingQuestion(resp.coding_question);
+        setTechnicalQuestions(resp.tech_questions);
       }
     };
     genQuestions();
@@ -347,7 +343,9 @@ const RespJdDash = () => {
             >
               Refresh
             </button>
+            <ExampleComponent />
           </div>
+
           <div className="flex gap-[2rem]">
             <div
               className="flex w-[19rem] items-center bg-zinc-200 dark:bg-zinc-800 rounded-lg "
