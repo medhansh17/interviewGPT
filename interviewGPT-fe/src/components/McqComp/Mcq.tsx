@@ -3,6 +3,7 @@ import McqMain from "./McqMain";
 import api from "../customAxios/Axios";
 import MainAssessment from "../MainAssessment";
 import SideBar2 from "../SideBar2";
+import New_Sidebar from "../navbar.component";
 
 const Mcq = () => {
   const [canName, setCanname] = useState("");
@@ -50,11 +51,12 @@ const Mcq = () => {
     <div className="flex h-screen">
       {technicalQuestions.length > 0 && (
         <>
-          <SideBar2
+          {/* <SideBar2
             questions={technicalQuestions}
             currentIndex={currentIndex}
             setCurrentIndex={setCurrentIndex}
-          />
+          /> */}
+          <New_Sidebar />
           <McqMain
             questions={technicalQuestions}
             setCurrentIndex={setCurrentIndex}
