@@ -150,8 +150,7 @@ function Application() {
       }
       console.log("rr", response);
     } catch (error: any) {
-      console.error("Error uploading jd data:", error);
-      console.error("API Error:", error);
+      alert("Error uploading JD");
       // setError(error);
       // setTimeout(() => {
       // 	setError(null);

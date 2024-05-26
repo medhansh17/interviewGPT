@@ -10,6 +10,8 @@ import { faTimes, faRedo } from "@fortawesome/free-solid-svg-icons";
 import UpdateQuestionPopup from "./updateQuestionPopup";
 import ExampleComponent from "./multipleFileUpload";
 import { getTestQuestion } from "@/api/question";
+import GeneratedQuesPopup from "./generatedQuesPopup";
+import GenerateQuestionsPopup from "./generateQuestionsPopup";
 
 interface MyObjectType {
   jd: string | null;
@@ -50,9 +52,9 @@ const RespJdDash = () => {
     BehavioralQuestion[]
   >([]);
   const [show_Result, setshow_Result] = useState(false);
-  const [codingQuestion, setCodingQuestion] = useState<CodingQuestion | null>(
-    null
-  );
+  const [codingQuestion, setCodingQuestion] = useState<
+    CodingQuestion | undefined
+  >(undefined);
   const [technicalQuestions, setTechnicalQuestions] = useState<
     TechnicalQuestion[]
   >([]);
@@ -497,7 +499,6 @@ const RespJdDash = () => {
                               e.target.checked
                             );
                             setCanName(item.candidate_name);
-                            console.log("heeeee", item.candidate_name);
                           }}
                         />
                         {/* <input type='checkbox' checked={item.selected_status}  onChange={(e) => handleCandidateSelect(item.candidate_name, e.target.checked)} /> */}
@@ -587,136 +588,12 @@ const RespJdDash = () => {
       </div>
 
       {approval && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
-          <div
-            className="absolute bg-white dark:bg-zinc-700 rounded-lg shadow p-6 mt-6 w-full"
-            style={{
-              maxWidth: "63rem",
-              overflow: "auto",
-              msOverflowStyle: "none",
-              scrollbarWidth: "none",
-              WebkitOverflowScrolling: "touch",
-              paddingBottom: "5px",
-              maxHeight: "calc(100vh - 1rem)",
-            }}
-          >
-            {updateStatus && (
-              <UpdateQuestionPopup handleUpdate={() => console.log("Handle")} />
-            )}
-            <button
-              style={{ top: "0rem", right: "0rem" }}
-              className="absolute text-white rounded-full p-2 w-10 h-10 flex items-center justify-center"
-              onClick={() => setApproval(false)}
-            >
-              <FontAwesomeIcon icon={faTimes} style={{ color: "black" }} />
-            </button>
-            <div className="mb-8 ">
-              <h2 className="text-xl font-semibold mb-2">
-                Behavioural Questions:
-              </h2>
-              <ul className="list-disc pl-4">
-                {behavioralQuestions.map((question, index) => (
-                  <li key={index} className="relative group flex items-center">
-                    <span className="flex-grow w-[90%]">
-                      {question.b_question_text}
-                    </span>
-                    <div className="flex items-center  absolute right-0">
-                      <button onClick={() => setUpdateStatus(!updateStatus)}>
-                        <FontAwesomeIcon icon={faRedo} />
-                      </button>
-                      {/* <button className="text-gray-300 mr-2">
-                        <FontAwesomeIcon icon={faEdit} />
-                      </button>
-                      <button className="text-gray-300">
-                        <FontAwesomeIcon icon={faTrash} />
-                      </button> */}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold mb-2">
-                Technical Questions:
-              </h2>
-              {technicalQuestions.map((question, index) => (
-                <div key={index} className="mb-4 relative group">
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="w-[95%]">
-                      <span className="font-semibold">Question:</span>{" "}
-                      {question.question}
-                    </p>
-                    <div className="flex items-center  absolute right-0">
-                      {/* <button className="text-gray-300 hover:text-grey-700 mr-2">
-                        <FontAwesomeIcon icon={faEdit} />
-                      </button>
-                      <button className="text-gray-300 hover:text-grey-700">
-                        <FontAwesomeIcon icon={faTrash} />
-                      </button> */}
-                      <button>
-                        <FontAwesomeIcon icon={faRedo} />
-                      </button>
-                    </div>
-                  </div>
-                  <ul className="list-disc pl-4 w-[95%]">
-                    {Object.entries(question.options).map(([key, value]) => (
-                      <li key={key}>
-                        {key}. {value}
-                      </li>
-                    ))}
-                  </ul>
-                  <p>
-                    <span className="font-semibold">Answer:</span>{" "}
-                    {question.answer}
-                  </p>
-                </div>
-              ))}
-            </div>
-            {codingQuestion && (
-              <div className="mb-8">
-                <h2 className="text-xl font-semibold mb-2">Coding Question:</h2>
-                <p className="w-[95%]">
-                  <span className="font-semibold">Question:</span>{" "}
-                  {codingQuestion.question}
-                </p>
-                <div className="flex items-center absolute right-4">
-                  {/* <button className="text-gray-300 hover:text-grey-700 mr-2">
-                    <FontAwesomeIcon icon={faEdit} />
-                  </button>
-                  <button className="text-gray-300 hover:text-grey-700">
-                    <FontAwesomeIcon icon={faTrash} />
-                  </button> */}
-                  <button>
-                    <FontAwesomeIcon icon={faRedo} />
-                  </button>
-                </div>
-                <p>
-                  <span className="font-semibold">Sample Input:</span>{" "}
-                  {codingQuestion.sample_input}
-                </p>
-                <p>
-                  <span className="font-semibold">Sample Output:</span>{" "}
-                  {codingQuestion.sample_output}
-                </p>
-              </div>
-            )}
-
-            <div className="flex justify-between mt-4">
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 focus:outline-none"
-                onClick={() => navigate(`/online-assess/`)}
-              >
-                Approve
-              </button>
-              <button
-                className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 focus:outline-none"
-                onClick={() => setApproval(false)}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
+        <GeneratedQuesPopup
+          behavioralQuestions={behavioralQuestions}
+          codingQuestion={codingQuestion}
+          technicalQuestions={technicalQuestions}
+          onClose={() => setApproval(false)}
+        />
       )}
 
       {showSelectCandidatePopup && (
@@ -828,100 +705,11 @@ const RespJdDash = () => {
         </div>
       )}
       {showPopup && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
-          <div
-            className="relative bg-white dark:bg-zinc-700 rounded-lg shadow p-6 w-full"
-            style={{ maxWidth: "30rem" }}
-          >
-            <button
-              style={{ top: "-1rem", right: "-1rem" }}
-              className="absolute bg-blue-500 text-white rounded-full p-2 w-10 h-10 flex items-center justify-center"
-              onClick={() => setShowPopup(false)}
-            >
-              <FontAwesomeIcon icon={faTimes} />
-            </button>
-            <h2 className="text-lg font-semibold mb-4">
-              Enter Number of Questions
-            </h2>
-
-            <div className="mb-4 flex">
-              <div className="inp-pop">
-                <label htmlFor="numBehavioral">
-                  Number of Behavioral Questions:
-                </label>
-                <p className="text-sm">*Max 5</p>
-              </div>
-              <div className="inp-pop2">
-                <input
-                  type="number"
-                  id="numBehavioral"
-                  min={1}
-                  max={5}
-                  value={numBehavioral}
-                  onChange={(e) => setNumBehavioral(Number(e.target.value))}
-                  style={{
-                    border: "1px solid #ccc",
-                    width: "100%",
-                    borderRadius: "0.25rem",
-                    padding: "0.5rem",
-                  }}
-                />
-              </div>
-            </div>
-            <div className="mb-4 flex">
-              <div className="inp-pop">
-                <label htmlFor="numMCQ">Number of MCQ Questions:</label>
-                <p className="text-sm">*Max 5</p>
-              </div>
-              <div className="inp-pop2">
-                <input
-                  type="number"
-                  id="numMCQ"
-                  min={1}
-                  max={5}
-                  value={numMCQ}
-                  onChange={(e) => setNumMCQ(Number(e.target.value))}
-                  style={{
-                    border: "1px solid #ccc",
-                    borderRadius: "0.25rem",
-                    width: "100%",
-                    padding: "0.5rem",
-                  }}
-                />
-              </div>
-            </div>
-            <div className="mb-4 flex">
-              <div className="inp-pop">
-                <label htmlFor="numMCQ">Number of Coding Questions:</label>
-                <p className="text-sm">*Max 3</p>
-              </div>
-              <div className="inp-pop2">
-                <input
-                  type="number"
-                  id="numMCQ"
-                  defaultValue={0}
-                  min={0}
-                  max={3}
-                  value={numCoding}
-                  onChange={(e) => setNumCoding(Number(e.target.value))}
-                  style={{
-                    border: "1px solid #ccc",
-                    width: "100%",
-                    borderRadius: "0.25rem",
-                    padding: "0.5rem",
-                  }}
-                />
-              </div>
-            </div>
-
-            <button
-              className="bg-blue-500 text-white p-2 rounded-lg shadow"
-              onClick={handleProceed}
-            >
-              Proceed
-            </button>
-          </div>
-        </div>
+        <GenerateQuestionsPopup
+          candName={candName}
+          job_id={jobDetails?.job_id!}
+          setPop={() => setShowPopup(false)}
+        />
       )}
     </div>
   );
