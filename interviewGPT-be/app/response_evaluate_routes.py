@@ -4,11 +4,12 @@ import uuid
 from flask import Blueprint, request, jsonify
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
-from .models import db, CodeResponse, TechResponse, AudioTranscription, ResumeScore
+from .models import db, CodeResponse, TechResponse, AudioTranscription, ResumeScore,Candidate,BehaviouralQuestion
 from .prompts.response_evaluate_prompts import (
     factors, evaluate_tech_prompt, evaluate_code_prompt)
 from openai import OpenAI
-from .config import AUDIO_FOLDER
+from .config import AUDIO_FOLDER,MODEL_NAME
+
 response_evaluate_bp = Blueprint('response_evaluate', __name__)
 
 # 4 Screen
@@ -20,16 +21,16 @@ response_evaluate_bp = Blueprint('response_evaluate', __name__)
 @response_evaluate_bp.route('/blob_process_audio', methods=['POST'])
 def blob_process_audio():
     data = request.form
-    question = data.get('question')
-    candidate_name = data.get('candidate_name')
+    question_id = data.get('question_id')
+    candidate_id = data.get('candidate_id')
     job_id = data.get('job_id')
     audio_blob = request.files['audio']
 
-    if not question or not candidate_name or not job_id or not audio_blob:
+    if not question_id or not candidate_id or not job_id or not audio_blob:
         return jsonify({'error': 'Missing required parameters.'}), 400
-
-    unique_filename = f"{candidate_name}_{uuid.uuid4().hex}.wav"
-    audio_folder = os.path.join(AUDIO_FOLDER, candidate_name)
+    candidate = Candidate.query.filter_by(id=candidate_id,job_id=job_id).one()
+    unique_filename = f"{candidate.name}_{uuid.uuid4().hex}.wav"
+    audio_folder = os.path.join(AUDIO_FOLDER, candidate.name)
     if not os.path.exists(audio_folder):
         os.makedirs(audio_folder)
 
@@ -44,10 +45,14 @@ def blob_process_audio():
             response_format="text"
         )
 
+    behav=BehaviouralQuestion.query.filter_by(id=question_id,candidate_id=candidate_id).first()
+    if behav:
+       question = behav.question_text
+    
     try:
         new_transcription = AudioTranscription(
             question=question,
-            name=candidate_name,
+            name=candidate.name,
             job_id=job_id,
             audio_transcript=transcript
         )
@@ -71,7 +76,7 @@ def perform_code_assessment(question, code):
     client = OpenAI()
     client.api_key = os.getenv("OPENAI_API_KEY")
     response = client.chat.completions.create(
-        model="gpt-4",
+        model=MODEL_NAME,
         messages=message,
         max_tokens=1000
     )
@@ -88,12 +93,15 @@ def perform_code_assessment(question, code):
 def store_code_response():
     data = request.get_json()
     job_id = data.get('job_id')
-    name = data.get('candidate_name')
-    question = data.get('question')
     code = data.get('code')
+    name=data.get('candidate_name')
+    question=data.get('question')
 
+    #candidate_id = data.get('candidate_id')
+    #question_id = data.get('question_id')
     if not job_id or not name or not question or not code:
         return jsonify({'error': 'Missing required parameters.'}), 400
+
 
     assessment_response = perform_code_assessment(question, code)
 
@@ -139,7 +147,7 @@ def perform_techmcq_assessment(mcq_question):
     client = OpenAI()
     client.api_key = os.getenv("OPENAI_API_KEY")
     response = client.chat.completions.create(
-        model="gpt-4",
+        model=MODEL_NAME,
         messages=message,
 
         max_tokens=1000

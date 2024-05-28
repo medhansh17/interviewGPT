@@ -10,7 +10,7 @@ from datetime import datetime
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
 from flask import Blueprint, request, jsonify, current_app
-from .models import Job, Resume, ExtractedInfo, ResumeScore
+from .models import Job, Resume, ExtractedInfo, ResumeScore,Candidate
 from .config import RESUME_FOLDER, ARCHIVE_FOLDER, client, MODEL_NAME
 from .prompts.resume_prompts import extract_resume_prompt, evaluate_resume_prompt, user_prompt_resume_evaluation
 
@@ -21,19 +21,21 @@ ats_bp = Blueprint('ats', __name__)
 @ats_bp.route('/extracted_info', methods=['GET'])
 def get_extracted_info():
     """
-    Fetch details from the ExtractedInfo table based on candidate name and job ID.
+    Fetch details from the ExtractedInfo table based on Resume ID.
     """
-    candidate_name = request.args.get('candidate_name')
-    job_id = request.args.get('job_id')
+    
+    resume_id=request.args.get('resume_id')
+    if not resume_id:
+        return jsonify({'error': 'Resume ID are required in the query parameters'}), 400
 
-    if not candidate_name or not job_id:
-        return jsonify({'error': 'Candidate name and job ID are required in the query parameters'}), 400
-
+    # Query to fetch ExtractedInfo based on resume_id
     extracted_info = ExtractedInfo.query.filter(
-        ExtractedInfo.job_id == job_id,
-        ExtractedInfo.resume_id.ilike(candidate_name)
+        ExtractedInfo.resume_id.ilike(resume_id)
     ).first()
 
+    if not extracted_info:
+        return jsonify({'error': 'No extracted information found for the provided resume ID.'}), 404
+    
     if extracted_info:
         extracted_info_details = {
             'candidate_name': extracted_info.name,
@@ -93,7 +95,9 @@ def extract_resume_info(app, job_id, role, resume_list):
         for filename in resume_list:
             if filename.endswith(".pdf"):
                 text_resume = extract_text_from_resume(app, role, filename)
-
+                resume_record = Resume.query.filter_by(job_id=job_id,filename=filename ).first()
+                if resume_record:
+                    resume_id = resume_record.id
                 message_resumefetch = [
                     {"role": "system", "content": extract_resume_prompt},
                     {"role": "user", "content": (
@@ -120,12 +124,42 @@ def extract_resume_info(app, job_id, role, resume_list):
                 response_data = response_data.strip().strip('```json').strip().strip('```')
 
                 extracted_info = json.loads(response_data)
-
+                print(extracted_info)
+                # Extracting the candidate name
+                candidate_name = extracted_info['resume_details'][0]['candidate_name']
+                # ADD DETAILS TO CANDIDATE TABLE 
+                new_candidate=Candidate(
+                    name=candidate_name,
+                    job_id=job_id,
+                    resume_id=resume_id
+                )
+                db.session.add(new_candidate)
+                db.session.commit()
+                # Save to ResumeScore table
+                """print("inital show os records")
+                resume_score_record = ResumeScore(
+                    resume_id=resume_id,
+                    resume_filename=filename,
+                    name=candidate_name,
+                    jd_match=None,
+                    match_status=None,
+                    matching_skills=None,
+                    missing_skills=None,
+                    experience_match=None
+                )
+                            
+                            
+                db.session.add(resume_score_record)
+                db.session.commit()"""
                 try:
+                    print("inside try block")
                     for resume_detail in extracted_info['resume_details']:
+                        
+                        #candidate_name=resume_detail.get('candidate_name', 'NIL')
+                        
+                        print("inside for loop")  
                         extracted_record = ExtractedInfo(
-                            job_id=job_id,
-                            resume_id=resume_detail['candidate_name'],
+                            resume_id=resume_id,
                             name=resume_detail.get('candidate_name', 'NIL'),
                             total_experience=resume_detail.get(
                                 'work_exp', 'NIL'),
@@ -146,6 +180,7 @@ def extract_resume_info(app, job_id, role, resume_list):
                                 'date_of_birth', 'NIL')
                         )
                         db.session.add(extracted_record)
+                    print("outside the for block")
                     db.session.commit()
                 except Exception as e:
                     pass
@@ -200,6 +235,10 @@ def calculate_resume_scores(app, job_id, mandatory_skills, resume_list):
             AI_score_response = chatgpt_message(
                 app, jd, role, text_resume, mandatory_skills)
             AI_score_response_dict = json.loads(AI_score_response)
+            # To fetch resume id 
+            resume_record = Resume.query.filter_by(job_id=job_id,filename=filename ).first()
+            if resume_record:
+                resume_id = resume_record.id
 
             for resume_info in AI_score_response_dict['score']:
                 resume_filename = resume_info['resume_filename']
@@ -213,7 +252,7 @@ def calculate_resume_scores(app, job_id, mandatory_skills, resume_list):
                 new_score = ResumeScore(
                     resume_filename=resume_filename,
                     name=candidate_name,
-                    job_id=job_id,
+                    resume_id=resume_id,
                     jd_match=jd_match,
                     match_status=match_status,
                     matching_skills=matching_skills,
@@ -221,6 +260,26 @@ def calculate_resume_scores(app, job_id, mandatory_skills, resume_list):
                     experience_match=experience_match
                 )
                 db.session.add(new_score)
+                """# Check if the record exists
+                existing_score = ResumeScore.query.filter_by(
+                    resume_filename=resume_filename,
+                    name=candidate_name,
+                    job_id=job_id
+                ).first()
+                if existing_score:
+                    # Update the existing record with new details
+                    if jd_match is not None:
+                        existing_score.jd_match = jd_match
+                    if match_status is not None:
+                        existing_score.match_status = match_status
+                    if matching_skills is not None:
+                        existing_score.matching_skills = matching_skills
+                    if missing_skills is not None:
+                        existing_score.missing_skills = missing_skills
+                    if experience_match is not None:
+                        existing_score.experience_match = experience_match
+
+                    db.session.commit()"""
 
                 scores.append({
                     "resume_filename": resume_filename,
@@ -280,16 +339,17 @@ def upload_resume_to_job():
             new_resume = Resume(filename=resume_filename, job_id=job.id)
             db.session.add(new_resume)
             db.session.commit()
-
+        print(" 1st thread extrat_resume info goinf to start")
         app = current_app._get_current_object()
         extract_thread = Thread(target=extract_resume_info, args=(
             app, job.id, role, resume_list))
         extract_thread.start()
-
+        print(" 1st extrat_resume info completed")
+        print(" 2 nd thread calculate_resume_score going to start ")
         score_thread = Thread(target=calculate_resume_scores, args=(
             app, job.id, mandatory_skills, resume_list))
         score_thread.start()
-
+        print(" 2nd thread calculate_resume_score info completed")
         return jsonify({'message': 'Resumes uploaded successfully and processing started.'}), 200
 
     except Exception as e:
@@ -311,7 +371,8 @@ def get_resume_scores():
     if not job_id:
         return jsonify({'error': 'Job ID is a required parameter.'}), 400
 
-    query = ResumeScore.query.filter_by(job_id=job_id)
+    # Query to fetch ResumeScore based on job_id
+    query = db.session.query(ResumeScore).join(Resume).filter(Resume.job_id == job_id)
 
     if sort_by in ['status', 'jd_match']:
         if sort_order == 'desc':
@@ -323,6 +384,7 @@ def get_resume_scores():
     resume_scores = pagination.items
 
     scores_list = [{
+        "resume_id":score.resume_id,
         "resume_filename": score.resume_filename,
         "candidate_name": score.name,
         "JD_MATCH": score.jd_match,
@@ -343,52 +405,37 @@ def get_resume_scores():
         'per_page': pagination.per_page
     }), 200
 
-
 @ats_bp.route('/delete_resume', methods=['GET'])
 def delete_resume():
     """
-    Delete a resume and associated data based on the candidate name and job ID.
+    Delete a resume and associated data based on the resume ID.
     """
-    candidate_name = request.args.get('candidate_name')
-    job_id = request.args.get('job_id')
+    resume_id = request.args.get('resume_id')
 
-    if not candidate_name or not job_id:
-        return jsonify({'error': 'Candidate name and job ID are required parameters.'}), 400
+    if not resume_id:
+        return jsonify({'error': 'Resume ID is a required parameter.'}), 400
 
-    job = Job.query.filter_by(id=job_id).first()
-    role = job.role if job else None
+    resume = Resume.query.filter_by(id=resume_id).first()
+    if not resume:
+        return jsonify({'error': 'No resume found for the provided resume ID.'}), 404
+
+    role = resume.job.role if resume.job else None
 
     try:
-        num_deleted_info = ExtractedInfo.query.filter(
-            func.lower(ExtractedInfo.name) == func.lower(candidate_name),
-            ExtractedInfo.job_id == job_id
-        ).delete()
+        # Archive the resume file
+        archive_role_folder = os.path.join(ARCHIVE_FOLDER, role)
+        if not os.path.exists(archive_role_folder):
+            os.makedirs(archive_role_folder)
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        new_filename = f"{resume.filename}_{timestamp}.pdf"
+        file_to_archive_path = os.path.join(archive_role_folder, new_filename)
+        shutil.move(os.path.join(RESUME_FOLDER, role, resume.filename), file_to_archive_path)
 
-        resume_scores = ResumeScore.query.filter(
-            func.lower(ResumeScore.name) == func.lower(candidate_name),
-            ResumeScore.job_id == job_id
-        ).all()
-
-        for score in resume_scores:
-            resume = Resume.query.filter_by(
-                filename=score.resume_filename, job_id=job_id
-            ).first()
-            if resume:
-                archive_role_folder = os.path.join(ARCHIVE_FOLDER, role)
-                if not os.path.exists(archive_role_folder):
-                    os.makedirs(archive_role_folder)
-                timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-                new_filename = f"{resume.filename}_{timestamp}.pdf"
-                file_to_archive_path = os.path.join(
-                    archive_role_folder, new_filename)
-                shutil.move(os.path.join(RESUME_FOLDER, role,
-                            resume.filename), file_to_archive_path)
-                db.session.delete(resume)
-
-            db.session.delete(score)
-
+        # Delete the resume record
+        db.session.delete(resume)
         db.session.commit()
-        return jsonify({'message': f'Resume deleted successfully. {num_deleted_info} records deleted from ExtractedInfo table.'}), 200
+
+        return jsonify({'message': 'Resume and associated data deleted successfully.'}), 200
 
     except IntegrityError:
         db.session.rollback()
@@ -397,25 +444,23 @@ def delete_resume():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
-
-
+    
 @ats_bp.route('/update_resume_status', methods=['POST'])
 def update_resume_status():
     data = request.get_json()
-    name = data.get('name')
+    resume_id = data.get('resume_id')
     status = data.get('status')  # 'True' or 'False'
 
-    if name is None or status is None:
-        return jsonify({'error': 'Candidate name and status are required fields.'}), 400
+    if resume_id is None or status is None:
+        return jsonify({'error': 'Resume ID and status are required fields.'}), 400
 
     status_bool = status.lower() == 'true'
 
-    resume_score = ResumeScore.query.filter(
-        func.lower(ResumeScore.name) == func.lower(name)).first()
+    resume_score = ResumeScore.query.filter_by(resume_id=resume_id).first()
     if resume_score is None:
         return jsonify({'error': 'Resume score record not found.'}), 404
 
     resume_score.selected_status = status_bool
     db.session.commit()
 
-    return jsonify({'message': f'Resume status updated to {status_bool} for candidate {name}.'}), 200
+    return jsonify({'message': f'Resume status updated to {status_bool} for Resume ID {resume_id}.'}), 200

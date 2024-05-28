@@ -109,7 +109,7 @@ def edit_job(job_id):
     """
     new_role = request.json.get('role')
     new_jd = request.json.get('jd')
-    new_status = request.json.get('status')
+    new_status = request.json.get('active')
 
     # Check if at least one field to update is provided
     if new_role is None and new_jd is None and new_status is None:
@@ -126,7 +126,7 @@ def edit_job(job_id):
         job.jd = new_jd
     if new_status is not None:
         job.active = new_status
-
+    
     db.session.commit()
     return jsonify({'message': 'Job details updated successfully'}), 200
 
@@ -148,11 +148,7 @@ def delete_job():
         return jsonify({'message': 'Job not found.'}), 404
 
     try:
-        # Delete related data from other tables
-        ExtractedInfo.query.filter_by(job_id=job_id).delete()
-        ResumeScore.query.filter_by(job_id=job_id).delete()
-        Resume.query.filter_by(job_id=job_id).delete()
-
+        # Deleting the job will automatically delete related data due to cascade settings
         db.session.delete(job)
         db.session.commit()
 

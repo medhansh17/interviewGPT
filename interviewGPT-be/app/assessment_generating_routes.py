@@ -4,10 +4,10 @@ from flask import Blueprint, request, jsonify, current_app
 from threading import Thread
 from sqlalchemy import func
 from openai import OpenAI
-from .models import Job, Candidate, TechnicalQuestion, BehaviouralQuestion, CodingQuestion, CandidateQuestion, AssessmentAttempt, ResumeScore, ExtractedInfo
+from .models import Job, Candidate, TechnicalQuestion, BehaviouralQuestion, CodingQuestion, CandidateQuestion, ResumeScore, ExtractedInfo
 from . import db
 from .prompts.assessment_prompts import tech_question_mcq_prompt, behaviour_question_prompt, coding_question_prompt, tech_question_mcq_prompt, behaviour_question_prompt, coding_question_prompt
-
+from .config import MODEL_NAME
 assessment_bp = Blueprint('assessment', __name__)
 
 # QUESTION GENERATION
@@ -17,7 +17,7 @@ assessment_bp = Blueprint('assessment', __name__)
 def tech_question_mcq(jd13, no_tech_questions, Tech_skills):
     message = [
         {"role": "system", "content": tech_question_mcq_prompt},
-        {"role": "user", "content": f"""always manadotry to Generate {no_tech_questions} technical question, the difficulty level should be medium to hard, should not be easy questions,even question should not repeat.
+        {"role": "user", "content": f"""always mandatory to Generate {no_tech_questions} technical question, the difficulty level should be medium to hard, should not be easy questions,even question should not repeat.
                 important information, options sshould be too hard, so that candiate can get confuse easily with other choices.
                 Questions should be entirely based on job description {jd13} and candiate technical skills found from {Tech_skills}.
                 """}
@@ -25,7 +25,7 @@ def tech_question_mcq(jd13, no_tech_questions, Tech_skills):
     client = OpenAI()
     client.api_key = os.getenv("OPENAI_API_KEY")
     tech_response = client.chat.completions.create(
-        model="gpt-4-turbo",
+        model=MODEL_NAME,
         messages=message,
         max_tokens=1000
     )
@@ -41,12 +41,12 @@ def tech_question_mcq(jd13, no_tech_questions, Tech_skills):
 def behaviour_questions(no_behav_questions, behav_skills):
     message = [
         {"role": "system", "content": behaviour_question_prompt},
-        {"role": "user", "content": f"always manadotry to Generate {no_behav_questions} behaivour questions not more than that,and based on behaviour skills which candidate have {behav_skills}, if they dont have,give a question by your choice.ie soft skill question"}
+        {"role": "user", "content": f"always mandatory to Generate {no_behav_questions} behaivour questions not more than that,and based on behaviour skills which candidate have {behav_skills}, if they dont have,give a question by your choice.ie soft skill question"}
     ]
     client = OpenAI()
     client.api_key = os.getenv("OPENAI_API_KEY")
     behav_response = client.chat.completions.create(
-        model="gpt-4-turbo",
+        model=MODEL_NAME,
         messages=message,
         max_tokens=1000
     )
@@ -59,15 +59,15 @@ def behaviour_questions(no_behav_questions, behav_skills):
     return behav_response
 
 
-def coding_question_generate():
+def coding_question_generate(no_code_questions):
     message = [
         {"role": "system", "content": coding_question_prompt},
-        {"role": "user", "content": "Generate coding question, questions should not repeat."}
+        {"role": "user", "content": f"always mandatory to Generate {no_code_questions} number of coding question, questions should not repeat."}
     ]
     client = OpenAI()
     client.api_key = os.getenv("OPENAI_API_KEY")
     coding_response = client.chat.completions.create(
-        model="gpt-4-turbo",
+        model=MODEL_NAME,
         messages=message,
         max_tokens=1000
     )
@@ -80,58 +80,43 @@ def coding_question_generate():
     return coding_response
 
 
-def save_assessment_to_db(job_id, role, candidate_name, tech_questions, behaviour_questions, coding_question, version_number):
+def save_assessment_to_db(job_id, role, candidate_id, tech_questions, behaviour_questions, coding_questions):
     job = Job.query.get(job_id)
     if not job:
         return jsonify({'error': 'Invalid job ID.'}), 400
     print("save assesmnet to db fucnstatred")
-    candidate = Candidate.query.filter_by(name=candidate_name).first()
-    if not candidate:
-        version_number = 1
-        candidate = Candidate(name=candidate_name,
-                              job_id=job_id, version_number=version_number)
-        db.session.add(candidate)
-        db.session.commit()
-    else:
-        candidate.version_number += 1
-        db.session.commit()
+    candidate = Candidate.query.filter_by(id=candidate_id).first()
 
     for question in tech_questions:
         tech_question = TechnicalQuestion(question_text=question['question'], options=json.dumps(
-            question['options']), correct_answer=question['answer'], job_id=job_id, name=candidate_name, version_number=version_number)
+            question['options']), correct_answer=question['answer'],candidate_id=candidate_id)
         db.session.add(tech_question)
         db.session.commit()
-        candidate_question = CandidateQuestion(candidate_id=candidate.id, question_type='technical',
-                                               question_id=tech_question.id, job_id=job_id, name=candidate_name, version_number=version_number)
+        candidate_question = CandidateQuestion(candidate_id=candidate_id, question_type='technical')
         db.session.add(candidate_question)
 
     for question in behaviour_questions:
         behav_question = BehaviouralQuestion(
-            question_text=question['b_question_text'], job_id=job_id, name=candidate_name, version_number=version_number)
+            question_text=question['b_question_text'],candidate_id=candidate_id)
         db.session.add(behav_question)
         db.session.commit()
-        candidate_question = CandidateQuestion(candidate_id=candidate.id, question_type='behavioural',
-                                               question_id=behav_question.id, job_id=job_id, name=candidate_name, version_number=version_number)
+        candidate_question = CandidateQuestion(candidate_id=candidate_id, question_type='behavioural')
         db.session.add(candidate_question)
 
-    coding_question = CodingQuestion(question_text=coding_question['question'], sample_input=coding_question['sample_input'],
-                                     sample_output=coding_question['sample_output'], job_id=job_id, name=candidate_name, version_number=version_number)
-    db.session.add(coding_question)
-    db.session.commit()
-    candidate_question = CandidateQuestion(candidate_id=candidate.id, question_type='coding',
-                                           question_id=coding_question.id, job_id=job_id, name=candidate_name, version_number=version_number)
-    db.session.add(candidate_question)
-
-    assessment_attempt = AssessmentAttempt(
-        candidate_id=candidate.id, job_id=job_id, version_number=version_number)
-    db.session.add(assessment_attempt)
+    for question in coding_questions:
+        code_question = CodingQuestion(question_text=question['question'], sample_input=question['sample_input'],
+                                     sample_output=question['sample_output'],candidate_id=candidate_id)
+        db.session.add(code_question)
+        db.session.commit()
+        candidate_question = CandidateQuestion(candidate_id=candidate.id, question_type='coding')
+        db.session.add(candidate_question)
 
     db.session.commit()
     print("asved successfully")
     return jsonify({'message': 'Assessment data saved successfully.'}), 200
 
 
-def generate_and_save_assessment(app, job_id, candidate_name, no_tech_questions, no_behav_questions, resume_score_id):
+def generate_and_save_assessment(app, job_id, no_tech_questions, no_behav_questions,no_code_questions, resume_score_id,resume_id):
     with app.app_context():
         try:
             print("entered genrate and save assessment")
@@ -148,35 +133,16 @@ def generate_and_save_assessment(app, job_id, candidate_name, no_tech_questions,
             job = Job.query.get(job_id)
             jd = job.jd
             role = job.role
+            # To fetch candidate id based on resume id 
+            candidate = Candidate.query.filter_by(resume_id=resume_id).one()
+            candidate_id = candidate.id
+            TechnicalQuestion.query.filter(TechnicalQuestion.candidate_id == candidate_id).delete()
+            BehaviouralQuestion.query.filter(BehaviouralQuestion.candidate_id == candidate_id).delete()
+            CodingQuestion.query.filter(CodingQuestion.candidate_id == candidate_id).delete()
 
-            candidate_name_formatted = candidate_name.lower().replace(" ", "")
-            TechnicalQuestion.query.filter(
-                func.lower(func.replace(TechnicalQuestion.name,
-                           " ", "")) == candidate_name_formatted,
-                TechnicalQuestion.job_id == job_id
-            ).delete()
-            BehaviouralQuestion.query.filter(
-                func.lower(func.replace(BehaviouralQuestion.name,
-                           " ", "")) == candidate_name_formatted,
-                BehaviouralQuestion.job_id == job_id
-            ).delete()
-            CodingQuestion.query.filter(
-                func.lower(func.replace(CodingQuestion.name, " ", "")
-                           ) == candidate_name_formatted,
-                CodingQuestion.job_id == job_id
-            ).delete()
             db.session.commit()
 
-            candidate_info = ExtractedInfo.query.filter_by(job_id=job_id).filter(func.lower(
-                func.replace(ExtractedInfo.name, " ", "")) == candidate_name_formatted).first()
-            existing_candidate = Candidate.query.filter(func.lower(func.replace(
-                Candidate.name, " ", "")) == candidate_name_formatted).filter_by(job_id=job_id).first()
-            if existing_candidate:
-                existing_version_number = db.session.query(func.max(
-                    Candidate.version_number)).filter_by(name=candidate_name, job_id=job_id).scalar()
-                version_number = existing_version_number + 1 if existing_version_number else 1
-            else:
-                version_number = 1
+            candidate_info = ExtractedInfo.query.filter_by(resume_id=resume_id).one()
 
             if candidate_info:
                 technical_skills = candidate_info.tech_skill
@@ -186,20 +152,20 @@ def generate_and_save_assessment(app, job_id, candidate_name, no_tech_questions,
                     jd, no_tech_questions, technical_skills)
                 question_behav = behaviour_questions(
                     no_behav_questions, behavioral_skills)
-                question_coding = coding_question_generate()
+                question_coding = coding_question_generate(no_code_questions)
                 print("every type of questio is completed")
                 tech_questions_json = json.loads(
                     question_tech).get('tech_questions', [])
                 behaviour_questions_json = json.loads(
                     question_behav).get('Behaviour_q', [])
                 coding_question_json = json.loads(
-                    question_coding).get('coding_question', {})
+                    question_coding).get('coding_question', [])
 
-                save_assessment_to_db(job_id, role, candidate_name, tech_questions_json,
-                                      behaviour_questions_json, coding_question_json, version_number)
+                save_assessment_to_db(job_id, role, candidate_id, tech_questions_json,
+                                      behaviour_questions_json, coding_question_json)
                 resume_score.status = 'assessment_generated'
                 db.session.commit()
-                print("save to db can heck now")
+                print("save to db can check now")
             else:
                 resume_score.status = 'candidate_info_not_found'
                 db.session.commit()
@@ -216,16 +182,18 @@ def CHECK_Auto_assessment():
     try:
         data = request.get_json()
         job_id = data.get('job_id')
-        candidate_name = data.get('candidate_name')
+        resume_id = data.get('resume_id')
         no_tech_questions = data.get('no_tech_questions')
         no_behav_questions = data.get('no_behav_questions')
+        no_code_question=data.get('no_code_question')
         print("check assesmet started")
-        if not job_id or not candidate_name:
-            return jsonify({'error': 'Job ID and candidate name are required parameters.'}), 400
+        if not job_id or not resume_id:
+            return jsonify({'error': 'Job ID and Resume ID  are required parameters.'}), 400
 
-        candidate_name_formatted = candidate_name.lower().replace(" ", "")
-        resume_score = ResumeScore.query.filter_by(job_id=job_id).filter(func.lower(
-            func.replace(ResumeScore.name, " ", "")) == candidate_name_formatted).first()
+        #candidate_name_formatted = candidate_name.lower().replace(" ", "")
+        #resume_score = ResumeScore.query.filter_by(job_id=job_id).filter(func.lower(
+            #func.replace(ResumeScore.name, " ", "")) == candidate_name_formatted).first()
+        resume_score = ResumeScore.query.filter_by(resume_id=resume_id).first()
 
         if resume_score:
             resume_score.status = 'generating_assessment'
@@ -233,7 +201,7 @@ def CHECK_Auto_assessment():
             print("thread fucntionis called")
             app = current_app._get_current_object()
             thread = Thread(target=generate_and_save_assessment, args=(
-                app, job_id, candidate_name, no_tech_questions, no_behav_questions, resume_score.id))
+                app, job_id, no_tech_questions, no_behav_questions,no_code_question,resume_score.id,resume_score.resume_id))
 
             thread.start()
 
@@ -248,24 +216,22 @@ def CHECK_Auto_assessment():
 @assessment_bp.route('/fetch_candidate_questions_after_selected', methods=['POST'])
 def fetch_candidate_questions():
     data = request.get_json()
-    candidate_name = data.get('candidate_name')
+    resume_id = data.get('resume_id')
     job_id = data.get('job_id')
 
-    if not candidate_name or not job_id:
-        return jsonify({'error': 'Candidate name and job_id are required parameters.'}), 400
+    if not resume_id or not job_id:
+        return jsonify({'error': 'Resume ID and job_id are required parameters.'}), 400
 
-    normalized_candidate_name = candidate_name.replace(" ", "").lower().strip()
-    candidate = Candidate.query.filter(func.lower(func.replace(Candidate.name, " ", "")) == normalized_candidate_name,
-                                       Candidate.job_id == job_id).order_by(Candidate.version_number.desc()).first()
+    
+    candidate = Candidate.query.filter_by(resume_id=resume_id,job_id=job_id).first()
 
     if not candidate:
         return jsonify({'error': 'Candidate not found for the given job_id.'}), 404
 
-    version_number = candidate.version_number
+    
 
     technical_questions = []
-    for question in candidate.job.technical_questions:
-        if question.version_number == version_number and question.name.replace(" ", "").lower().strip() == normalized_candidate_name and question.job_id == job_id:
+    for question in candidate.technical_questions:
             technical_questions.append({
                 'question': question.question_text,
                 'options': json.loads(question.options),
@@ -274,27 +240,25 @@ def fetch_candidate_questions():
             })
 
     behavioural_questions = []
-    for question in candidate.job.behavioural_questions:
-        if question.version_number == version_number and question.name.replace(" ", "").lower().strip() == normalized_candidate_name and question.job_id == job_id:
+    for question in candidate.behavioural_questions:
             behavioural_questions.append({
                 'b_question_id': question.id,
                 'b_question_text': question.question_text
             })
 
-    coding_question = {}
-    if candidate.job.coding_questions:
-        for coding_question_data in candidate.job.coding_questions:
-            if coding_question_data.version_number == version_number and coding_question_data.name.replace(" ", "").lower().strip() == normalized_candidate_name and coding_question_data.job_id == job_id:
-                coding_question = {
-                    'question': coding_question_data.question_text,
-                    'sample_input': coding_question_data.sample_input,
-                    'sample_output': coding_question_data.sample_output,
-                    'coding_ques_id': coding_question_data.id
-                }
-                break
+    coding_questions = []
+    for question in candidate.coding_questions:
+            coding_questions.append({
+                'question': question.question_text,
+                'sample_input': question.sample_input,
+                'sample_output': question.sample_output,
+                'coding_ques_id': question.id
+            })
+
+    
 
     return jsonify({
         'tech_questions': technical_questions,
         'Behaviour_q': behavioural_questions,
-        'coding_question': coding_question
+        'coding_question': coding_questions
     }), 200

@@ -1,35 +1,37 @@
+### new models.py
 import uuid
+from datetime import datetime,timezone
 from . import db
 
-
 class Job(db.Model):
-    id = db.Column(db.String(36), primary_key=True,
-                   default=lambda: str(uuid.uuid4()))
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     role = db.Column(db.String(100), nullable=False)
     jd = db.Column(db.Text, nullable=False)
-    resumes = db.relationship('Resume', backref='job', lazy=True)
     active = db.Column(db.Boolean, default=True, nullable=False)
+    resumes = db.relationship('Resume', backref='job', cascade='all, delete')
+    candidates = db.relationship('Candidate', backref='job', cascade='all, delete')
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     def __repr__(self):
         return f'<Job {self.role}>'
 
-
 class Resume(db.Model):
-    id = db.Column(db.String(36), primary_key=True,
-                   default=lambda: str(uuid.uuid4()))
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     filename = db.Column(db.String(100), nullable=False)
     job_id = db.Column(db.String, db.ForeignKey('job.id'), nullable=False)
+    extracted_info = db.relationship('ExtractedInfo', backref='resume', cascade='all, delete')
+    resume_scores = db.relationship('ResumeScore', backref='resume', cascade='all, delete')
+    candidates = db.relationship('Candidate', backref='resume', cascade='all, delete')
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     def __repr__(self):
         return f'<Resume {self.filename}>'
 
-
 class ExtractedInfo(db.Model):
-    id = db.Column(db.String(36), primary_key=True,
-                   default=lambda: str(uuid.uuid4()))
-    job_id = db.Column(db.String, db.ForeignKey('job.id'), nullable=False)
-    resume_id = db.Column(db.String, db.ForeignKey(
-        'resume.id'), nullable=False)
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    resume_id = db.Column(db.String, db.ForeignKey('resume.id'), nullable=False)
     name = db.Column(db.String(100))
     total_experience = db.Column(db.String(50))
     phone_number = db.Column(db.String(30))
@@ -41,12 +43,12 @@ class ExtractedInfo(db.Model):
     tech_skill = db.Column(db.JSON)
     behaviour_skill = db.Column(db.JSON)
     date_of_birth = db.Column(db.Text)
-
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class ResumeScore(db.Model):
-    id = db.Column(db.String(36), primary_key=True,
-                   default=lambda: str(uuid.uuid4()))
-    job_id = db.Column(db.String, db.ForeignKey('job.id'), nullable=False)
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    resume_id = db.Column(db.String, db.ForeignKey('resume.id'), nullable=False)
     resume_filename = db.Column(db.Text)
     name = db.Column(db.String(100))
     jd_match = db.Column(db.String(10), nullable=False)
@@ -57,102 +59,85 @@ class ResumeScore(db.Model):
     assessment_status = db.Column(db.Integer, nullable=False, default=0)
     experience_match = db.Column(db.Integer, nullable=False)
     status = db.Column(db.String(100))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     def __repr__(self):
         return f'<ResumeScore {self.id}>'
 
-
 class Candidate(db.Model):
-    id = db.Column(db.String(36), primary_key=True,
-                   default=lambda: str(uuid.uuid4()))
+    __tablename__ = 'candidate'
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = db.Column(db.String(255), nullable=False)
     job_id = db.Column(db.String, db.ForeignKey('job.id'), nullable=False)
-    job = db.relationship('Job', backref=db.backref('candidates', lazy=True))
-    version_number = db.Column(db.Integer, default=1, nullable=False)
-
+    resume_id = db.Column(db.String, db.ForeignKey('resume.id'), nullable=False)
+    technical_questions = db.relationship('TechnicalQuestion', backref='candidate', cascade='all, delete')
+    behavioural_questions = db.relationship('BehaviouralQuestion', backref='candidate', cascade='all, delete')
+    coding_questions = db.relationship('CodingQuestion', backref='candidate', cascade='all, delete')
+    candidate_questions = db.relationship('CandidateQuestion', backref='candidate', cascade='all, delete')
+    audio_transcriptions = db.relationship('AudioTranscription', backref='candidate', cascade='all, delete')
+    code_responses = db.relationship('CodeResponse', backref='candidate', cascade='all, delete')
+    tech_responses = db.relationship('TechResponse', backref='candidate', cascade='all, delete')
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class TechnicalQuestion(db.Model):
-    id = db.Column(db.String(36), primary_key=True,
-                   default=lambda: str(uuid.uuid4()))
+    __tablename__ = 'technical_question'
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     question_text = db.Column(db.Text, nullable=False)
     options = db.Column(db.Text, nullable=False)
     correct_answer = db.Column(db.String(255), nullable=False)
-    job_id = db.Column(db.String, db.ForeignKey('job.id'), nullable=False)
-    job = db.relationship('Job', backref=db.backref(
-        'technical_questions', lazy=True))
-    version_number = db.Column(db.Integer, default=1, nullable=False)
-    name = db.Column(db.String(255), nullable=False)
-
+    candidate_id = db.Column(db.String, db.ForeignKey('candidate.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class BehaviouralQuestion(db.Model):
-    id = db.Column(db.String(36), primary_key=True,
-                   default=lambda: str(uuid.uuid4()))
+    __tablename__ = 'behavioural_question'
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     question_text = db.Column(db.Text, nullable=False)
-    job_id = db.Column(db.String, db.ForeignKey('job.id'), nullable=False)
-    job = db.relationship('Job', backref=db.backref(
-        'behavioural_questions', lazy=True))
-    version_number = db.Column(db.Integer, default=1, nullable=False)
-    name = db.Column(db.String(255), nullable=False)
-
+    candidate_id = db.Column(db.String, db.ForeignKey('candidate.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class CodingQuestion(db.Model):
-    id = db.Column(db.String(36), primary_key=True,
-                   default=lambda: str(uuid.uuid4()))
+    __tablename__ = 'coding_question'
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     question_text = db.Column(db.Text, nullable=False)
     sample_input = db.Column(db.Text, nullable=False)
     sample_output = db.Column(db.Text, nullable=False)
-    job_id = db.Column(db.String, db.ForeignKey('job.id'), nullable=False)
-    job = db.relationship('Job', backref=db.backref(
-        'coding_questions', lazy=True))
-    version_number = db.Column(db.Integer, default=1, nullable=False)
-    name = db.Column(db.String(255), nullable=False)
-
+    candidate_id = db.Column(db.String, db.ForeignKey('candidate.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class CandidateQuestion(db.Model):
-    id = db.Column(db.String(36), primary_key=True,
-                   default=lambda: str(uuid.uuid4()))
-    candidate_id = db.Column(db.String, db.ForeignKey(
-        'candidate.id'), nullable=False)
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    candidate_id = db.Column(db.String, db.ForeignKey('candidate.id'), nullable=False)
     question_type = db.Column(db.String(50), nullable=False)
-    question_id = db.Column(db.String(36), nullable=False)
-    job_id = db.Column(db.String, db.ForeignKey('job.id'), nullable=False)
-    job = db.relationship('Job', backref=db.backref(
-        'candidate_questions', lazy=True))
-    version_number = db.Column(db.Integer, default=1, nullable=False)
-    name = db.Column(db.String(255), nullable=False)
-
-
-class AssessmentAttempt(db.Model):
-    id = db.Column(db.String(36), primary_key=True,
-                   default=lambda: str(uuid.uuid4()))
-    candidate_id = db.Column(db.String, db.ForeignKey(
-        'candidate.id'), nullable=False)
-    job_id = db.Column(db.String, db.ForeignKey('job.id'), nullable=False)
-    job = db.relationship('Job', backref=db.backref(
-        'assessment_attempts', lazy=True))
-    version_number = db.Column(db.Integer, default=1, nullable=False)
-
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class AudioTranscription(db.Model):
-    id = db.Column(db.String(36), primary_key=True,
-                   default=lambda: str(uuid.uuid4()))
+    __tablename__ = 'audio_transcription'
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    question_id = db.Column(db.String, db.ForeignKey('behavioural_question.id'), nullable=False)
     question = db.Column(db.String(255))
-    name = db.Column(db.String(255), nullable=False)
-    job_id = db.Column(db.String, db.ForeignKey('job.id'), nullable=False)
+    candidate_id = db.Column(db.String, db.ForeignKey('candidate.id'), nullable=False)
     audio_transcript = db.Column(db.Text)
-
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class CodeResponse(db.Model):
-    id = db.Column(db.String(36), primary_key=True,
-                   default=lambda: str(uuid.uuid4()))
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    question_id = db.Column(db.String, db.ForeignKey('coding_question.id'), nullable=False)
     code_response = db.Column(db.JSON, nullable=False)
-    job_id = db.Column(db.String, nullable=False)
-    name = db.Column(db.String(255), nullable=False)
-
+    candidate_id = db.Column(db.String, db.ForeignKey('candidate.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class TechResponse(db.Model):
-    id = db.Column(db.String(36), primary_key=True,
-                   default=lambda: str(uuid.uuid4()))
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    question_id = db.Column(db.String, db.ForeignKey('technical_question.id'), nullable=False)
     tech_response = db.Column(db.JSON, nullable=False)
-    job_id = db.Column(db.String, nullable=False)
-    name = db.Column(db.String(255), nullable=False)
+    candidate_id = db.Column(db.String, db.ForeignKey('candidate.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))

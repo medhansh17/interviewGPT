@@ -23,7 +23,7 @@ def create_app(config_class=Config):
 
     # Import models to register them with SQLAlchemy
     with app.app_context():
-        from .models import Job, Resume, ExtractedInfo, ResumeScore, Candidate, TechnicalQuestion, BehaviouralQuestion, CodingQuestion, CandidateQuestion, AssessmentAttempt, AudioTranscription, CodeResponse, TechResponse
+        from .models import Job, Resume, ExtractedInfo, ResumeScore, Candidate, TechnicalQuestion, BehaviouralQuestion, CodingQuestion, CandidateQuestion, AudioTranscription, CodeResponse, TechResponse
         db.create_all()
 
         # Import blueprints

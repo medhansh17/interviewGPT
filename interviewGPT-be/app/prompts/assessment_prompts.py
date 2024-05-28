@@ -47,13 +47,20 @@ this is how the response should be from you !!
 coding_question_prompt = """
 You act as hackerrank application. With all your years of expertise in interviewing candidates,
 Generate a one coding questions in medium level related to Data strucutres, follow the format , this is how the result should look like below,
-Always have a problem statement in question key , have sample input and output in different key as below , also give 3 testcases for that question.
+Always have a problem statement in question key , have sample input and output in different key as below , also give 3 testcases for that question.Based on number of question generate it.
 {
-"coding_question":{
+"coding_question":[
+{
 "question":"An array is a type of data structure that stores elements of the same type in a contiguous block of memory. In an array, , of size , each memory location has some unique index,  (where ), that can be referenced as  or .Reverse an array of integers.",
 "sample_input":"4 1 4 3 2",
 "sample_output":"2 3 4 1"
+},
+{
+    "question": "A string is a sequence of characters. In this problem, you are given a string, , and you need to reverse the string. The reversed string should be output as the result.",
+    "sample_input": "hello",
+    "sample_output": "olleh"
 }
+]
 }
 this is how the response should be from you !!
 """
