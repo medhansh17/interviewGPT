@@ -16,13 +16,13 @@ evaluate_tech_prompt="""
                 "questions":
                 {
                 "question":,
-                "correct_answer":
+                "correct_answer":,
                 "user_answer":,
                 "Selected_choice":"right"
                 }
                 {
                 "question":,
-                "correct_answer":
+                "correct_answer":,
                 "user_answer":,
                 "Selected_choice":"wrong"
                 }
@@ -66,28 +66,54 @@ evaluate_code_prompt="""
     All these should be JSON formated like below , where code_score , question can be taken from {response_data89} and user_code can be obtained from the variable {code}
     Always the repsone should only be in JSON format like below structure no other string should be added.
     {
-    "code_score":
+  "coding_evaluation": [
     {
-    "Correctness":,
-    "Efficiency":,
-    "Clarity_and_Readability":,
-    "Modularity and Maintainability":,
-    "Edge Cases Handling":,
-    "Error Handling and Robustness":,
-    "Testing":,
-    "Optimization":,
-    "Language_Proficiency":,
-    "Problem-Solving_Approach":,
-    "OVERALL_SCORE":"12/100",
+      "code_score": {
+        "Correctness": ,
+        "Efficiency": ,
+        "Clarity_and_Readability": ,
+        "Modularity_and_Maintainability": ,
+        "Edge_Cases_Handling": ,
+        "Error_Handling_and_Robustness": ,
+        "Testing": ,
+        "Optimization": ,
+        "Language_Proficiency": ,
+        "Problem_Solving_Approach": ,
+        "OVERALL_SCORE": "32/100"
+      },
+      "coding_question": {
+        "question": "Write a function to reverse a string.",
+        "sample_input": "hello",
+        "sample_output": "olleh"
+      },
+      "user_code": {
+        "code": "def reverse_string(s): return s[::-1]"
+      }
     },
     {
-    "coding_question":{
-    "question":,
-    "sample_input":,
-    "sample_output":
-    },
-    {
-    "user_code":{}
+      "code_score": {
+        "Correctness": ,
+        "Efficiency": ,
+        "Clarity_and_Readability": ,
+        "Modularity_and_Maintainability": ,
+        "Edge_Cases_Handling": ,
+        "Error_Handling_and_Robustness": ,
+        "Testing": ,
+        "Optimization": ,
+        "Language_Proficiency": ,
+        "Problem_Solving_Approach": ,
+        "OVERALL_SCORE": "60/100"
+      },
+      "coding_question": {
+        "question": "Write a function to check if a number is prime.",
+        "sample_input": 7,
+        "sample_output": true
+      },
+      "user_code": {
+        "code": "def is_prime(n): if n <= 1: return False for i in range(2, int(n**0.5) + 1): if n % i == 0: return False return True"
+      }
     }
-    }
+  ]
+}
+
     """
