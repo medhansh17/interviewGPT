@@ -1,3 +1,5 @@
+import time
+from functools import wraps
 import os
 import json
 import shutil
@@ -10,7 +12,7 @@ from datetime import datetime
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
 from flask import Blueprint, request, jsonify, current_app
-from .models import Job, Resume, ExtractedInfo, ResumeScore,Candidate
+from .models import Job, Resume, ExtractedInfo, ResumeScore, Candidate
 from .config import RESUME_FOLDER, ARCHIVE_FOLDER, client, MODEL_NAME
 from .prompts.resume_prompts import extract_resume_prompt, evaluate_resume_prompt, user_prompt_resume_evaluation
 
@@ -18,13 +20,30 @@ from .prompts.resume_prompts import extract_resume_prompt, evaluate_resume_promp
 ats_bp = Blueprint('ats', __name__)
 
 
+def retry(max_retries=3, delay=2):
+    def decorator_retry(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            retries = 0
+            while retries < max_retries:
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    retries += 1
+                    if retries == max_retries:
+                        raise e
+                    time.sleep(delay)
+        return wrapper
+    return decorator_retry
+
+
 @ats_bp.route('/extracted_info', methods=['GET'])
 def get_extracted_info():
     """
     Fetch details from the ExtractedInfo table based on Resume ID.
     """
-    
-    resume_id=request.args.get('resume_id')
+
+    resume_id = request.args.get('resume_id')
     if not resume_id:
         return jsonify({'error': 'Resume ID are required in the query parameters'}), 400
 
@@ -35,7 +54,7 @@ def get_extracted_info():
 
     if not extracted_info:
         return jsonify({'error': 'No extracted information found for the provided resume ID.'}), 404
-    
+
     if extracted_info:
         extracted_info_details = {
             'candidate_name': extracted_info.name,
@@ -76,28 +95,24 @@ def extract_text_from_resume(app, role, filename):
     Extract text content from a resume PDF.
     """
     with app.app_context():
-        path = os.path.join(RESUME_FOLDER, role)
-        file_path = os.path.join(path, filename)
+        file_path = os.path.join(RESUME_FOLDER, role, filename)
         reader = PdfReader(file_path)
-        text_resume = f"Text extracted from: {filename}\n"
-        for page in reader.pages:
-            text_resume += page.extract_text()
-            text_resume += "\n"
-        text_resume += "\n---\n"
-        return text_resume
+        return "\n".join([page.extract_text() for page in reader.pages])
 
 
+@retry(max_retries=2, delay=2)
 def extract_resume_info(app, job_id, role, resume_list):
     """
     Extract information from resumes and save it to the database.
     """
     with app.app_context():
-        for filename in resume_list:
+        for resume_id, filename in resume_list:
             if filename.endswith(".pdf"):
                 text_resume = extract_text_from_resume(app, role, filename)
-                resume_record = Resume.query.filter_by(job_id=job_id,filename=filename ).first()
+                resume_record = Resume.query.get(resume_id)
                 if resume_record:
                     resume_id = resume_record.id
+
                 message_resumefetch = [
                     {"role": "system", "content": extract_resume_prompt},
                     {"role": "user", "content": (
@@ -124,40 +139,21 @@ def extract_resume_info(app, job_id, role, resume_list):
                 response_data = response_data.strip().strip('```json').strip().strip('```')
 
                 extracted_info = json.loads(response_data)
-                print(extracted_info)
                 # Extracting the candidate name
                 candidate_name = extracted_info['resume_details'][0]['candidate_name']
-                # ADD DETAILS TO CANDIDATE TABLE 
-                new_candidate=Candidate(
-                    name=candidate_name,
-                    job_id=job_id,
-                    resume_id=resume_id
-                )
-                db.session.add(new_candidate)
-                db.session.commit()
-                # Save to ResumeScore table
-                """print("inital show os records")
-                resume_score_record = ResumeScore(
-                    resume_id=resume_id,
-                    resume_filename=filename,
-                    name=candidate_name,
-                    jd_match=None,
-                    match_status=None,
-                    matching_skills=None,
-                    missing_skills=None,
-                    experience_match=None
-                )
-                            
-                            
-                db.session.add(resume_score_record)
-                db.session.commit()"""
-                try:
-                    print("inside try block")
-                    for resume_detail in extracted_info['resume_details']:
-                        
-                        #candidate_name=resume_detail.get('candidate_name', 'NIL')
-                        
-                        print("inside for loop")  
+
+                existing_candidate = Candidate.query.filter_by(
+                    name=candidate_name, job_id=job_id, resume_id=resume_id).first()
+                if not existing_candidate:
+                    new_candidate = Candidate(
+                        name=candidate_name, job_id=job_id, resume_id=resume_id)
+                    db.session.add(new_candidate)
+                    db.session.commit()
+
+                for resume_detail in extracted_info['resume_details']:
+                    existing_info = ExtractedInfo.query.filter_by(
+                        resume_id=resume_id, name=resume_detail.get('candidate_name', 'NIL')).first()
+                    if not existing_info:
                         extracted_record = ExtractedInfo(
                             resume_id=resume_id,
                             name=resume_detail.get('candidate_name', 'NIL'),
@@ -180,10 +176,7 @@ def extract_resume_info(app, job_id, role, resume_list):
                                 'date_of_birth', 'NIL')
                         )
                         db.session.add(extracted_record)
-                    print("outside the for block")
-                    db.session.commit()
-                except Exception as e:
-                    pass
+                db.session.commit()
 
 
 def chatgpt_message(app, jd, job_role, text_resume, mandatory_skills):
@@ -204,10 +197,7 @@ def chatgpt_message(app, jd, job_role, text_resume, mandatory_skills):
             model=MODEL_NAME,
             messages=messages,
             temperature=0,
-            max_tokens=1000,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0
+            max_tokens=1000
         )
 
         response = dict(response)
@@ -216,86 +206,33 @@ def chatgpt_message(app, jd, job_role, text_resume, mandatory_skills):
         return response_data
 
 
+@retry(max_retries=2, delay=2)
 def calculate_resume_scores(app, job_id, mandatory_skills, resume_list):
     """
     Calculate scores for resumes based on job description and mandatory skills.
     """
     with app.app_context():
         job = Job.query.filter_by(id=job_id).first()
-
         if not job:
             return jsonify({'error': 'Job not found.'}), 404
 
-        jd = job.jd
-        role = job.role
-        scores = []
-
-        for filename in resume_list:
-            text_resume = extract_text_from_resume(app, role, filename)
+        for resume_id, filename in resume_list:
+            text_resume = extract_text_from_resume(app, job.role, filename)
             AI_score_response = chatgpt_message(
-                app, jd, role, text_resume, mandatory_skills)
+                app, job.jd, job.role, text_resume, mandatory_skills)
             AI_score_response_dict = json.loads(AI_score_response)
-            # To fetch resume id 
-            resume_record = Resume.query.filter_by(job_id=job_id,filename=filename ).first()
-            if resume_record:
-                resume_id = resume_record.id
-
-            for resume_info in AI_score_response_dict['score']:
-                resume_filename = resume_info['resume_filename']
-                jd_match = resume_info['JD_MATCH']
-                match_status = resume_info['MATCH_STATUS']
-                matching_skills = resume_info['Matching_Skills']
-                missing_skills = resume_info['Missing_Skills']
-                candidate_name = resume_info['candidate_name']
-                experience_match = resume_info['experience_match']
-
-                new_score = ResumeScore(
-                    resume_filename=resume_filename,
-                    name=candidate_name,
-                    resume_id=resume_id,
-                    jd_match=jd_match,
-                    match_status=match_status,
-                    matching_skills=matching_skills,
-                    missing_skills=missing_skills,
-                    experience_match=experience_match
-                )
-                db.session.add(new_score)
-                """# Check if the record exists
-                existing_score = ResumeScore.query.filter_by(
-                    resume_filename=resume_filename,
-                    name=candidate_name,
-                    job_id=job_id
-                ).first()
-                if existing_score:
-                    # Update the existing record with new details
-                    if jd_match is not None:
-                        existing_score.jd_match = jd_match
-                    if match_status is not None:
-                        existing_score.match_status = match_status
-                    if matching_skills is not None:
-                        existing_score.matching_skills = matching_skills
-                    if missing_skills is not None:
-                        existing_score.missing_skills = missing_skills
-                    if experience_match is not None:
-                        existing_score.experience_match = experience_match
-
-                    db.session.commit()"""
-
-                scores.append({
-                    "resume_filename": resume_filename,
-                    "candidate_name": candidate_name,
-                    "JD_MATCH": jd_match,
-                    "MATCH_STATUS": match_status,
-                    "Matching_Skills": matching_skills,
-                    "Missing_Skills": missing_skills,
-                    "role": role,
-                    "jd": jd,
-                    "experience_match": experience_match
-                })
-
-            db.session.commit()
-
-        return jsonify({'scores': scores}), 200
+            resume_score = ResumeScore.query.filter_by(
+                resume_id=resume_id).first()
+            if resume_score:
+                resume_info = AI_score_response_dict['score'][0]
+                resume_score.resume_filename = resume_info['resume_filename']
+                resume_score.name = resume_info['candidate_name']
+                resume_score.jd_match = resume_info['JD_MATCH']
+                resume_score.match_status = resume_info['MATCH_STATUS']
+                resume_score.matching_skills = resume_info['Matching_Skills']
+                resume_score.missing_skills = resume_info['Missing_Skills']
+                resume_score.experience_match = resume_info['experience_match']
+                db.session.commit()
 
 
 @ats_bp.route('/upload_resume_to_job', methods=['POST'])
@@ -318,11 +255,15 @@ def upload_resume_to_job():
 
     try:
         uploaded_files = request.files.getlist('resume')
-
         if len(uploaded_files) > MAX_FILES:
             return jsonify({'message': f'Exceeded maximum number of files ({MAX_FILES}) allowed for upload.'}), 400
 
+        job = Job.query.filter_by(role=role, id=job_id).first()
+        if not job:
+            return jsonify({'message': 'Specified job role or description does not exist.'}), 400
+
         resume_list = []
+
         for resume_file in uploaded_files:
             if resume_file.filename == '':
                 return jsonify({'message': 'No selected file'}), 400
@@ -330,26 +271,26 @@ def upload_resume_to_job():
             resume_filename = secure_filename(resume_file.filename)
             resume_path = os.path.join(folder_path, resume_filename)
             resume_file.save(resume_path)
-            resume_list.append(resume_filename)
-
-            job = Job.query.filter_by(role=role, id=job_id).first()
-            if not job:
-                return jsonify({'message': 'Specified job role or description does not exist.'}), 400
 
             new_resume = Resume(filename=resume_filename, job_id=job.id)
             db.session.add(new_resume)
             db.session.commit()
-        print(" 1st thread extrat_resume info goinf to start")
+
+            resume_list.append((new_resume.id, resume_filename))
+
+            resume_score = ResumeScore(
+                resume_id=new_resume.id, name="Fetching Details")
+            db.session.add(resume_score)
+            db.session.commit()
+
         app = current_app._get_current_object()
         extract_thread = Thread(target=extract_resume_info, args=(
             app, job.id, role, resume_list))
         extract_thread.start()
-        print(" 1st extrat_resume info completed")
-        print(" 2 nd thread calculate_resume_score going to start ")
         score_thread = Thread(target=calculate_resume_scores, args=(
             app, job.id, mandatory_skills, resume_list))
         score_thread.start()
-        print(" 2nd thread calculate_resume_score info completed")
+
         return jsonify({'message': 'Resumes uploaded successfully and processing started.'}), 200
 
     except Exception as e:
@@ -372,7 +313,8 @@ def get_resume_scores():
         return jsonify({'error': 'Job ID is a required parameter.'}), 400
 
     # Query to fetch ResumeScore based on job_id
-    query = db.session.query(ResumeScore).join(Resume).filter(Resume.job_id == job_id)
+    query = db.session.query(ResumeScore).join(
+        Resume).filter(Resume.job_id == job_id)
 
     if sort_by in ['status', 'jd_match']:
         if sort_order == 'desc':
@@ -384,7 +326,7 @@ def get_resume_scores():
     resume_scores = pagination.items
 
     scores_list = [{
-        "resume_id":score.resume_id,
+        "resume_id": score.resume_id,
         "resume_filename": score.resume_filename,
         "candidate_name": score.name,
         "JD_MATCH": score.jd_match,
@@ -404,6 +346,7 @@ def get_resume_scores():
         'current_page': pagination.page,
         'per_page': pagination.per_page
     }), 200
+
 
 @ats_bp.route('/delete_resume', methods=['GET'])
 def delete_resume():
@@ -429,7 +372,8 @@ def delete_resume():
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
         new_filename = f"{resume.filename}_{timestamp}.pdf"
         file_to_archive_path = os.path.join(archive_role_folder, new_filename)
-        shutil.move(os.path.join(RESUME_FOLDER, role, resume.filename), file_to_archive_path)
+        shutil.move(os.path.join(RESUME_FOLDER, role,
+                    resume.filename), file_to_archive_path)
 
         # Delete the resume record
         db.session.delete(resume)
@@ -444,7 +388,8 @@ def delete_resume():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
-    
+
+
 @ats_bp.route('/update_resume_status', methods=['POST'])
 def update_resume_status():
     data = request.get_json()
