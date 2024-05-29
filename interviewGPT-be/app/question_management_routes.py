@@ -259,7 +259,7 @@ def fetch_behavioural_questions():
         return jsonify({'error': 'Candidate name and job_id are required parameters.'}), 400
 
     
-    candidate = Candidate.query.filter_by(resume_id=resume_id,job_id=job_id).one()
+    candidate = Candidate.query.filter_by(resume_id=resume_id,job_id=job_id).first()
 
     if not candidate:
         return jsonify({'error': 'Candidate not found for the given job_id.'}), 404
@@ -285,7 +285,7 @@ def fetch_technical_questions():
         return jsonify({'error': 'Candidate name and job_id are required parameters.'}), 400
 
     
-    candidate = Candidate.query.filter_by(resume_id=resume_id,job_id=job_id).one()
+    candidate = Candidate.query.filter_by(resume_id=resume_id,job_id=job_id).first()
 
     if not candidate:
         return jsonify({'error': 'Candidate not found for the given job_id.'}), 404
@@ -313,7 +313,7 @@ def fetch_coding_question():
         return jsonify({'error': 'Candidate name and job_id are required parameters.'}), 400
 
     
-    candidate = Candidate.query.filter_by(resume_id=resume_id,job_id=job_id).one()
+    candidate = Candidate.query.filter_by(resume_id=resume_id,job_id=job_id).first()
 
     if not candidate:
         return jsonify({'error': 'Candidate not found for the given job_id.'}), 404

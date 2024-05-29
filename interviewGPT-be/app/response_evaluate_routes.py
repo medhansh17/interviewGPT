@@ -90,7 +90,7 @@ def store_tech_response():
     candidate_id = data.get('candidate_id')
     answers = data.get('answers')  ## [{"question_id":"1","user_answer":"the tool is ai"},{"question_id":"2","user_answer":"start with *"},{"question_id":"3","user_answer":"the ai is artifial intelligence"}]
 
-    if not job_id or not candidate_id or  not answer:
+    if not job_id or not candidate_id or  not answers:
         return jsonify({'error': 'Missing required parameters.'}), 400
 
     # Iterate over each answer in the provided list
@@ -125,12 +125,14 @@ def store_tech_response():
                 "correct_answer": question.correct_answer,
                 "user_answer": question.user_answer
             })
+    print("perform score callaed")
     tech_response = perform_techmcq_assessment(response_data)
     try:
-        eval_store=TechnicalQuestion.query.filter_by(candidate_id=candidate_id).all()
-        if eval_store:
-            eval_store.tech_eval = tech_response
-            db.session.commit()
+        print("inside try block")
+        print(tech_response)
+        for question in tech_questions:
+            question.tech_eval = tech_response
+        db.session.commit()
         return jsonify({'status': 'tech response evaluated and stored successfully.'}), 200
 
     except Exception as e:
@@ -203,11 +205,12 @@ def store_code_response():
                 "user_code": question.user_code
             })
     code_response = perform_code_assessment(response_data)
+    
     try:
-        eval_store=TechnicalQuestion.query.filter_by(candidate_id=candidate_id).all()
-        if eval_store:
-            eval_store.code_eval = code_response
-            db.session.commit()
+        for question in code_questions:
+            question.code_eval = code_response
+        db.session.commit()
+        
 
         # TO UPDATE THE STATUS COLUMN OF RESUME TO ASSESSMENT COMPLETED
         # Query the Candidate table to get the resume_id for the given candidate_id
@@ -236,41 +239,50 @@ def store_code_response():
 
 
 # To fetch the user responses after the assessment (all types of questions)
-
-
 @response_evaluate_bp.route('/fetch_user_responses', methods=['POST'])
 def fetch_user_responses():
     data = request.get_json()
     candidate_id = data.get('candidate_id')
     job_id = data.get('job_id')
 
-    # Query the Candidate table to get the resume_id for the given candidate_id
-    candidate = Candidate.query.filter_by(id=candidate_id).first()
+    try:
+        # Query the Candidate table to get the resume_id for the given candidate_id
+        candidate = Candidate.query.filter_by(id=candidate_id).first()
+        if not candidate:
+            return jsonify({'error': 'Candidate not found.'}), 404
 
-    resume_score_entry = ResumeScore.query.filter_by(resume_id=candidate.resume_id).first()
+        resume_score_entry = ResumeScore.query.filter_by(resume_id=candidate.resume_id).first()
+        if not resume_score_entry or resume_score_entry.assessment_status != 1:
+            return jsonify({'error': 'Assessment not completed or not found.'}), 400
 
-    if not resume_score_entry or resume_score_entry.assessment_status != 1:
-        return jsonify({'error': 'Assessment not completed or not found.'}), 400
+        code_responses = CodingQuestion.query.filter_by(candidate_id=candidate_id).all()
+        if not code_responses:
+            return jsonify({'error': 'No code responses found for the given candidate ID.'}), 404
 
-    code_responses = CodingQuestion.query.filter_by(candidate_id=candidate_id).first()
+        tech_responses = TechnicalQuestion.query.filter_by(candidate_id=candidate_id).all()
+        if not tech_responses:
+            return jsonify({'error': 'No technical responses found for the given candidate ID.'}), 404
 
-    tech_responses = TechnicalQuestion.query.filter_by(candidate_id=candidate_id).first()
+        audio_transcriptions = BehaviouralQuestion.query.filter_by(candidate_id=candidate_id).all()
+        if not audio_transcriptions:
+            return jsonify({'error': 'No audio transcriptions found for the given candidate ID.'}), 404
 
-    audio_transcriptions = BehaviouralQuestion.query.filter_by(candidate_id=candidate_id).all()
+        formatted_audio_transcriptions = []
+        for audio_transcription in audio_transcriptions:
+            formatted_audio_transcriptions.append({
+                'question': audio_transcription.question_text,
+                'User_response': audio_transcription.audio_transcript
+            })
 
-    formatted_audio_transcriptions = []
-    for audio_transcription in audio_transcriptions:
-        formatted_audio_transcriptions.append({
-            'question': audio_transcription.question_text,
-            'User_response': audio_transcription.audio_transcript
-        })
+        formatted_data = {
+            'candidate_name': candidate.name,
+            'job_id': job_id,
+            'code_response': [code_response.code_eval for code_response in code_responses],
+            'tech_response': [tech_response.tech_eval for tech_response in tech_responses],
+            'audio_transcript': formatted_audio_transcriptions
+        }
 
-    formatted_data = {
-        'candidate_name': candidate.name,
-        'job_id': job_id,
-        'code_response': [code_response.code_eval for code_response in code_responses],
-        'tech_response': [tech_response.tech_eval for tech_response in tech_responses],
-        'audio_transcript': formatted_audio_transcriptions
-    }
+        return jsonify(formatted_data), 200
 
-    return jsonify(formatted_data), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

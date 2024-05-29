@@ -15,24 +15,25 @@ from flask import Blueprint, request, jsonify, current_app
 from .models import Job, Resume, ExtractedInfo, ResumeScore, Candidate
 from .config import RESUME_FOLDER, ARCHIVE_FOLDER, client, MODEL_NAME
 from .prompts.resume_prompts import extract_resume_prompt, evaluate_resume_prompt, user_prompt_resume_evaluation
-
+from .agents_resume import create_agents
+import time
 
 ats_bp = Blueprint('ats', __name__)
 
 
-def retry(max_retries=3, delay=2):
+def retry_with_switch(max_retries=3, delay=2):
     def decorator_retry(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             retries = 0
             while retries < max_retries:
                 try:
-                    return func(*args, **kwargs)
+                    return func(*args, **kwargs, attempt=retries)
                 except Exception as e:
                     retries += 1
                     if retries == max_retries:
                         raise e
-                    time.sleep(delay)
+                    time.sleep(delay)  # Delay in seconds between retries
         return wrapper
     return decorator_retry
 
@@ -100,11 +101,13 @@ def extract_text_from_resume(app, role, filename):
         return "\n".join([page.extract_text() for page in reader.pages])
 
 
-@retry(max_retries=2, delay=2)
-def extract_resume_info(app, job_id, role, resume_list):
+
+@retry_with_switch(max_retries=3, delay=2)
+def extract_resume_info(app, job_id, role, resume_list,attempt=0):
     """
     Extract information from resumes and save it to the database.
     """
+    
     with app.app_context():
         for resume_id, filename in resume_list:
             if filename.endswith(".pdf"):
@@ -206,8 +209,9 @@ def chatgpt_message(app, jd, job_role, text_resume, mandatory_skills):
         return response_data
 
 
-@retry(max_retries=2, delay=2)
-def calculate_resume_scores(app, job_id, mandatory_skills, resume_list):
+
+@retry_with_switch(max_retries=3, delay=2)
+def calculate_resume_scores(app, job_id, mandatory_skills, resume_list,attempt=0):
     """
     Calculate scores for resumes based on job description and mandatory skills.
     """
@@ -218,8 +222,13 @@ def calculate_resume_scores(app, job_id, mandatory_skills, resume_list):
 
         for resume_id, filename in resume_list:
             text_resume = extract_text_from_resume(app, job.role, filename)
-            AI_score_response = chatgpt_message(
-                app, job.jd, job.role, text_resume, mandatory_skills)
+            #if attempt == 0:
+                # Use create_agents function on the first attempt
+                #AI_score_response = create_agents(app,text_resume, job.jd, mandatory_skills, job.role)
+            #else:
+                # Use chatgpt_message function on retries
+            AI_score_response = chatgpt_message(app, job.jd, job.role, text_resume, mandatory_skills)
+            
             AI_score_response_dict = json.loads(AI_score_response)
             resume_score = ResumeScore.query.filter_by(
                 resume_id=resume_id).first()
@@ -282,7 +291,7 @@ def upload_resume_to_job():
                 resume_id=new_resume.id, name="Fetching Details")
             db.session.add(resume_score)
             db.session.commit()
-
+        print("thread going to start")
         app = current_app._get_current_object()
         extract_thread = Thread(target=extract_resume_info, args=(
             app, job.id, role, resume_list))

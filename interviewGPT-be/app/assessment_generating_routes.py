@@ -89,7 +89,7 @@ def save_assessment_to_db(job_id, role, candidate_id, tech_questions, behaviour_
 
     for question in tech_questions:
         tech_question = TechnicalQuestion(question_text=question['question'], options=json.dumps(
-            question['options']), correct_answer=question['answer'],candidate_id=candidate_id)
+            question['options']), correct_answer=question['answer'],candidate_id=candidate_id,user_answer="",tech_eval="")
         db.session.add(tech_question)
         db.session.commit()
         candidate_question = CandidateQuestion(candidate_id=candidate_id, question_type='technical')
@@ -97,7 +97,7 @@ def save_assessment_to_db(job_id, role, candidate_id, tech_questions, behaviour_
 
     for question in behaviour_questions:
         behav_question = BehaviouralQuestion(
-            question_text=question['b_question_text'],candidate_id=candidate_id)
+            question_text=question['b_question_text'],candidate_id=candidate_id,audio_transcript="")
         db.session.add(behav_question)
         db.session.commit()
         candidate_question = CandidateQuestion(candidate_id=candidate_id, question_type='behavioural')
@@ -105,7 +105,7 @@ def save_assessment_to_db(job_id, role, candidate_id, tech_questions, behaviour_
 
     for question in coding_questions:
         code_question = CodingQuestion(question_text=question['question'], sample_input=question['sample_input'],
-                                     sample_output=question['sample_output'],candidate_id=candidate_id)
+                                     sample_output=question['sample_output'],candidate_id=candidate_id,user_code="",code_eval="")
         db.session.add(code_question)
         db.session.commit()
         candidate_question = CandidateQuestion(candidate_id=candidate.id, question_type='coding')
@@ -153,6 +153,12 @@ def generate_and_save_assessment(app, job_id, no_tech_questions, no_behav_questi
                 question_behav = behaviour_questions(
                     no_behav_questions, behavioral_skills)
                 question_coding = coding_question_generate(no_code_questions)
+                print("tech_mcqquestion")
+                print(question_tech)
+                print("behavquestion")
+                print(question_behav)
+                print("codingquestion")
+                print(question_coding)
                 print("every type of questio is completed")
                 tech_questions_json = json.loads(
                     question_tech).get('tech_questions', [])
@@ -160,7 +166,9 @@ def generate_and_save_assessment(app, job_id, no_tech_questions, no_behav_questi
                     question_behav).get('Behaviour_q', [])
                 coding_question_json = json.loads(
                     question_coding).get('coding_question', [])
-
+                print(tech_questions_json)
+                print(behaviour_questions_json)
+                print(coding_question_json)
                 save_assessment_to_db(job_id, role, candidate_id, tech_questions_json,
                                       behaviour_questions_json, coding_question_json)
                 resume_score.status = 'assessment_generated'
