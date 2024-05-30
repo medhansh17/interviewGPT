@@ -4,13 +4,13 @@ import { useState } from "react";
 import api from "@/components/customAxios/Axios";
 
 interface GenerateQuestionsPopupProps {
-  candName: string;
-  job_id: number;
+  resume_id: string;
+  job_id: number | null;
   setPop: (show: boolean) => void;
 }
 
 export default function GenerateQuestionsPopup({
-  candName,
+  resume_id,
   job_id,
   setPop,
 }: GenerateQuestionsPopupProps) {
@@ -18,12 +18,17 @@ export default function GenerateQuestionsPopup({
   const [numMCQ, setNumMCQ] = useState(1);
   const [numCoding, setNumCoding] = useState(0);
 
+  if (job_id === null) {
+    alert("Job id not found");
+    return null;
+  }
+
   const handleProceed = async () => {
     setPop(false);
     try {
       const resp = await api.post("/CHECK_Auto_assessment", {
         job_id,
-        candidate_name: candName,
+        resume_id: resume_id,
         no_tech_questions: numMCQ,
         no_behav_questions: numBehavioral,
         no_coding_questions: numCoding,

@@ -15,7 +15,8 @@ export async function submitAudio({
   formData.append("audio", audioBlob);
   formData.append("question", question);
   formData.append("candidate_name", canName);
-  formData.append("job_id", jobId);
+  formData.append("job_id", jobId ?? "");
+
   try {
     const response = await api.post("/blob_process_audio", formData, {
       headers: {

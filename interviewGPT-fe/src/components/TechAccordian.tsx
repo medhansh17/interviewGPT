@@ -232,12 +232,12 @@ const TechAccordion: FC<TechAccordionProps> = ({
   };
 
   const calculateTotalPercentage = () => {
-    let keys = Object.keys(percentages);
+    const keys = Object.keys(percentages);
     let totalRightWrongSum = 0;
     keys?.map((itm) => {
       totalRightWrongSum += percentages[itm];
     });
-    let percentage = calc(totalRightWrongSum, keys?.length);
+    const percentage = calc(totalRightWrongSum, keys?.length);
     return percentage.toFixed(2) + "%";
   };
 
@@ -295,7 +295,7 @@ const Faq: FC<FaqProps> = ({ techSkill, setTechSkillOne }) => {
     // Save data to local storage whenever techSkillPercentages changes
     localStorage.setItem(
       "techSkillPercentages",
-      JSON.stringify(techSkillPercentages),
+      JSON.stringify(techSkillPercentages)
     );
   }, [techSkillPercentages]);
 
@@ -323,7 +323,7 @@ const Faq: FC<FaqProps> = ({ techSkill, setTechSkillOne }) => {
                 techSkill={techSkill}
                 updateTechSkillPercentage={updateTechSkillPercentage}
               />
-            ),
+            )
           )}
         </div>
       </div>

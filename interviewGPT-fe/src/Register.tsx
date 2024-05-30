@@ -1,31 +1,30 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from './components/customAxios/Axios';
+import api from "./components/customAxios/Axios";
 const Register: React.FC = () => {
-
-  let navigate=useNavigate()
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [first_name, setUsername] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-const last_name=""
-  const handleSubmit = async(event: React.FormEvent<HTMLFormElement>) => {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [first_name, setUsername] = useState("");
+  // const [confirmPassword, setConfirmPassword] = useState("");
+  const last_name = "";
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // Add your form submission logic here
     try {
-      const res = await api.post("/register", {first_name,email,password,last_name});
-      
-      if(res.statusText=="OK"){
-        navigate('/app')
-      }else alert(res.data.message)
-    } catch (err) {
-      
-      
-    }
-  };
+      const res = await api.post("/register", {
+        first_name,
+        email,
+        password,
+        last_name,
+      });
 
-  const handleGoogleSignUp = () => {
-    // Add logic for signing up with Google
+      if (res.statusText == "OK") {
+        navigate("/app");
+      } else alert(res.data.message);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
@@ -47,7 +46,8 @@ const last_name=""
                 Username
               </label>
               <div className="mt-1">
-                <input onChange={(e)=>setUsername(e.target.value)}
+                <input
+                  onChange={(e) => setUsername(e.target.value)}
                   name="username"
                   type="text"
                   required
@@ -64,7 +64,8 @@ const last_name=""
                 Email
               </label>
               <div className="mt-1">
-                <input onChange={(e)=>setEmail(e.target.value)}
+                <input
+                  onChange={(e) => setEmail(e.target.value)}
                   name="email"
                   type="email"
                   autoComplete="email"
@@ -82,7 +83,8 @@ const last_name=""
                 Password
               </label>
               <div className="mt-1">
-                <input onChange={(e)=>setPassword(e.target.value)}
+                <input
+                  onChange={(e) => setPassword(e.target.value)}
                   name="password"
                   type="password"
                   autoComplete="new-password"
@@ -100,7 +102,7 @@ const last_name=""
                 Confirm Password
               </label>
               <div className="mt-1">
-                <input onChange={(e)=>setConfirmPassword(e.target.value)}
+                <input
                   name="confirm_password"
                   type="password"
                   autoComplete="confirm-password"
@@ -124,11 +126,19 @@ const last_name=""
                 type="submit"
                 className="flex w-full justify-center rounded-md border border-transparent bg-sky-400 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-opacity-75 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2"
               >
-                Register 
+                Register
               </button>
             </div>
             <div className="text-center">
-              <p className="text-zinc-600 dark:text-zinc-300 text-sm">Already have an account? <Link to="/login" className="text-blue-500 hover:text-blue-800 dark:hover:text-blue-300">Login</Link></p>
+              <p className="text-zinc-600 dark:text-zinc-300 text-sm">
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="text-blue-500 hover:text-blue-800 dark:hover:text-blue-300"
+                >
+                  Login
+                </Link>
+              </p>
             </div>
           </form>
         </div>

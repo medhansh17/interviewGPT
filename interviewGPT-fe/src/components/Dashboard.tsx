@@ -4,16 +4,12 @@ import { useNavigate } from "react-router-dom";
 import api from "./customAxios/Axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faTrash,
-  faEdit,
-  faSave,
-  faTimes,
   faChevronUp,
   faChevronDown,
   faArrowUpRightFromSquare,
 } from "@fortawesome/free-solid-svg-icons";
 import { UserContext } from "../context/JobContext";
-import { setJobList, deleteJob } from "../context/JobContext";
+import { deleteJob } from "../context/JobContext";
 
 interface DataItem {
   id: number;
@@ -31,8 +27,8 @@ const Dashboard = () => {
   const [fullDescriptionId, setFullDescriptionId] = useState<number | null>(
     null
   );
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const currentPage = 1;
 
   useEffect(() => {
     const getJobList = async () => {
@@ -88,6 +84,7 @@ const Dashboard = () => {
         jd: item.jd,
         active: active,
       });
+      console.log(response);
     } catch (error: unknown) {
       console.log(error);
     }
@@ -117,18 +114,18 @@ const Dashboard = () => {
     setData(newData);
   };
 
-  const handleJdChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    id: number
-  ) => {
-    const newData = data.map((item) => {
-      if (item.id === id) {
-        return { ...item, jd: event.target.value };
-      }
-      return item;
-    });
-    setData(newData);
-  };
+  // const handleJdChange = (
+  //   event: React.ChangeEvent<HTMLInputElement>,
+  //   id: number
+  // ) => {
+  //   const newData = data.map((item) => {
+  //     if (item.id === id) {
+  //       return { ...item, jd: event.target.value };
+  //     }
+  //     return item;
+  //   });
+  //   setData(newData);
+  // };
 
   const statusChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
@@ -159,11 +156,11 @@ const Dashboard = () => {
    * Pagination
    */
 
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  // const totalPages = Math.ceil(data.length / itemsPerPage);
 
-  const handlePageClick = (selectedPage: number) => {
-    setCurrentPage(selectedPage);
-  };
+  // const handlePageClick = (selectedPage: number) => {
+  //   setCurrentPage(selectedPage);
+  // };
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);

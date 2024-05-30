@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMicrophone } from "@fortawesome/free-solid-svg-icons";
 import AudioRecorder from "../audio_recorder";
-import api from "../customAxios/Axios";
+// import api from "../customAxios/Axios";
 import { useNavigate } from "react-router-dom";
-import MainAssessment from "../MainAssessment";
 import New_Sidebar from "../navbar.component";
 
 const Sample: React.FC = () => {
@@ -23,21 +22,23 @@ const Sample: React.FC = () => {
     }
 
     const fetchBehavioralQuestions = async () => {
-      console.log(canName, jobId);
-      try {
-        if (canName && jobId) {
-          const resp = await api.post("/fetch_behavioural_questions", {
-            candidate_name: canName,
-            job_id: jobId,
-          });
-          setBehavioralQuestions(resp.data.Behaviour_q);
-        }
-      } catch (error) {
-        console.error("Error fetching behavioral questions:", error);
-      }
-      console.log("Fired");
+      //   console.log(canName, jobId);
+      //   try {
+      //     if (canName && jobId) {
+      //       const resp = await api.post("/fetch_behavioural_questions", {
+      //         candidate_name: canName,
+      //         job_id: jobId,
+      //       });
+      //       setBehavioralQuestions(resp.data.Behaviour_q);
+      //     }
+      //   } catch (error) {
+      //     console.error("Error fetching behavioral questions:", error);
+      //   }
+      //   console.log("Fired");
+      // };
+      const beha = sessionStorage.getItem("question");
+      setBehavioralQuestions(beha ? JSON.parse(beha).Behaviour_q : []);
     };
-
     fetchBehavioralQuestions();
   }, [canName, jobId]);
 

@@ -65,8 +65,11 @@ const ExampleComponent: React.FC = () => {
       uploadedFiles.forEach((file) => {
         formData.append("resume", file);
       });
-      formData.append("id", jobDetails.job_id!);
-      formData.append("role", jobDetails.role!);
+      formData.append(
+        "id",
+        jobDetails?.job_id ? jobDetails.job_id.toString() : ""
+      );
+      formData.append("role", jobDetails?.role!);
 
       const response = await api.post("/upload_resume_to_job", formData);
       console.log(response.data);

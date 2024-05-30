@@ -1,11 +1,11 @@
 import api from "@/components/customAxios/Axios";
 
-export async function getTestQuestion(candName: string, jobId: number) {
+export async function getTestQuestion(resume_id: string, jobId: number) {
   try {
     const response = await api.post(
       "/fetch_candidate_questions_after_selected",
       {
-        candidate_name: candName,
+        resume_id: resume_id,
         job_id: jobId,
       }
     );
