@@ -10,7 +10,7 @@ const AudioRecorder = ({
   canName: string;
   jobId: string | null;
 }) => {
-  const [recordedUrl, setRecordedUrl] = useState<string>("");
+  // const [recordedUrl, setRecordedUrl] = useState<string>("");
   const mediaStream = useRef<MediaStream | null>(null);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
@@ -48,8 +48,8 @@ const AudioRecorder = ({
       };
       mediaRecorder.current.onstop = () => {
         const recordedBlob = new Blob(chunks.current, { type: "audio/wav" });
-        const url = URL.createObjectURL(recordedBlob);
-        setRecordedUrl(url);
+        // const url = URL.createObjectURL(recordedBlob);
+        // setRecordedUrl(url);
         chunks.current = [];
         submitAudioBlob(recordedBlob);
       };

@@ -1,13 +1,12 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import Header from "./Header";
 import api from "./customAxios/Axios";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { UserContext } from "../context/JobContext";
 import { setCandList, deleteCandidateByName } from "../context/JobContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import InterviewDataDisplay from "./candidateResult";
-import { faTimes, faRedo } from "@fortawesome/free-solid-svg-icons";
-import UpdateQuestionPopup from "./updateQuestionPopup";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import ExampleComponent from "./multipleFileUpload";
 import { getTestQuestion } from "@/api/question";
 import GeneratedQuesPopup from "./generatedQuesPopup";
@@ -20,6 +19,7 @@ interface MyObjectType {
 }
 
 interface DataItem {
+  resume_id: string;
   candidate_name: string;
   JD_MATCH: string;
   MATCH_STATUS: string;
@@ -58,42 +58,35 @@ const RespJdDash = () => {
   const [technicalQuestions, setTechnicalQuestions] = useState<
     TechnicalQuestion[]
   >([]);
-  const [row, setRow] = useState<any | number>(0);
   const [showFullJobDesc, setShowFullJobDesc] = useState(false);
-  const [action, setAction] = useState(false);
-  const [rowAction, setRowAction] = useState<any | number>(0);
   const [showDetails, setShowDetails] = useState(false); // State variable for pop-up
   const [candidateDetails, setCandidateDetails] = useState<any>(null);
   const { id } = useParams();
   const [approval, setApproval] = useState(false);
-  const [numMCQ, setNumMCQ] = useState<number>(1);
-  const [numBehavioral, setNumBehavioral] = useState<number>(1);
-  const [numCoding, setNumCoding] = useState<number>(0);
   const [showPopup, setShowPopup] = useState(false);
   const [candName, setCanName] = useState("");
-  const [selectedCandidates, setSelectedCandidates] = useState<string>("");
+  const [resume_id, setResume_id] = useState("");
   const [showSelectCandidatePopup, setShowSelectCandidatePopup] =
     useState(false);
-  const [gen, setGen] = useState("");
-  const [pop, setPop] = useState(false);
-  const [updateStatus, setUpdateStatus] = useState(false);
+  const gen = "";
+  const pop = false;
   const [Resultdata, setResultData] = useState<any>(null);
 
   const handleCandidateSelect = async (
-    candidateName: string,
+    resume_id: string,
+    // candidateName: string,
     checked: boolean
   ) => {
     const updatedData = Data.map((item) => {
-      if (item.candidate_name === candidateName) {
+      if (item.resume_id === resume_id) {
         return { ...item, selected_status: checked };
       }
       return item;
     });
     try {
-      let check = checked ? "true" : "false";
-      setSelectedCandidates(checked ? candidateName : "");
+      const check = checked ? "true" : "false";
       const resp = await api.post("/update_resume_status", {
-        name: candidateName,
+        resume_id: resume_id,
         status: check,
       });
       console.log(resp);
@@ -134,9 +127,9 @@ const RespJdDash = () => {
     const getCandList = async () => {
       try {
         const res = await api.get(`/get_resume_scores?job_id=${id}`);
-
         const candidateData = res.data.resume_scores;
         dispatch(setCandList(candidateData));
+        console.log("Candidate Data:", candidateData);
       } catch (err: any) {
         console.log(err);
       }
@@ -150,20 +143,19 @@ const RespJdDash = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5; // Number of items per page
-  const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const handleBrowseClick = () => {
     if (fileInputRef.current !== null && fileInputRef.current !== undefined) {
       (fileInputRef.current as HTMLInputElement).click();
     }
   };
-  const [refreshStatus, setRefreshStatus] = useState<string>("Done");
+  // const [refreshStatus, setRefreshStatus] = useState<string>("Done");
   const handleRefresh = () => {
-    setRefreshStatus("refreshing");
     const getCandList = async () => {
       try {
         const res = await api.get(`/get_resume_scores?job_id=${id}`);
         const candidateData = res.data.resume_scores;
+        console.log("Candidate Data:", candidateData);
         dispatch(setCandList(candidateData));
       } catch (err: any) {
         alert("Error fetching data");
@@ -171,6 +163,7 @@ const RespJdDash = () => {
       }
     };
     getCandList();
+    console.log("Refreshed");
   };
   // Calculate total number of pages
   const totalPages = Math.ceil(Data.length / itemsPerPage);
@@ -180,10 +173,10 @@ const RespJdDash = () => {
     setCurrentPage(page);
   };
 
-  const otherActions = (id: number) => {
-    setAction(!action);
-    setRowAction(id);
-  };
+  // const otherActions = (id: number) => {
+  //   setAction(!action);
+  //   setRowAction(id);
+  // };
 
   const addResume = async () => {
     if (!file || !jobDetails) {
@@ -192,7 +185,10 @@ const RespJdDash = () => {
     }
     const newResume = new FormData();
     newResume.append("resume", file);
-    newResume.append("id", jobDetails.job_id!);
+    newResume.append(
+      "id",
+      jobDetails.job_id ? jobDetails.job_id.toString() : ""
+    );
     newResume.append("role", jobDetails.role!);
 
     try {
@@ -214,8 +210,12 @@ const RespJdDash = () => {
   const deleteCandHandler = async (item: any) => {
     try {
       const resp = await api.get(
-        `/delete_resume?candidate_name=${item.candidate_name}&job_id=${jobDetails?.job_id}`
+        `/delete_resume?resume_id=${item.resume_id}&job_id=${jobDetails?.job_id}`
       );
+      if (resp.statusText === "OK") {
+        alert("Candidate Deleted Successfully");
+        // window.location.reload();
+      }
       dispatch(deleteCandidateByName(item.candidate_name));
     } catch (error) {
       console.log(error);
@@ -225,7 +225,7 @@ const RespJdDash = () => {
   const showCandDetails = async (item: any) => {
     try {
       const res = await api.get(
-        `/extracted_info?job_id=${jobDetails?.job_id}&candidate_name=${item.candidate_name}`
+        `/extracted_info?job_id=${jobDetails?.job_id}&resume_id=${item.resume_id}`
       );
       setCandidateDetails(res.data.extracted_info_details);
       setShowDetails(true);
@@ -249,32 +249,32 @@ const RespJdDash = () => {
     return lines.slice(0, maxLines).join("\n");
   };
 
-  const handleProceed = async () => {
-    setShowPopup(false);
-    setGen("Generating Questions");
-    try {
-      const resp = await api.post("/CHECK_Auto_assessment", {
-        job_id: jobDetails?.job_id,
-        candidate_name: candName,
-        no_tech_questions: numMCQ,
-        no_behav_questions: numBehavioral,
-      });
-      if (resp.statusText == "OK") {
-        setPop(true);
-        setGen("");
-      }
-      setTimeout(() => {
-        handleRefresh();
-      }, 1000);
-    } catch (err: unknown) {
-      console.log(err);
-    }
-  };
+  // const handleProceed = async () => {
+  //   setShowPopup(false);
+  //   setGen("Generating Questions");
+  //   try {
+  //     const resp = await api.post("/CHECK_Auto_assessment", {
+  //       job_id: jobDetails?.job_id,
+  //       candidate_name: candName,
+  //       no_tech_questions: numMCQ,
+  //       no_behav_questions: numBehavioral,
+  //     });
+  //     if (resp.statusText == "OK") {
+  //       setPop(true);
+  //       setGen("");
+  //     }
+  //     setTimeout(() => {
+  //       handleRefresh();
+  //     }, 1000);
+  //   } catch (err: unknown) {
+  //     console.log(err);
+  //   }
+  // };
 
   useEffect(() => {
     const genQuestions = async () => {
       if (jobDetails?.job_id) {
-        const resp = await getTestQuestion(candName, jobDetails?.job_id);
+        const resp = await getTestQuestion(resume_id, jobDetails?.job_id);
         setBehavioralQuestions(resp.Behaviour_q);
         setCodingQuestion(resp.coding_question);
         setTechnicalQuestions(resp.tech_questions);
@@ -324,7 +324,6 @@ const RespJdDash = () => {
       >
         <div className="mb-4">
           <h1 className="text-2xl font-semibold mb-1">{jobDetails?.role}</h1>
-
           <p
             className="text-sm text-zinc-600 dark:text-zinc-400"
             onClick={() => setShowFullJobDesc(!showFullJobDesc)}
@@ -333,7 +332,8 @@ const RespJdDash = () => {
               ? jobDetails?.jd
               : truncateJobDescription(jobDetails?.jd)}
             {!showFullJobDesc &&
-              jobDetails?.jd?.split("\n").length > 5 &&
+              jobDetails?.jd &&
+              jobDetails.jd.split("\n").length > 5 &&
               "..."}
           </p>
         </div>
@@ -380,7 +380,9 @@ const RespJdDash = () => {
               type="file"
               ref={fileInputRef}
               className="hidden"
-              onChange={(e) => setFile(e.target.files[0])}
+              onChange={(e) =>
+                setFile(e.target.files ? e.target.files[0] : null)
+              }
             />
             {file ? (
               <button
@@ -449,25 +451,29 @@ const RespJdDash = () => {
                       <td className="p-3 w-[300px]">
                         <p className="">
                           {item.Matching_Skills &&
-                            item.Matching_Skills.map((skill, index) => (
-                              <span key={index}>
-                                {skill}
-                                {index !== item.Matching_Skills.length - 1 &&
-                                  ", "}
-                              </span>
-                            ))}
+                            item.Matching_Skills.map(
+                              (skill: any, index: any) => (
+                                <span key={index}>
+                                  {skill}
+                                  {index !== item.Matching_Skills.length - 1 &&
+                                    ", "}
+                                </span>
+                              )
+                            )}
                         </p>
                       </td>
                       <td className="p-3 w-[300px]">
                         <p className="">
                           {item.Missing_Skills &&
-                            item.Missing_Skills.map((skill, index) => (
-                              <span key={index}>
-                                {skill}
-                                {index !== item.Missing_Skills.length - 1 &&
-                                  ", "}
-                              </span>
-                            ))}
+                            item.Missing_Skills.map(
+                              (skill: any, index: any) => (
+                                <span key={index}>
+                                  {skill}
+                                  {index !== item.Missing_Skills.length - 1 &&
+                                    ", "}
+                                </span>
+                              )
+                            )}
                         </p>
                       </td>
                       <td className="p-3 text-center">
@@ -492,12 +498,14 @@ const RespJdDash = () => {
                       <td>
                         <input
                           type="checkbox"
-                          // checked={item.selected_status}
+                          checked={item.selected_status}
                           onChange={(e) => {
                             handleCandidateSelect(
-                              item.candidate_name,
+                              item.resume_id,
+                              // item.candidate_name,
                               e.target.checked
                             );
+                            setResume_id(item.resume_id);
                             setCanName(item.candidate_name);
                           }}
                         />
@@ -517,18 +525,14 @@ const RespJdDash = () => {
                               Delete
                             </button>
                           </div>
-                          {item.selected_status &&
-                            item.assessment_status == 0 &&
-                            gen == "" &&
-                            pop == false &&
-                            item.status == null && (
-                              <button
-                                className="resp-btn"
-                                onClick={() => handleRightArrowClick(item)}
-                              >
-                                Generate
-                              </button>
-                            )}
+                          {gen == "" && pop == false && item.status == null && (
+                            <button
+                              className="resp-btn"
+                              onClick={() => handleRightArrowClick(item)}
+                            >
+                              Generate
+                            </button>
+                          )}
                           {candName == item.candidate_name &&
                             item.selected_status &&
                             item.assessment_status == 0 &&
@@ -536,7 +540,7 @@ const RespJdDash = () => {
                               <button className="resp-btn">Generating </button>
                             )}
                           {item.selected_status &&
-                            item.assessment_status == 0 &&
+                            item.assessment_status == 1 &&
                             item.status == "assessment_generated" && (
                               <button className="resp-btn" onClick={popHandle}>
                                 Generated
@@ -706,8 +710,8 @@ const RespJdDash = () => {
       )}
       {showPopup && (
         <GenerateQuestionsPopup
-          candName={candName}
-          job_id={jobDetails?.job_id!}
+          resume_id={resume_id}
+          job_id={jobDetails?.job_id ? jobDetails.job_id : null}
           setPop={() => setShowPopup(false)}
         />
       )}

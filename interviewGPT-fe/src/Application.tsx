@@ -2,30 +2,27 @@ import TextArea from "./components/TextArea";
 import Table from "./components/Table";
 import { useState, useEffect } from "react";
 import Header from "./components/Header";
-import Image from "./assets/loader.gif";
 import Modal from "react-modal";
 
 Modal.setAppElement("#root");
 
 // import html2canvas from 'html2canvas';
-import axios from "axios";
-import ErrorAlert from "./components/Alerts/ErrorAlert";
 import TechSkillTable from "./components/TechSkillTable";
 import { FetchSkillsData } from "./types";
 import api from "./components/customAxios/Axios";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import AddJd from "./components/AddJd";
 import TextArea2 from "./components/TextArea2";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCheckCircle,
-  faTimesCircle,
-} from "@fortawesome/free-solid-svg-icons";
+// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+// import {
+//   faCheckCircle,
+//   faTimesCircle,
+// } from "@fortawesome/free-solid-svg-icons";
 
 function Application() {
   const [file, setFile] = useState<any | null>(null);
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [success, setSuccess] = useState(false);
+  // const [modalIsOpen, setModalIsOpen] = useState(false);
+  // const [success, setSuccess] = useState(false);
   const [mainData, setMainData] = useState<any | null>(null);
   const [mainTextArea, setMainTextArea] = useState<any | null>("");
   const [load, setLoad] = useState(false);
@@ -41,11 +38,9 @@ function Application() {
   // const [isReportGenerated, setIsReportGenerated] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [empty, setEmpty] = useState<boolean>(false);
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const [modalMessage, setModalMessage] = useState<string>("");
-  const [fetchSkill, setFetchSkill] = useState<
-    FetchSkillsData & { timestamp: number }
-  >();
+  // const [showModal, setShowModal] = useState<boolean>(true);
+  // const [modalMessage, setModalMessage] = useState<string>("");
+  const [fetchSkill] = useState<FetchSkillsData & { timestamp: number }>();
   console.log(mainData, mainTextArea);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,22 +64,22 @@ function Application() {
     };
   }, []);
 
-  const customStyles = {
-    content: {
-      top: "20%",
-      left: "50%",
-      right: "auto",
-      bottom: "auto",
-      marginRight: "0%",
-      transform: "translate(-50%, -50%)",
-      // width:"52%",
-      borderRadius: "5px",
-      // boxShadow:'0 2px 9px grey',
-      fontFamily: "sans-serif",
+  // const customStyles = {
+  //   content: {
+  //     top: "20%",
+  //     left: "50%",
+  //     right: "auto",
+  //     bottom: "auto",
+  //     marginRight: "0%",
+  //     transform: "translate(-50%, -50%)",
+  //     // width:"52%",
+  //     borderRadius: "5px",
+  //     // boxShadow:'0 2px 9px grey',
+  //     fontFamily: "sans-serif",
 
-      borderBottom: success ? "2px solid green" : "2px solid red",
-    },
-  };
+  //     borderBottom: success ? "2px solid green" : "2px solid red",
+  //   },
+  // };
 
   const uploadJD = async () => {
     setIsHidden(true);
@@ -104,7 +99,7 @@ function Application() {
     }
 
     setIsLoading(true);
-    setModalIsOpen(true);
+    // setModalIsOpen(true);
     console.log("kere");
     console.log("hhh", {
       role: mainData?.role || mainData2?.role || role || "",
@@ -119,9 +114,9 @@ function Application() {
       if (response.data.message === "Job uploaded successfully.") {
         setIsLoading(false);
         // Display modal for 3 seconds
-        setSuccess(true);
-        setModalMessage("Successfully added JD");
-        setShowModal(true);
+        // setSuccess(true);
+        // setModalMessage("Successfully added JD");
+        // setShowModal(true);
         setMainTextArea(null);
         setMainTextArea2(null);
         setMainData("");
@@ -130,23 +125,23 @@ function Application() {
         setRole("");
         setRole2("");
         setTimeout(() => {
-          setShowModal(false);
+          // setShowModal(false);
         }, 5000);
         navigate("/dashboard");
       } else if (response.data.message == "Job JD already exists.") {
         setIsLoading(false);
-        setSuccess(false);
+        // setSuccess(false);
         setEmpty(true);
-        setModalMessage("Job JD already exists.");
-        setShowModal(true);
+        // setModalMessage("Job JD already exists.");
+        // setShowModal(true);
         setMainTextArea(null);
         setMainTextArea2(null);
         setMainData(null);
         setRole("");
         setRole2("");
-        setTimeout(() => {
-          setShowModal(false);
-        }, 5000);
+        // setTimeout(() => {
+        //   // setShowModal(false);
+        // }, 5000);
       }
       console.log("rr", response);
     } catch (error: any) {
@@ -157,33 +152,32 @@ function Application() {
       // }, 3000);
     }
   };
-  const fetchDataFetchSkill = async () => {
-    setIsLoading(true);
-    setModalIsOpen(true);
-    try {
-      const response = await api.post<FetchSkillsData>("/fetch_skills", {
-        role: mainData?.role || "",
-        job_description: mainData?.jd || mainTextArea,
-      });
+  // const fetchDataFetchSkill = async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     const response = await api.post<FetchSkillsData>("/fetch_skills", {
+  //       role: mainData?.role || "",
+  //       job_description: mainData?.jd || mainTextArea,
+  //     });
 
-      setFetchSkill({ ...response.data, timestamp: Date.now() });
-      localStorage.setItem("mainSkill", JSON.stringify(response.data));
-      // setMainSkill(response.data);
-      await fetchSoftSkillQuestions(response.data);
-      // await fetchSoftTechQuestions(response.data);
-      setIsHidden(true);
+  //     setFetchSkill({ ...response.data, timestamp: Date.now() });
+  //     localStorage.setItem("mainSkill", JSON.stringify(response.data));
+  //     // setMainSkill(response.data);
+  //     await fetchSoftSkillQuestions(response.data);
+  //     // await fetchSoftTechQuestions(response.data);
+  //     setIsHidden(true);
 
-      // window.location.href = "#/app-submit"
-    } catch (error: any) {
-      console.error("Error fetching data:", error);
-      console.error("API Error:", error);
-      setError(error);
-      setTimeout(() => {
-        setError(null);
-      }, 3000);
-    }
-    setIsLoading(false);
-  };
+  //     // window.location.href = "#/app-submit"
+  //   } catch (error: any) {
+  //     console.error("Error fetching data:", error);
+  //     console.error("API Error:", error);
+  //     setError(error);
+  //     setTimeout(() => {
+  //       setError(null);
+  //     }, 3000);
+  //   }
+  //   setIsLoading(false);
+  // };
 
   const uploadDoc = async () => {
     if (!file || !role2) {
@@ -199,32 +193,22 @@ function Application() {
       const response = await api.post("/file_upload_jd", newResume);
 
       if (response.statusText === "OK") {
-        // Display modal for 3 seconds
-        setSuccess(true);
-        setModalMessage("Successfully added JD");
-        setShowModal(true);
+        // setSuccess(true);
         setMainTextArea(null);
         setMainTextArea2(null);
         setMainData(null);
         setRole("");
         setRole2("");
-        setTimeout(() => {
-          setShowModal(false);
-        }, 5000);
         navigate("/dashboard");
       } else {
-        setSuccess(false);
-        setModalMessage("Error Uploading JD");
-        setShowModal(true);
-        setTimeout(() => {
-          setShowModal(false);
-        }, 5000);
+        // setSuccess(false);
+        console.log("Error uploading jd");
       }
 
       console.log("Response:", response);
     } catch (error) {
       console.error("Error uploading jd:", error);
-      // Handle error and display appropriate message
+      alert("Error uploading JD");
     }
   };
   // const generateQuestion=async ()=>{
@@ -247,35 +231,35 @@ function Application() {
   //     console.error(err)
   //   }
   // }
-  const fetchSoftSkillQuestions = async (data: any) => {
-    try {
-      const softSkillResponse = await api.post(
-        "/generate_soft_skill_questions",
-        {
-          name: mainData?.role,
-          soft_skills: data?.skills?.soft_skills.join(","), // Ensure soft_skills is an array
-          experience: data?.skills?.experience,
-        }
-      );
+  // const fetchSoftSkillQuestions = async (data: any) => {
+  //   try {
+  //     const softSkillResponse = await api.post(
+  //       "/generate_soft_skill_questions",
+  //       {
+  //         name: mainData?.role,
+  //         soft_skills: data?.skills?.soft_skills.join(","), // Ensure soft_skills is an array
+  //         experience: data?.skills?.experience,
+  //       }
+  //     );
 
-      localStorage.setItem(
-        "softSkill",
-        JSON.stringify(softSkillResponse?.data)
-      );
-      // setSoftSkill(softSkillResponse?.data);
-    } catch (error: any) {
-      console.error("Error fetching soft skill questions:", error);
-      console.error("Error fetching data:", error);
-      console.error("API Error:", error);
-      setError(error);
-      setTimeout(() => {
-        setError(null);
-      }, 3000);
-    }
-  };
+  //     localStorage.setItem(
+  //       "softSkill",
+  //       JSON.stringify(softSkillResponse?.data)
+  //     );
+  //     // setSoftSkill(softSkillResponse?.data);
+  //   } catch (error: any) {
+  //     console.error("Error fetching soft skill questions:", error);
+  //     console.error("Error fetching data:", error);
+  //     console.error("API Error:", error);
+  //     setError(error);
+  //     setTimeout(() => {
+  //       setError(null);
+  //     }, 3000);
+  //   }
+  // };
 
-  // const fetchSoftTechQuestions = async (data: any) => {
-  // 	try {
+  //  const fetchSoftTechQuestions = async (data: any) => {
+  //  	try {
   // 		const techSkillResponse = await axios.post(
   // 			"https://coops-backend.bluetickconsultants.com:8000/generate_technical_questions",
   // 			{
@@ -502,7 +486,7 @@ function Application() {
           />
         </div>
       </div>
-      {showModal && (
+      {/* {showModal && (
         <Modal
           isOpen={showModal}
           onRequestClose={() => setShowModal(false)}
@@ -531,7 +515,7 @@ function Application() {
             <span style={{ marginRight: "10px" }}>{modalMessage}</span>
           </div>
         </Modal>
-      )}
+      )} */}
 
       {/* {isLoading &&  */}
 

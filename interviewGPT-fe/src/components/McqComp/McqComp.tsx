@@ -1,5 +1,3 @@
-import React from "react";
-
 const McqComp = () => {
   return (
     <div className="max-w-lg mx-auto p-4">
@@ -9,7 +7,7 @@ const McqComp = () => {
         undefined from multiple source systems is consolidated into a single
         undefined warehouse?
       </p>
-      <form> 
+      <form>
         <div className="mb-2 border p-2 rounded">
           <label className="block">
             <input type="radio" name="question" value="ARPU" className="mr-2" />

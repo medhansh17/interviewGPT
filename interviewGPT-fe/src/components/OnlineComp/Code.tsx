@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import MonacoEditor from "react-monaco-editor";
 import api from "../customAxios/Axios";
 import { useNavigate } from "react-router-dom";
-import MainAssessment from "../MainAssessment";
 import Timer from "../McqComp/Timer";
 import New_Sidebar from "../navbar.component";
 
@@ -31,13 +30,14 @@ const Code = () => {
       setId(storedItem?.job_id);
     }
     const codeQues = async () => {
-      const job_id = localStorage.getItem("job_id");
-      const resp = await api.post("/fetch_coding_question", {
-        candidate_name: canName,
-        job_id: job_id,
-      });
-      console.log(resp);
-      setCodingQuestion(resp.data.coding_question);
+      // const job_id = localStorage.getItem("job_id");
+      // const resp = await api.post("/fetch_coding_question", {
+      //   candidate_name: canName,
+      //   job_id: job_id,
+      // });
+      // console.log(resp);
+      const beha = sessionStorage.getItem("question");
+      setCodingQuestion(beha ? JSON.parse(beha).coding_question : []);
     };
     codeQues();
   }, [canName, id]);

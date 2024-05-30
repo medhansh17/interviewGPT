@@ -18,14 +18,14 @@ const McqMain: React.FC<QuestionProps> = ({
   }>({});
   const navigate = useNavigate();
   const [canName, setCanname] = useState("");
-  const [id, setId] = useState<number>();
+  // const [id, setId] = useState<number>();
 
   useEffect(() => {
     const storedItemString = localStorage.getItem("item");
     if (storedItemString) {
       const storedItem = JSON.parse(storedItemString);
       setCanname(storedItem?.candidate_name);
-      setId(storedItem?.job_id);
+      // setId(storedItem?.job_id);
     }
     // Initialize selected options when questions change
     setSelectedOptions({});
