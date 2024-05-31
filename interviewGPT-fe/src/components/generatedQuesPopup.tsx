@@ -26,7 +26,7 @@ export default function GeneratedQuesPopup({
   const [updateStatus, setUpdateStatus] = useState(false);
   const navigate = useNavigate();
   // const [approval, setApproval] = useState(true);
-
+  
   const handleApproval = () => {
     // Handle approval logic here
     navigate(`/online-assess/`);

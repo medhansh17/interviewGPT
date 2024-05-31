@@ -85,7 +85,7 @@ const New_Sidebar = () => {
         >
           <div className="flex justify-between w-full">
             <span className={`text-[15px]  font-bold `}>
-              1. Behavioural Round
+              1. Behavioural Assessment
             </span>
           </div>
         </div>
@@ -112,7 +112,9 @@ const New_Sidebar = () => {
           }`}
         >
           <div className="flex justify-between w-full">
-            <span className="text-[15px]  font-bold">2. Technical Round</span>
+            <span className="text-[15px]  font-bold">
+              2. Technical Assessment
+            </span>
           </div>
         </div>
         <div className="text-left text-sm mt-2 w-4/5 mx-auto text-black font-bold">
@@ -134,7 +136,7 @@ const New_Sidebar = () => {
           }`}
         >
           <div className="flex justify-between w-full">
-            <span className="text-[15px] font-bold">3. Coding Round</span>
+            <span className="text-[15px] font-bold">3. Coding Assessment</span>
           </div>
         </div>
         <div className="text-left text-sm mt-2 w-4/5 mx-auto text-black font-bold">
@@ -144,7 +146,7 @@ const New_Sidebar = () => {
                 key={question.coding_ques_id}
                 className="cursor-pointer p-2 hover:bg-blue-600 rounded-md mt-1 font-medium"
               >
-                Question {index + 1}
+                Question {index + 1} : {question.question}
               </h1>
             ))}
         </div>

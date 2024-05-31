@@ -72,6 +72,9 @@ const ExampleComponent: React.FC = () => {
       formData.append("role", jobDetails?.role!);
 
       const response = await api.post("/upload_resume_to_job", formData);
+      if (response.statusText === "OK") {
+        window.location.reload();
+      }
       console.log(response.data);
     } catch (error) {
       console.error("Error occurred:", error);
