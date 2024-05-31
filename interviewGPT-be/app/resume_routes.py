@@ -13,30 +13,14 @@ from datetime import datetime
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
 from flask import Blueprint, request, jsonify, current_app
+from app.middleware import retry
 from .models import Job, Resume, ExtractedInfo, ResumeScore, Candidate
-from .config import RESUME_FOLDER, ARCHIVE_FOLDER, client, MODEL_NAME
-from .prompts.resume_prompts import extract_resume_prompt, evaluate_resume_prompt, user_prompt_resume_evaluation
-from .agents_resume import create_agents
+from .config import RESUME_FOLDER, ARCHIVE_FOLDER, MODEL_NAME
+from .prompts.resume_prompts import extract_resume_prompt, evaluate_task_prompt, user_prompt_evaluation
+# from .agents_resume import create_agents
 import time
 
 ats_bp = Blueprint('ats', __name__)
-
-
-def retry_with_switch(max_retries=3, delay=2):
-    def decorator_retry(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            retries = 0
-            while retries < max_retries:
-                try:
-                    return func(*args, **kwargs, attempt=retries)
-                except Exception as e:
-                    retries += 1
-                    if retries == max_retries:
-                        raise e
-                    time.sleep(delay)  # Delay in seconds between retries
-        return wrapper
-    return decorator_retry
 
 
 @ats_bp.route('/extracted_info', methods=['GET'])
@@ -44,7 +28,6 @@ def get_extracted_info():
     """
     Fetch details from the ExtractedInfo table based on Resume ID.
     """
-
 
     resume_id = request.args.get('resume_id')
     if not resume_id:
@@ -100,18 +83,18 @@ def extract_text_from_resume(app, role, filename):
     with app.app_context():
         file_path = os.path.join(RESUME_FOLDER, role, filename)
         reader = PdfReader(file_path)
-        print("\n".join([page.extract_text() for page in reader.pages]))
         return "\n".join([page.extract_text() for page in reader.pages])
+
 
 def chatgpt_message(app, jd, job_role, skill_set, total_experience):
     """
-    Send a message to ChatGPT to evaluate resumes based on job description and mandatory skills.
+    Send a message to ChatGPT to evaluate skill sets based on job description and mandatory skills.
     """
     with app.app_context():
         messages = [
-            {"role": 'system', "content": evaluate_resume_prompt},
-            {"role": "user", "content": user_prompt_resume_evaluation.format(
-                skill_set=skill_set, job_role=job_role, jd=jd,total_experience=total_experience
+            {"role": 'system', "content": evaluate_task_prompt},
+            {"role": "user", "content": user_prompt_evaluation.format(
+                skill_set=skill_set, job_role=job_role, jd=jd, total_experience=total_experience
             )}
         ]
 
@@ -129,8 +112,63 @@ def chatgpt_message(app, jd, job_role, skill_set, total_experience):
             'content'].replace("\n", " ")
         return response_data
 
-#@retry_with_switch(max_retries=3, delay=2)
-def process_resumes(app, job_id, role, resume_list, mandatory_skills, attempt=0):
+
+def create_extracted_info(extracted_info, resume_id):
+    """
+    Save extracted information to the database.
+    """
+    existing_info = ExtractedInfo.query.filter_by(
+        resume_id=resume_id).first()
+    if not existing_info:
+        extracted_record = ExtractedInfo(
+            resume_id=resume_id,
+            name=extracted_info.get('candidate_name'),
+            total_experience=extracted_info.get('work_exp'),
+            phone_number=extracted_info.get('phone_number'),
+            email_id=extracted_info.get('email_id'),
+            address=extracted_info.get('address'),
+            linkedin_id=extracted_info.get('linkedin_id'),
+            github_id=extracted_info.get('github_id'),
+            nationality=extracted_info.get('nationality'),
+            tech_skill=extracted_info.get('technical_skills'),
+            behaviour_skill=extracted_info.get('soft_skills'),
+            date_of_birth=extracted_info.get('date_of_birth')
+        )
+        db.session.add(extracted_record)
+    db.session.commit()
+
+
+def extract_details_from_resume(text_resume):
+    """
+    Extract details from the resume text using OpenAI API.
+    """
+    extract_candidate_info = [
+        {"role": "system", "content": extract_resume_prompt},
+        {"role": "user", "content": (
+            f"use the {text_resume} resume to extract details such as name, work experience, phone number, address, email id, LinkedIn id, and GitHub id. "
+            "Fetch all the technical skills and soft skills separately and give the details as per instructed. If years of experience are not explicitly mentioned, calculate the total years of experience based on the dates provided in the candidate's employment history and use it for work_exp"
+        )}
+    ]
+
+    client = OpenAI()
+    client.api_key = os.getenv("OPENAI_API_KEY")
+    response = client.chat.completions.create(
+        model=MODEL_NAME,
+        messages=extract_candidate_info,
+        max_tokens=1000
+    )
+    res = {}
+    response = dict(response)
+    response_data = dict(dict(response['choices'][0])['message'])[
+        'content'].replace("\n", " ")
+    response_data = ' '.join(response_data.split())
+    response_data = response_data.strip().strip('```json').strip().strip('```')
+
+    return response_data
+
+
+@ retry(max_retries=2, delay=2)
+def process_resumes(app, job_id, role, resume_list):
     """
     Extract information from resumes, save it to the database, and calculate resume scores.
     """
@@ -138,122 +176,98 @@ def process_resumes(app, job_id, role, resume_list, mandatory_skills, attempt=0)
         job = Job.query.filter_by(id=job_id).first()
         if not job:
             return jsonify({'error': 'Job not found.'}), 404
+
+        any_errors = False  # Flag to track if any errors occurred
+
         for resume_id, filename in resume_list:
-            if filename.endswith(".pdf"):
-                # Extract text from resume
-                text_resume = extract_text_from_resume(app, role, filename)
-                resume_record = Resume.query.get(resume_id)
-                if resume_record:
-                    resume_id = resume_record.id
+            try:
+                if filename.endswith(".pdf"):
+                    text_resume = extract_text_from_resume(app, role, filename)
+                    print(f"Extracted text from resume:")
 
-                # Prepare prompt for resume information extraction
-                message_resumefetch = [
-                    {"role": "system", "content": extract_resume_prompt},
-                    {"role": "user", "content": (
-                        f"use the {text_resume} resume to details which are stated like name (get full name with initial if it is there), "
-                        f"work experience, phone number, address, email id, LinkedIn id and GitHub id. Fetch all the technical skills and "
-                        f"soft skills separately don't mix it from the resume {text_resume} and give the details as per instructed. If years "
-                        f"of experience are not explicitly mentioned in the {text_resume}, calculate the total years of experience based on the "
-                        f"dates provided in the candidate's employment history and use it for work_exp"
-                    )}
-                ]
+                    resume_record = Resume.query.get(resume_id)
+                    if resume_record:
+                        resume_id = resume_record.id
 
-                # Call OpenAI API to extract resume information
-                client = OpenAI()
-                client.api_key = os.getenv("OPENAI_API_KEY")
-                response = client.chat.completions.create(
-                    model=MODEL_NAME,
-                    messages=message_resumefetch,
-                    max_tokens=1000
-                )
-
-                response = dict(response)
-                response_data = dict(dict(response['choices'][0])['message'])[
-                    'content'].replace("\n", " ")
-                response_data = ' '.join(response_data.split())
-                response_data = response_data.strip().strip('```json').strip().strip('```')
-
-                print(response_data)
-                if response_data:
-
-                    extracted_info = json.loads(response_data)
-
-                else:
-                    print("no content or json not in format")
-                # Extracting the candidate name
-                candidate_name = extracted_info['resume_details'][0]['candidate_name']
-
-                # Save extracted candidate information to the database
-                existing_candidate = Candidate.query.filter_by(
-                    name=candidate_name, job_id=job_id, resume_id=resume_id).first()
-                if not existing_candidate:
-                    new_candidate = Candidate(
-                        name=candidate_name, job_id=job_id, resume_id=resume_id)
-                    db.session.add(new_candidate)
-                    db.session.commit()
-
-                for resume_detail in extracted_info['resume_details']:
                     existing_info = ExtractedInfo.query.filter_by(
-                        resume_id=resume_id, name=resume_detail.get('candidate_name', 'NIL')).first()
-                    if not existing_info:
-                        extracted_record = ExtractedInfo(
-                            resume_id=resume_id,
-                            name=resume_detail.get('candidate_name', 'NIL'),
-                            total_experience=resume_detail.get(
-                                'work_exp', 'NIL'),
-                            phone_number=resume_detail.get(
-                                'phone_number', 'NIL'),
-                            email_id=resume_detail.get('email_id', 'NIL'),
-                            address=resume_detail.get('address', 'NIL'),
-                            linkedin_id=resume_detail.get(
-                                'linkedin_id', 'NIL'),
-                            github_id=resume_detail.get('github_id', 'NIL'),
-                            nationality=resume_detail.get(
-                                'nationality', 'NIL'),
-                            tech_skill=resume_detail.get(
-                                'technical_skills', []),
-                            behaviour_skill=resume_detail.get(
-                                'soft_skills', []),
-                            date_of_birth=resume_detail.get(
-                                'date_of_birth', 'NIL')
-                        )
-                        db.session.add(extracted_record)
-                db.session.commit()
-                print("extra info table is done")
-                # Calculate resume score
-                skill_set = extracted_info['resume_details'][0]['technical_skills']
-                total_experience=extracted_info['resume_details'][0]['work_exp']
-                print("=======@@@@=====")
-                print(skill_set)
-
-                print(total_experience)
-                if not skill_set:
-                    print("nothing in text_resume")
-                    continue
-                print("calling agents")
-                #AI_score_response = create_agents(app, text_resume, job.jd, mandatory_skills, job.role)
-
-                #if not AI_score_response:
-                print("calling ai")
-                AI_score_response = chatgpt_message(app, job.jd, job.role, skill_set, total_experience)
-                print("ai score for resume")
-                print(AI_score_response)
-                if AI_score_response:
-                    AI_score_response_dict = json.loads(AI_score_response)
-                    resume_score = ResumeScore.query.filter_by(
                         resume_id=resume_id).first()
+                    if not existing_info:
+                        response_data = extract_details_from_resume(
+                            text_resume)
+                        print(
+                            f"Extracted details from resume text: {response_data}")
+
+                        if response_data:
+                            extracted_info = json.loads(response_data)
+                            candidate_name = extracted_info.get(
+                                'candidate_name')
+
+                            existing_candidate = Candidate.query.filter_by(
+                                name=candidate_name, job_id=job_id, resume_id=resume_id).first()
+                            if not existing_candidate:
+                                new_candidate = Candidate(
+                                    name=candidate_name, job_id=job_id, resume_id=resume_id)
+                                db.session.add(new_candidate)
+                                db.session.commit()
+                            print(
+                                f"Saved candidate info to the database for: {candidate_name}")
+
+                            create_extracted_info(extracted_info, resume_id)
+                            print(
+                                f"Created extracted info for resume ID: {resume_id}")
+
+                    resume_score = ResumeScore.query.filter_by(
+                        resume_id=resume_id, isfilled=False).first()
+
                     if resume_score:
-                        resume_info = AI_score_response_dict['score'][0]
-                        resume_score.resume_filename = resume_info['resume_filename']
-                        resume_score.name = resume_info['candidate_name']
-                        resume_score.jd_match = resume_info['JD_MATCH']
-                        resume_score.match_status = resume_info['MATCH_STATUS']
-                        resume_score.matching_skills = resume_info['Matching_Skills']
-                        resume_score.missing_skills = resume_info['Missing_Skills']
-                        resume_score.experience_match = resume_info['experience_match']
-                        resume_score.candidate_experience = resume_info['candidate_experience']
-                        resume_score.required_experience = resume_info['required_experience']
-                        db.session.commit()
+                        existing_info = ExtractedInfo.query.filter_by(
+                            resume_id=resume_id).first()
+                        skill_set = existing_info.tech_skill
+                        total_experience = existing_info.total_experience
+
+                        print("Skill set -> ", skill_set)
+                        AI_score_response = chatgpt_message(
+                            app, job.jd, job.role, str(skill_set), str(total_experience))
+                        print(
+                            f"Received AI score response: {AI_score_response}")
+
+                        if AI_score_response:
+                            AI_score_response_dict = json.loads(
+                                AI_score_response)
+                            print(
+                                f"AI score response JSON parsed: {AI_score_response_dict}")
+
+                            resume_info = AI_score_response_dict
+                            resume_score.resume_filename = filename
+                            resume_score.name = existing_info.name
+                            resume_score.jd_match = resume_info.get(
+                                'JD_MATCH', None)
+                            resume_score.match_status = resume_info.get(
+                                'MATCH_STATUS', None)
+                            resume_score.matching_skills = resume_info.get(
+                                'Matching_Skills', None)
+                            resume_score.missing_skills = resume_info.get(
+                                'Missing_Skills', None)
+                            resume_score.experience_match = resume_info.get(
+                                'experience_match', None)
+                            resume_score.candidate_experience = resume_info.get(
+                                'candidate_experience', None)
+                            resume_score.required_experience = resume_info.get(
+                                'required_experience', None)
+                            resume_score.isfilled = True
+                            db.session.commit()
+                            print(
+                                f"Updated resume score for resume ID: {resume_id}")
+            except Exception as e:
+                # Log the error and set the error flag
+                print(f"Error processing resume {filename}: {e}")
+                any_errors = True
+                continue
+
+        if any_errors:
+            # Raise an exception if any errors occurred during the loop
+            raise Exception(
+                "Errors occurred during resume processing. Retrying...")
 
 
 @ats_bp.route('/upload_resume_to_job', methods=['POST'])
@@ -306,13 +320,14 @@ def upload_resume_to_job():
         print("thread is called")
         app = current_app._get_current_object()
         processing_thread = Thread(target=process_resumes, args=(
-            app, job.id, role, resume_list, mandatory_skills))
+            app, job.id, role, resume_list))
         processing_thread.start()
 
         return jsonify({'message': 'Resumes uploaded successfully and processing started.'}), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @ats_bp.route('/get_resume_scores', methods=['GET'])
 def get_resume_scores():
@@ -353,8 +368,8 @@ def get_resume_scores():
         "selected_status": score.selected_status,
         "assessment_status": score.assessment_status,
         "experience_match": score.experience_match,
-        "candidate_experience": score.candidate_experience,
-        "required_experience": score.required_experience,
+        # "candidate_experience": score.candidate_experience,
+        # "required_experience": score.required_experience,
         "status": score.status
     } for score in resume_scores]
 
