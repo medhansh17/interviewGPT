@@ -4,13 +4,13 @@ import api from "./customAxios/Axios";
 import { useParams } from "react-router-dom";
 import { UserContext } from "../context/JobContext";
 import { setCandList, deleteCandidateByName } from "../context/JobContext";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import InterviewDataDisplay from "./candidateResult";
-import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import ExampleComponent from "./multipleFileUpload";
 import { getTestQuestion } from "@/api/question";
 import GeneratedQuesPopup from "./generatedQuesPopup";
 import GenerateQuestionsPopup from "./generateQuestionsPopup";
+import CandidateDetailsPopup from "./candidateDetailsPopup";
+import ConfirmButton from "./confirmationPopup";
 
 interface MyObjectType {
   jd: string | null;
@@ -59,12 +59,10 @@ const RespJdDash = () => {
     TechnicalQuestion[]
   >([]);
   const [showFullJobDesc, setShowFullJobDesc] = useState(false);
-  const [showDetails, setShowDetails] = useState(false); // State variable for pop-up
-  const [candidateDetails, setCandidateDetails] = useState<any>(null);
+  const [showDetails, setShowDetails] = useState(false);
   const { id } = useParams();
   const [approval, setApproval] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
-  const [candName, setCanName] = useState("");
   const [resume_id, setResume_id] = useState("");
   const [showSelectCandidatePopup, setShowSelectCandidatePopup] =
     useState(false);
@@ -72,38 +70,30 @@ const RespJdDash = () => {
   const pop = false;
   const [Resultdata, setResultData] = useState<any>(null);
 
-  const handleCandidateSelect = async (
-    resume_id: string,
-    // candidateName: string,
-    checked: boolean
-  ) => {
-    const updatedData = Data.map((item) => {
-      if (item.resume_id === resume_id) {
-        return { ...item, selected_status: checked };
-      }
-      return item;
-    });
-    try {
-      const check = checked ? "true" : "false";
-      const resp = await api.post("/update_resume_status", {
-        resume_id: resume_id,
-        status: check,
-      });
-      console.log(resp);
-      // Handle response as needed
-    } catch (error) {
-      console.log(error);
-      // Handle error
-    }
-    setData(updatedData);
-  };
+  // const handleCandidateSelect = async (resume_id: string, checked: boolean) => {
+  //   const updatedData = Data.map((item) => {
+  //     if (item.resume_id === resume_id) {
+  //       return { ...item, selected_status: checked };
+  //     }
+  //     return item;
+  //   });
+  //   try {
+  //     const check = checked ? "true" : "false";
+  //     const resp = await api.post("/update_resume_status", {
+  //       resume_id: resume_id,
+  //       status: check,
+  //     });
+  //     console.log(resp);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  //   setData(updatedData);
+  // };
 
-  // Function to handle click on right arrow
   const handleRightArrowClick = (item: any) => {
     setShowPopup(true);
-    setCanName(item.candidate_name);
+    setResume_id(item.resume_id);
     const itemString = JSON.stringify(item);
-    // Store the stringified item in localStorage
     localStorage.setItem("item", itemString);
   };
 
@@ -212,31 +202,21 @@ const RespJdDash = () => {
       const resp = await api.get(
         `/delete_resume?resume_id=${item.resume_id}&job_id=${jobDetails?.job_id}`
       );
-      if (resp.statusText === "OK") {
-        alert("Candidate Deleted Successfully");
-        // window.location.reload();
-      }
+      console.log(resp);
       dispatch(deleteCandidateByName(item.candidate_name));
     } catch (error) {
       console.log(error);
     }
   };
 
-  const showCandDetails = async (item: any) => {
-    try {
-      const res = await api.get(
-        `/extracted_info?job_id=${jobDetails?.job_id}&resume_id=${item.resume_id}`
-      );
-      setCandidateDetails(res.data.extracted_info_details);
-      setShowDetails(true);
-    } catch (err: unknown) {
-      console.log(err);
-    }
+  const showCandDetails = (resume_id: string) => {
+    setResume_id(resume_id);
+    setShowDetails(true);
   };
 
   const closeDetails = () => {
     setShowDetails(false);
-    setCandidateDetails(null);
+    // setCandidateDetails(undefined);
   };
 
   const truncateJobDescription = (description: any) => {
@@ -283,7 +263,8 @@ const RespJdDash = () => {
     genQuestions();
   }, [approval]);
 
-  const popHandle = () => {
+  const popHandle = (resume_id: string) => {
+    setResume_id(resume_id);
     setApproval(true);
   };
 
@@ -413,7 +394,6 @@ const RespJdDash = () => {
 
                   <th className="p-3 text-left">Score</th>
                   <th className="p-3 text-left">Status</th>
-                  <th className="p-3 text-left">Select</th>
                   <th className="p-3 w-[150px] text-left">Action</th>
                   {/* <th className="p-3 text-left">Edit</th> */}
                 </tr>
@@ -444,7 +424,7 @@ const RespJdDash = () => {
                     <tr className="border-b dark:border-zinc-600" key={index}>
                       <td
                         className="p-3  font-bold underline"
-                        onClick={() => showCandDetails(item)}
+                        onClick={() => showCandDetails(item.resume_id)}
                       >
                         {item.candidate_name}
                       </td>
@@ -495,35 +475,20 @@ const RespJdDash = () => {
                         </span>
                       </td>
                       <td className="p-3 text-center">{`${item.status}`}</td>
-                      <td>
-                        <input
-                          type="checkbox"
-                          checked={item.selected_status}
-                          onChange={(e) => {
-                            handleCandidateSelect(
-                              item.resume_id,
-                              // item.candidate_name,
-                              e.target.checked
-                            );
-                            setResume_id(item.resume_id);
-                            setCanName(item.candidate_name);
-                          }}
-                        />
-                        {/* <input type='checkbox' checked={item.selected_status}  onChange={(e) => handleCandidateSelect(item.candidate_name, e.target.checked)} /> */}
-                      </td>
                       <td className="p-3 text-zinc-500 dark:text-zinc-400 relative">
                         <div
                           className="flex flex-col items-center justify-around text-lg"
                           style={{ gap: "4px" }}
                         >
                           <div>
-                            <button
-                              onClick={() => deleteCandHandler(item)}
-                              className="cursor-pointer resp-btn "
-                              style={{ color: "red" }}
-                            >
-                              Delete
-                            </button>
+                            <ConfirmButton
+                              label="Delete"
+                              message="Do you want to delete this record?"
+                              header="Delete Confirmation"
+                              icon="pi pi-times"
+                              acceptClassName="p-button-danger"
+                              onConfirm={() => deleteCandHandler(item)}
+                            />
                           </div>
                           {gen == "" && pop == false && item.status == null && (
                             <button
@@ -533,19 +498,23 @@ const RespJdDash = () => {
                               Generate
                             </button>
                           )}
-                          {candName == item.candidate_name &&
-                            item.selected_status &&
+                          {item.selected_status &&
                             item.assessment_status == 0 &&
                             gen && (
                               <button className="resp-btn">Generating </button>
                             )}
-                          {item.selected_status &&
-                            item.assessment_status == 1 &&
+                          {/* {item.selected_status && */}
+                          {
+                            // item.assessment_status == 1 &&
                             item.status == "assessment_generated" && (
-                              <button className="resp-btn" onClick={popHandle}>
+                              <button
+                                className="resp-btn"
+                                onClick={() => popHandle(item.resume_id)}
+                              >
                                 Generated
                               </button>
-                            )}
+                            )
+                          }
                           {item.assessment_status == 1 && (
                             <button
                               className="resp-btn"
@@ -617,97 +586,14 @@ const RespJdDash = () => {
         </div>
       )}
       {showDetails && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
-          <div className="relative bg-white dark:bg-zinc-700 rounded-lg shadow p-6 max-w-2xl w-full ">
-            <button
-              style={{ top: "-1rem", right: "-1rem" }}
-              className="absolute  bg-blue-500 text-white rounded-full p-2 w-10 h-10 flex items-center justify-center"
-              onClick={closeDetails}
-            >
-              <FontAwesomeIcon icon={faTimes} />
-            </button>
-            <div className="border-b-2 border-gray-400 mb-4 pb-4">
-              <div className="flex justify-between">
-                <div>
-                  <h2 className="text-xl font-semibold mb-2">
-                    {candidateDetails.candidate_name}
-                  </h2>
-                  <p className="text-sm text-gray-600">
-                    {candidateDetails.title}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm">
-                    <strong>Email:</strong> {candidateDetails.email_id}
-                  </p>
-                  <p className="text-sm">
-                    <strong>Phone:</strong> {candidateDetails.phone_number}
-                  </p>
-                  <p className="text-sm">
-                    <strong>Address:</strong> {candidateDetails.address}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold mb-2">Technical Skills</h3>
-              <div className="flex flex-wrap">
-                {candidateDetails.tech_skills.map(
-                  (skill: string, index: number) => (
-                    <button
-                      key={index}
-                      className="bg-blue-200 text-blue-900 rounded-lg px-2 py-1 mr-2 mb-2 text-sm"
-                    >
-                      {skill}
-                    </button>
-                  )
-                )}
-              </div>
-            </div>
-            <hr className="my-4" />
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold mb-2">Behavioral Skills</h3>
-              <div className="flex flex-wrap">
-                {candidateDetails.behaviour_skills.map(
-                  (skill: string, index: number) => (
-                    <button
-                      key={index}
-                      className="bg-blue-200 text-blue-900 rounded-lg px-2 py-1 mr-2 mb-2 text-sm"
-                    >
-                      {skill}
-                    </button>
-                  )
-                )}
-              </div>
-            </div>
-            <hr className="my-4" />
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold mb-2">
-                Additional Information
-              </h3>
-              <div className="mb-2">
-                <p className="text-sm">
-                  <strong>Date of Birth:</strong>{" "}
-                  {candidateDetails.date_of_birth}
-                </p>
-                <p className="text-sm">
-                  <strong>Nationality:</strong> {candidateDetails.nationality}
-                </p>
-                <p className="text-sm">
-                  <strong>LinkedIn:</strong> {candidateDetails.linkedin_id}
-                </p>
-                <p className="text-sm">
-                  <strong>GitHub:</strong> {candidateDetails.github_id}
-                </p>
-                <p className="text-sm">
-                  <strong>Total Experience:</strong>{" "}
-                  {candidateDetails.total_experience}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <CandidateDetailsPopup
+          resume_id={resume_id}
+          job_id={jobDetails?.job_id ? jobDetails.job_id : null}
+          setShowDetails={setShowDetails}
+          closeDetails={closeDetails}
+        />
       )}
+
       {showPopup && (
         <GenerateQuestionsPopup
           resume_id={resume_id}

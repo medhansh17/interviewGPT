@@ -24,6 +24,7 @@
     "html2canvas": "^1.4.1",
     "jquery": "^3.7.1",
     "lucide-react": "^0.287.0",
+    "primereact": "^10.6.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-modal": "^3.16.1",

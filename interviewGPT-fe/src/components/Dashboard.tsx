@@ -10,6 +10,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { UserContext } from "../context/JobContext";
 import { deleteJob } from "../context/JobContext";
+import ConfirmButton from "./confirmationPopup";
 
 interface DataItem {
   id: number;
@@ -357,14 +358,14 @@ const Dashboard = () => {
                             </button>
                           </div>
                           <div>
-                            <button
-                              onClick={() => deleteJobHandler(item)}
-                              className="cursor-pointer resp-btn "
-                              style={{ color: "red" }}
-                              title="Delete"
-                            >
-                              Delete
-                            </button>
+                            <ConfirmButton
+                              label="Delete"
+                              message="Do you want to delete this record?"
+                              header="Delete Confirmation"
+                              icon="pi pi-times"
+                              acceptClassName="p-button-danger"
+                              onConfirm={() => deleteJobHandler(item)}
+                            />
                           </div>
                         </div>
                       )}
