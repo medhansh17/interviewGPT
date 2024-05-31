@@ -15,7 +15,6 @@ export async function getTestQuestion(resume_id: string, jobId: number) {
     return response.data;
   } catch (error) {
     console.log(error);
-    alert("Select a Candidate!");
     return null;
   }
 }
