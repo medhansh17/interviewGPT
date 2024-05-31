@@ -1,4 +1,5 @@
 import time
+import re
 from functools import wraps
 import os
 import json
@@ -43,6 +44,7 @@ def get_extracted_info():
     """
     Fetch details from the ExtractedInfo table based on Resume ID.
     """
+
 
     resume_id = request.args.get('resume_id')
     if not resume_id:
@@ -98,24 +100,53 @@ def extract_text_from_resume(app, role, filename):
     with app.app_context():
         file_path = os.path.join(RESUME_FOLDER, role, filename)
         reader = PdfReader(file_path)
+        print("\n".join([page.extract_text() for page in reader.pages]))
         return "\n".join([page.extract_text() for page in reader.pages])
 
-
-
-@retry_with_switch(max_retries=3, delay=2)
-def extract_resume_info(app, job_id, role, resume_list,attempt=0):
+def chatgpt_message(app, jd, job_role, skill_set, total_experience):
     """
-    Extract information from resumes and save it to the database.
+    Send a message to ChatGPT to evaluate resumes based on job description and mandatory skills.
     """
-    
     with app.app_context():
+        messages = [
+            {"role": 'system', "content": evaluate_resume_prompt},
+            {"role": "user", "content": user_prompt_resume_evaluation.format(
+                skill_set=skill_set, job_role=job_role, jd=jd,total_experience=total_experience
+            )}
+        ]
+
+        client = OpenAI()
+        client.api_key = os.getenv("OPENAI_API_KEY")
+        response = client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=messages,
+            temperature=0,
+            max_tokens=1000
+        )
+
+        response = dict(response)
+        response_data = dict(dict(response['choices'][0])['message'])[
+            'content'].replace("\n", " ")
+        return response_data
+
+#@retry_with_switch(max_retries=3, delay=2)
+def process_resumes(app, job_id, role, resume_list, mandatory_skills, attempt=0):
+    """
+    Extract information from resumes, save it to the database, and calculate resume scores.
+    """
+    with app.app_context():
+        job = Job.query.filter_by(id=job_id).first()
+        if not job:
+            return jsonify({'error': 'Job not found.'}), 404
         for resume_id, filename in resume_list:
             if filename.endswith(".pdf"):
+                # Extract text from resume
                 text_resume = extract_text_from_resume(app, role, filename)
                 resume_record = Resume.query.get(resume_id)
                 if resume_record:
                     resume_id = resume_record.id
 
+                # Prepare prompt for resume information extraction
                 message_resumefetch = [
                     {"role": "system", "content": extract_resume_prompt},
                     {"role": "user", "content": (
@@ -127,6 +158,7 @@ def extract_resume_info(app, job_id, role, resume_list,attempt=0):
                     )}
                 ]
 
+                # Call OpenAI API to extract resume information
                 client = OpenAI()
                 client.api_key = os.getenv("OPENAI_API_KEY")
                 response = client.chat.completions.create(
@@ -141,10 +173,17 @@ def extract_resume_info(app, job_id, role, resume_list,attempt=0):
                 response_data = ' '.join(response_data.split())
                 response_data = response_data.strip().strip('```json').strip().strip('```')
 
-                extracted_info = json.loads(response_data)
+                print(response_data)
+                if response_data:
+
+                    extracted_info = json.loads(response_data)
+
+                else:
+                    print("no content or json not in format")
                 # Extracting the candidate name
                 candidate_name = extracted_info['resume_details'][0]['candidate_name']
 
+                # Save extracted candidate information to the database
                 existing_candidate = Candidate.query.filter_by(
                     name=candidate_name, job_id=job_id, resume_id=resume_id).first()
                 if not existing_candidate:
@@ -180,68 +219,41 @@ def extract_resume_info(app, job_id, role, resume_list,attempt=0):
                         )
                         db.session.add(extracted_record)
                 db.session.commit()
+                print("extra info table is done")
+                # Calculate resume score
+                skill_set = extracted_info['resume_details'][0]['technical_skills']
+                total_experience=extracted_info['resume_details'][0]['work_exp']
+                print("=======@@@@=====")
+                print(skill_set)
 
+                print(total_experience)
+                if not skill_set:
+                    print("nothing in text_resume")
+                    continue
+                print("calling agents")
+                #AI_score_response = create_agents(app, text_resume, job.jd, mandatory_skills, job.role)
 
-def chatgpt_message(app, jd, job_role, text_resume, mandatory_skills):
-    """
-    Send a message to ChatGPT to evaluate resumes based on job description and mandatory skills.
-    """
-    with app.app_context():
-        messages = [
-            {"role": 'system', "content": evaluate_resume_prompt},
-            {"role": "user", "content": user_prompt_resume_evaluation.format(
-                text_resume=text_resume, job_role=job_role, jd=jd, mandatory_skills=mandatory_skills
-            )}
-        ]
-
-        client = OpenAI()
-        client.api_key = os.getenv("OPENAI_API_KEY")
-        response = client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=messages,
-            temperature=0,
-            max_tokens=1000
-        )
-
-        response = dict(response)
-        response_data = dict(dict(response['choices'][0])['message'])[
-            'content'].replace("\n", " ")
-        return response_data
-
-
-
-@retry_with_switch(max_retries=3, delay=2)
-def calculate_resume_scores(app, job_id, mandatory_skills, resume_list,attempt=0):
-    """
-    Calculate scores for resumes based on job description and mandatory skills.
-    """
-    with app.app_context():
-        job = Job.query.filter_by(id=job_id).first()
-        if not job:
-            return jsonify({'error': 'Job not found.'}), 404
-
-        for resume_id, filename in resume_list:
-            text_resume = extract_text_from_resume(app, job.role, filename)
-            #if attempt == 0:
-                # Use create_agents function on the first attempt
-                #AI_score_response = create_agents(app,text_resume, job.jd, mandatory_skills, job.role)
-            #else:
-                # Use chatgpt_message function on retries
-            AI_score_response = chatgpt_message(app, job.jd, job.role, text_resume, mandatory_skills)
-            
-            AI_score_response_dict = json.loads(AI_score_response)
-            resume_score = ResumeScore.query.filter_by(
-                resume_id=resume_id).first()
-            if resume_score:
-                resume_info = AI_score_response_dict['score'][0]
-                resume_score.resume_filename = resume_info['resume_filename']
-                resume_score.name = resume_info['candidate_name']
-                resume_score.jd_match = resume_info['JD_MATCH']
-                resume_score.match_status = resume_info['MATCH_STATUS']
-                resume_score.matching_skills = resume_info['Matching_Skills']
-                resume_score.missing_skills = resume_info['Missing_Skills']
-                resume_score.experience_match = resume_info['experience_match']
-                db.session.commit()
+                #if not AI_score_response:
+                print("calling ai")
+                AI_score_response = chatgpt_message(app, job.jd, job.role, skill_set, total_experience)
+                print("ai score for resume")
+                print(AI_score_response)
+                if AI_score_response:
+                    AI_score_response_dict = json.loads(AI_score_response)
+                    resume_score = ResumeScore.query.filter_by(
+                        resume_id=resume_id).first()
+                    if resume_score:
+                        resume_info = AI_score_response_dict['score'][0]
+                        resume_score.resume_filename = resume_info['resume_filename']
+                        resume_score.name = resume_info['candidate_name']
+                        resume_score.jd_match = resume_info['JD_MATCH']
+                        resume_score.match_status = resume_info['MATCH_STATUS']
+                        resume_score.matching_skills = resume_info['Matching_Skills']
+                        resume_score.missing_skills = resume_info['Missing_Skills']
+                        resume_score.experience_match = resume_info['experience_match']
+                        resume_score.candidate_experience = resume_info['candidate_experience']
+                        resume_score.required_experience = resume_info['required_experience']
+                        db.session.commit()
 
 
 @ats_bp.route('/upload_resume_to_job', methods=['POST'])
@@ -291,20 +303,16 @@ def upload_resume_to_job():
                 resume_id=new_resume.id, name="Fetching Details")
             db.session.add(resume_score)
             db.session.commit()
-        print("thread going to start")
+        print("thread is called")
         app = current_app._get_current_object()
-        extract_thread = Thread(target=extract_resume_info, args=(
-            app, job.id, role, resume_list))
-        extract_thread.start()
-        score_thread = Thread(target=calculate_resume_scores, args=(
-            app, job.id, mandatory_skills, resume_list))
-        score_thread.start()
+        processing_thread = Thread(target=process_resumes, args=(
+            app, job.id, role, resume_list, mandatory_skills))
+        processing_thread.start()
 
         return jsonify({'message': 'Resumes uploaded successfully and processing started.'}), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 @ats_bp.route('/get_resume_scores', methods=['GET'])
 def get_resume_scores():
@@ -345,6 +353,8 @@ def get_resume_scores():
         "selected_status": score.selected_status,
         "assessment_status": score.assessment_status,
         "experience_match": score.experience_match,
+        "candidate_experience": score.candidate_experience,
+        "required_experience": score.required_experience,
         "status": score.status
     } for score in resume_scores]
 
