@@ -63,7 +63,6 @@ const RespJdDash = () => {
   const { id } = useParams();
   const [approval, setApproval] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
-  const [candName, setCanName] = useState("");
   const [resume_id, setResume_id] = useState("");
   const [showSelectCandidatePopup, setShowSelectCandidatePopup] =
     useState(false);
@@ -71,25 +70,25 @@ const RespJdDash = () => {
   const pop = false;
   const [Resultdata, setResultData] = useState<any>(null);
 
-  const handleCandidateSelect = async (resume_id: string, checked: boolean) => {
-    const updatedData = Data.map((item) => {
-      if (item.resume_id === resume_id) {
-        return { ...item, selected_status: checked };
-      }
-      return item;
-    });
-    try {
-      const check = checked ? "true" : "false";
-      const resp = await api.post("/update_resume_status", {
-        resume_id: resume_id,
-        status: check,
-      });
-      console.log(resp);
-    } catch (error) {
-      console.log(error);
-    }
-    setData(updatedData);
-  };
+  // const handleCandidateSelect = async (resume_id: string, checked: boolean) => {
+  //   const updatedData = Data.map((item) => {
+  //     if (item.resume_id === resume_id) {
+  //       return { ...item, selected_status: checked };
+  //     }
+  //     return item;
+  //   });
+  //   try {
+  //     const check = checked ? "true" : "false";
+  //     const resp = await api.post("/update_resume_status", {
+  //       resume_id: resume_id,
+  //       status: check,
+  //     });
+  //     console.log(resp);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  //   setData(updatedData);
+  // };
 
   const handleRightArrowClick = (item: any) => {
     setShowPopup(true);
@@ -499,8 +498,7 @@ const RespJdDash = () => {
                               Generate
                             </button>
                           )}
-                          {candName == item.candidate_name &&
-                            item.selected_status &&
+                          {item.selected_status &&
                             item.assessment_status == 0 &&
                             gen && (
                               <button className="resp-btn">Generating </button>
