@@ -393,36 +393,15 @@ const RespJdDash = () => {
                   <th className="p-3 text-left">Candidates</th>
                   <th className="p-3  text-left">Skills Matching</th>
                   <th className="p-3 text-left">Skills Missing</th>
-
+                  <th className="p-3 text-left">Experience Match</th>
                   <th className="p-3 text-left">Score</th>
                   <th className="p-3 text-left">Status</th>
                   <th className="p-3 w-[150px] text-left">Action</th>
-                  {/* <th className="p-3 text-left">Edit</th> */}
                 </tr>
               </thead>
               <tbody>
                 {currentJobs.map((item: any, index: number) => {
                   return (
-                    //  <tr className="border-b dark:border-zinc-600" key={index}>
-                    //   <td className="p-3 font-bold underline " onClick={()=>showCandDetails(item)}>{item.candidate_name}</td>
-                    //   <td className="p-3 "><p className='desc'>{item.Matching_Skills}</p></td>
-                    //   <td className="p-3 "><p className='desc'>{item.Missing_Skills}</p></td>
-
-                    //   <td className="p-3">{item.JD_MATCH}</td>
-                    //   <td className="p-3">
-                    //   <span className={`text-green-700 py-1 px-3 rounded-full text-xs ${item.MATCH_STATUS === 'SELECTED FOR REVIEW' ? 'bg-green-200' : (item.MATCH_STATUS === 'ON HOLD' ? 'bg-yellow-200' : 'bg-red-200')}`}>
-                    //   {item.MATCH_STATUS=='SELECTED FOR REVIEW'?'Selected':(item.MATCH_STATUS === 'ON HOLD' ? 'On Hold' : 'Rejected')}
-                    //     </span>
-                    //   </td>
-                    //   <td><input type='checkbox'/></td>
-                    //   <td className="p-3 text-zinc-500 dark:text-zinc-400 relative">
-                    //   <div className='flex items-center justify-around text-lg'>
-
-                    //                   <div><FontAwesomeIcon icon={faTrash} onClick={() => deleteCandHandler(item)} className="cursor-pointer " title='Delete' style={{ color: "red" }} /></div>
-                    //                   <div><FontAwesomeIcon icon={faArrowRight} className="mr-2 cursor-pointer " title='' style={{ color: "blue" }} /></div>
-                    //                 </div>
-                    //   </td>
-                    // </tr>
                     <tr className="border-b dark:border-zinc-600" key={index}>
                       <td
                         className="p-3  font-bold underline"
@@ -459,6 +438,9 @@ const RespJdDash = () => {
                         </p>
                       </td>
                       <td className="p-3 text-center">
+                        {item.experience_match}
+                      </td>
+                      <td className="p-3 text-center">
                         <p>{item.JD_MATCH}</p>
                         <span
                           className={`text-green-700 py-1 px-3 rounded-full text-xs ${
@@ -476,6 +458,7 @@ const RespJdDash = () => {
                             : "Rejected"}
                         </span>
                       </td>
+
                       <td className="p-3 text-center">{`${item.status}`}</td>
                       <td className="p-3 text-zinc-500 dark:text-zinc-400 relative">
                         <div
