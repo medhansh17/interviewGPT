@@ -13,7 +13,7 @@ from datetime import datetime
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
 from flask import Blueprint, request, jsonify, current_app
-from app.middleware import retry
+from api.middleware import retry
 from .models import Job, Resume, ExtractedInfo, ResumeScore, Candidate
 from .config import RESUME_FOLDER, ARCHIVE_FOLDER, MODEL_NAME
 from .prompts.resume_prompts import extract_resume_prompt, evaluate_task_prompt, user_prompt_evaluation
