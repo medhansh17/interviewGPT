@@ -11,6 +11,7 @@ import GeneratedQuesPopup from "./generatedQuesPopup";
 import GenerateQuestionsPopup from "./generateQuestionsPopup";
 import CandidateDetailsPopup from "./candidateDetailsPopup";
 import ConfirmButton from "./confirmationPopup";
+import { ConfirmDialog } from "primereact/confirmdialog";
 
 interface MyObjectType {
   jd: string | null;
@@ -385,6 +386,7 @@ const RespJdDash = () => {
 
         {currentJobs.length > 0 ? (
           <div className="max-w-[1400px] min-w-fit mx-auto shadow">
+            <ConfirmDialog />
             <table className="w-full">
               <thead className="bg-zinc-200 dark:bg-zinc-600">
                 <tr>
@@ -480,16 +482,15 @@ const RespJdDash = () => {
                           className="flex flex-col items-center justify-around text-lg"
                           style={{ gap: "4px" }}
                         >
-                          <div>
-                            <ConfirmButton
-                              label="Delete"
-                              message="Do you want to delete this record?"
-                              header="Delete Confirmation"
-                              icon="pi pi-times"
-                              acceptClassName="p-button-danger"
-                              onConfirm={() => deleteCandHandler(item)}
-                            />
-                          </div>
+                          <ConfirmButton
+                            label="Delete"
+                            message="Do you want to delete this record?"
+                            header="Delete Confirmation"
+                            icon="pi pi-times"
+                            acceptClassName="p-button-danger"
+                            onConfirm={() => deleteCandHandler(item)}
+                          />
+
                           {gen == "" && pop == false && item.status == null && (
                             <button
                               className="resp-btn"

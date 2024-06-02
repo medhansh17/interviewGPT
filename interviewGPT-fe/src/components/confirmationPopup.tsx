@@ -1,5 +1,5 @@
 import React from "react";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import { confirmDialog } from "primereact/confirmdialog";
 import { Button } from "primereact/button";
 
 interface ConfirmButtonProps {
@@ -37,9 +37,7 @@ const ConfirmButton: React.FC<ConfirmButtonProps> = ({
     confirmDialog({
       message: <div className="text-gray-700">{message}</div>,
       header: (
-        <div className="font-bold text-lg text-gray-800 mb-3">
-          {header} &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        </div>
+        <div className="font-bold text-lg text-gray-800 mb-3">{header}</div>
       ),
       icon: <i className={`${icon || "pi pi-info-circle"} text-blue-500`} />,
       acceptClassName: `${
@@ -56,15 +54,12 @@ const ConfirmButton: React.FC<ConfirmButtonProps> = ({
   };
 
   return (
-    <>
-      <ConfirmDialog />
-      <Button
-        onClick={showConfirmDialog}
-        icon={icon}
-        label={label}
-        className="cursor-pointer resp-btn text-red-600"
-      />
-    </>
+    <Button
+      onClick={showConfirmDialog}
+      icon={icon}
+      label={label}
+      className="cursor-pointer resp-btn text-red-600"
+    />
   );
 };
 
