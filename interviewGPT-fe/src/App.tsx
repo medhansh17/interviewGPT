@@ -16,12 +16,13 @@ import Mcq from "./components/McqComp/Mcq";
 import Code from "./components/OnlineComp/Code";
 import MainAssessment from "./components/MainAssessment";
 import Success from "./components/OnlineComp/Sucess";
+import { Toasts } from "./components/toast";
 
 function App() {
   return (
     <main>
       <Router>
-        <div>
+        <Toasts>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/app" element={<Application />} />
@@ -44,7 +45,7 @@ function App() {
               <Route path="code" element={<Code />} />
             </Route>
           </Routes>
-        </div>
+        </Toasts>
       </Router>
     </main>
   );
