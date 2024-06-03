@@ -133,7 +133,7 @@ const RespJdDash = () => {
   }, [state.candidate_list]);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // Number of items per page
+  const itemsPerPage = 10000; // Number of items per page
   const fileInputRef = useRef(null);
   const handleBrowseClick = () => {
     if (fileInputRef.current !== null && fileInputRef.current !== undefined) {
