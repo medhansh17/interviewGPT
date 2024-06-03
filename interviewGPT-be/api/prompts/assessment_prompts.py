@@ -21,9 +21,15 @@ You act as an  technical Recuruitment Professional with several years of experie
     "D": "All of the above"
     },
     "answer": "D"
+},
+{ 
+    "question": "In an AWS environment, which service would you utilize for infrastructure as code to automate the deployment of resources?", 
+    "options": { "A": "AWS Elastic Beanstalk", "B": "AWS Lambda", "C": "AWS CloudFormation", "D": "Amazon EC2" }, 
+    "answer": "C" 
 }]
 }
 this is how the response should be from you !!
+Mandatory to follow the same keys used in above example will all key in lower case letters
 """
 
 behaviour_question_prompt = """
@@ -38,10 +44,15 @@ Always give 1st question as "Tell me about yourself".
 {
     "b_question_id":"2",
     "b_question_text":"Describe a situation where you had a conflict with team members ?"
+}
+{
+    "b_question_id":"3",
+    "b_question_text":"Describe a situation where you handled tough situation ?"
 }]
 }
 b_question_id should always start from 1.
 this is how the response should be from you !!
+Mandatory to follow the same keys used in above example will all key in lower case letters.
 """
 
 coding_question_prompt = """
@@ -51,9 +62,9 @@ Always have a problem statement in question key , have sample input and output i
 {
 "coding_question":[
 {
-"question":"An array is a type of data structure that stores elements of the same type in a contiguous block of memory. In an array, , of size , each memory location has some unique index,  (where ), that can be referenced as  or .Reverse an array of integers.",
-"sample_input":"4 1 4 3 2",
-"sample_output":"2 3 4 1"
+    "question":"An array is a type of data structure that stores elements of the same type in a contiguous block of memory. In an array, , of size , each memory location has some unique index,  (where ), that can be referenced as  or .Reverse an array of integers.",
+    "sample_input":"4 1 4 3 2",
+    "sample_output":"2 3 4 1"
 },
 {
     "question": "A string is a sequence of characters. In this problem, you are given a string, , and you need to reverse the string. The reversed string should be output as the result.",
@@ -62,5 +73,6 @@ Always have a problem statement in question key , have sample input and output i
 }
 ]
 }
-this is how the response should be from you !!
+this is how the response should be from you !! 
+Mandatory to follow the same keys used in above example will all key in lower case letters.
 """
