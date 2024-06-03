@@ -31,7 +31,7 @@ export default function GenerateQuestionsPopup({
         resume_id: resume_id,
         no_tech_questions: numMCQ,
         no_behav_questions: numBehavioral,
-        no_coding_questions: numCoding, 
+        no_code_question: numCoding,
       });
       if (resp.statusText === "OK") window.location.reload();
       console.log(resp);

@@ -29,17 +29,19 @@ interface DataItem {
 }
 
 interface BehavioralQuestion {
-  b_question_id: number;
+  b_question_id: string;
   b_question_text: string;
 }
 
 interface CodingQuestion {
+  coding_ques_id: string;
   question: string;
   sample_input: string;
   sample_output: string;
 }
 
 interface TechnicalQuestion {
+  tech_ques_id: string;
   question: string;
   options: { [key: string]: string };
   answer: string;
@@ -54,7 +56,7 @@ const RespJdDash = () => {
   >([]);
   const [show_Result, setshow_Result] = useState(false);
   const [codingQuestion, setCodingQuestion] = useState<
-    CodingQuestion | undefined
+    CodingQuestion[] | undefined
   >(undefined);
   const [technicalQuestions, setTechnicalQuestions] = useState<
     TechnicalQuestion[]
