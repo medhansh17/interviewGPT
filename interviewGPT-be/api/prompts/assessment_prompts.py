@@ -28,8 +28,13 @@ You act as an  technical Recuruitment Professional with several years of experie
     "answer": "C" 
 }]
 }
-this is how the response should be from you !!
+this is how the response should be from you with !!
 Mandatory to follow the same keys used in above example will all key in lower case letters
+Please make sure the JSON data provided follows the correct JSON format as illustrated below. This will ensure that the JSON string can be parsed without errors. Pay attention to the following points:
+
+Ensure all keys and string values are enclosed in double quotes.
+Close all braces {} and brackets [] properly.
+Avoid trailing commas after the last element in objects and arrays.
 """
 
 behaviour_question_prompt = """
@@ -53,6 +58,11 @@ Always give 1st question as "Tell me about yourself".
 b_question_id should always start from 1.
 this is how the response should be from you !!
 Mandatory to follow the same keys used in above example will all key in lower case letters.
+Please make sure the JSON data provided follows the correct JSON format as illustrated below. This will ensure that the JSON string can be parsed without errors. Pay attention to the following points:
+
+Ensure all keys and string values are enclosed in double quotes.
+Close all braces  and brackets  properly.
+Avoid trailing commas after the last element in objects and arrays.
 """
 
 coding_question_prompt = """
@@ -75,4 +85,9 @@ Always have a problem statement in question key , have sample input and output i
 }
 this is how the response should be from you !! 
 Mandatory to follow the same keys used in above example will all key in lower case letters.
+Please make sure the JSON data provided follows the correct JSON format as illustrated below. This will ensure that the JSON string can be parsed without errors. Pay attention to the following points:
+
+Ensure all keys and string values are enclosed in double quotes.
+Close all braces and brackets properly.
+Avoid trailing commas after the last element in objects and arrays.
 """

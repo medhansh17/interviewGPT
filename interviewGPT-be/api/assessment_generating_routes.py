@@ -20,6 +20,11 @@ def tech_question_mcq(jd13, no_tech_questions, Tech_skills):
         {"role": "user", "content": f"""always mandatory to Generate {no_tech_questions} technical question, the difficulty level should be medium to hard, should not be easy questions,even question should not repeat.
                 important information, options sshould be too hard, so that candiate can get confuse easily with other choices.
                 Questions should be entirely based on job description {jd13} and candiate technical skills found from {Tech_skills}.
+                Mandatory to follow the same keys used in above example will all key in lower case letters\
+                Please make sure the JSON data provided follows the correct JSON format as illustrated below. This will ensure that the JSON string can be parsed without errors. Pay attention to the following points:\
+                Ensure all keys and string values are enclosed in double quotes.\
+                Close all braces  and brackets  properly.\
+                Avoid trailing commas after the last element in objects and arrays.
                 """}
     ]
     client = OpenAI()
@@ -41,7 +46,13 @@ def tech_question_mcq(jd13, no_tech_questions, Tech_skills):
 def behaviour_questions(no_behav_questions, behav_skills):
     message = [
         {"role": "system", "content": behaviour_question_prompt},
-        {"role": "user", "content": f"always mandatory to Generate {no_behav_questions} behaivour questions not more than that,and based on behaviour skills which candidate have {behav_skills}, if they dont have,give a question by your choice.ie soft skill question"}
+        {"role": "user", "content": f"""always mandatory to Generate {no_behav_questions} behaivour questions not more than that,and based on behaviour skills which candidate have {behav_skills}, if they dont have,give a question by your choice.ie soft skill question.\
+         Mandatory to follow the same keys used in above example will all key in lower case letters\
+        Please make sure the JSON data provided follows the correct JSON format as illustrated below. This will ensure that the JSON string can be parsed without errors. Pay attention to the following points:\
+        Ensure all keys and string values are enclosed in double quotes.\
+        Close all braces  and brackets  properly.\
+        Avoid trailing commas after the last element in objects and arrays.
+         """}
     ]
     client = OpenAI()
     client.api_key = os.getenv("OPENAI_API_KEY")
@@ -62,7 +73,13 @@ def behaviour_questions(no_behav_questions, behav_skills):
 def coding_question_generate(no_code_questions):
     message = [
         {"role": "system", "content": coding_question_prompt},
-        {"role": "user", "content": f"always mandatory to Generate {no_code_questions} number of coding question, questions should not repeat."}
+        {"role": "user", "content": f"""always mandatory to Generate {no_code_questions} number of coding question, questions should not repeat.
+         Mandatory to follow the same keys used in above example will all key in lower case letters\
+        Please make sure the JSON data provided follows the correct JSON format as illustrated below. This will ensure that the JSON string can be parsed without errors. Pay attention to the following points:\
+        Ensure all keys and string values are enclosed in double quotes.\
+        Close all braces  and brackets  properly.\
+        Avoid trailing commas after the last element in objects and arrays.
+         """}
     ]
     client = OpenAI()
     client.api_key = os.getenv("OPENAI_API_KEY")
@@ -77,6 +94,8 @@ def coding_question_generate(no_code_questions):
         'content'].replace("\n", " ")
     coding_response = ' '.join(coding_response.split())
     print("done code quest")
+    print("code question which are genrated below:")
+    print(coding_response)
     return coding_response
 
 
@@ -159,6 +178,7 @@ def generate_and_save_assessment(app, job_id, no_tech_questions, no_behav_questi
                     jd, no_tech_questions, technical_skills)
                 question_behav = behaviour_questions(
                     no_behav_questions, behavioral_skills)
+                print("code fucntioni scalled to geerate")
                 question_coding = coding_question_generate(no_code_questions)
                 print("tech_mcqquestion")
                 print(question_tech)
@@ -169,13 +189,14 @@ def generate_and_save_assessment(app, job_id, no_tech_questions, no_behav_questi
                 print("every type of questio is completed")
                 tech_questions_json = json.loads(
                     question_tech).get('tech_questions', [])
+                print("tech loaded ")
                 behaviour_questions_json = json.loads(
                     question_behav).get('Behaviour_q', [])
                 coding_question_json = json.loads(
                     question_coding).get('coding_question', [])
-                print(tech_questions_json)
-                print(behaviour_questions_json)
-                print(coding_question_json)
+                print("tech_questions_json",tech_questions_json)
+                print("behaviour_questions_json",behaviour_questions_json)
+                print("coding_question_json",coding_question_json)
                 save_assessment_to_db(job_id, role, candidate_id, tech_questions_json,
                                       behaviour_questions_json, coding_question_json)
                 resume_score.status = 'assessment_generated'
@@ -200,8 +221,11 @@ def CHECK_Auto_assessment():
         resume_id = data.get('resume_id')
         no_tech_questions = data.get('no_tech_questions')
         no_behav_questions = data.get('no_behav_questions')
-        no_code_question = data.get('no_code_question')
+        no_code_questions = data.get('no_code_question')
         print("check assesmet started")
+        print('no_tech_questions',no_tech_questions)
+        print('no_behav_questions',no_behav_questions)
+        print('no_code_question',no_code_questions)
         if not job_id or not resume_id:
             return jsonify({'error': 'Job ID and Resume ID  are required parameters.'}), 400
 
@@ -216,7 +240,7 @@ def CHECK_Auto_assessment():
             print("thread fucntionis called")
             app = current_app._get_current_object()
             thread = Thread(target=generate_and_save_assessment, args=(
-                app, job_id, no_tech_questions, no_behav_questions, no_code_question, resume_score.id, resume_score.resume_id))
+                app, job_id, no_tech_questions, no_behav_questions, no_code_questions, resume_score.id, resume_score.resume_id))
 
             thread.start()
 
