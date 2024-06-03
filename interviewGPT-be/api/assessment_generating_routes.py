@@ -89,26 +89,29 @@ def save_assessment_to_db(job_id, role, candidate_id, tech_questions, behaviour_
 
     for question in tech_questions:
         tech_question = TechnicalQuestion(question_text=question['question'], options=json.dumps(
-            question['options']), correct_answer=question['answer'],candidate_id=candidate_id,user_answer="",tech_eval="")
+            question['options']), correct_answer=question['answer'], candidate_id=candidate_id, user_answer="", tech_eval="")
         db.session.add(tech_question)
         db.session.commit()
-        candidate_question = CandidateQuestion(candidate_id=candidate_id, question_type='technical')
+        candidate_question = CandidateQuestion(
+            candidate_id=candidate_id, question_type='technical')
         db.session.add(candidate_question)
 
     for question in behaviour_questions:
         behav_question = BehaviouralQuestion(
-            question_text=question['b_question_text'],candidate_id=candidate_id,audio_transcript="")
+            question_text=question['b_question_text'], candidate_id=candidate_id, audio_transcript="")
         db.session.add(behav_question)
         db.session.commit()
-        candidate_question = CandidateQuestion(candidate_id=candidate_id, question_type='behavioural')
+        candidate_question = CandidateQuestion(
+            candidate_id=candidate_id, question_type='behavioural')
         db.session.add(candidate_question)
 
     for question in coding_questions:
         code_question = CodingQuestion(question_text=question['question'], sample_input=question['sample_input'],
-                                     sample_output=question['sample_output'],candidate_id=candidate_id,user_code="",code_eval="")
+                                       sample_output=question['sample_output'], candidate_id=candidate_id, user_code="", code_eval="")
         db.session.add(code_question)
         db.session.commit()
-        candidate_question = CandidateQuestion(candidate_id=candidate.id, question_type='coding')
+        candidate_question = CandidateQuestion(
+            candidate_id=candidate.id, question_type='coding')
         db.session.add(candidate_question)
 
     db.session.commit()
@@ -116,7 +119,7 @@ def save_assessment_to_db(job_id, role, candidate_id, tech_questions, behaviour_
     return jsonify({'message': 'Assessment data saved successfully.'}), 200
 
 
-def generate_and_save_assessment(app, job_id, no_tech_questions, no_behav_questions,no_code_questions, resume_score_id,resume_id):
+def generate_and_save_assessment(app, job_id, no_tech_questions, no_behav_questions, no_code_questions, resume_score_id, resume_id):
     with app.app_context():
         try:
             print("entered genrate and save assessment")
@@ -124,25 +127,29 @@ def generate_and_save_assessment(app, job_id, no_tech_questions, no_behav_questi
             if resume_score is None:
                 raise ValueError("ResumeScore not found")
 
-            selected_status = resume_score.selected_status
-            if not selected_status:
-                resume_score.status = 'candidate_rejected'
-                db.session.commit()
-                return
+            # selected_status = resume_score.selected_status
+            # if not selected_status:
+            #     resume_score.status = 'candidate_rejected'
+            #     db.session.commit()
+            #     return
 
             job = Job.query.get(job_id)
             jd = job.jd
             role = job.role
-            # To fetch candidate id based on resume id 
+            # To fetch candidate id based on resume id
             candidate = Candidate.query.filter_by(resume_id=resume_id).one()
             candidate_id = candidate.id
-            TechnicalQuestion.query.filter(TechnicalQuestion.candidate_id == candidate_id).delete()
-            BehaviouralQuestion.query.filter(BehaviouralQuestion.candidate_id == candidate_id).delete()
-            CodingQuestion.query.filter(CodingQuestion.candidate_id == candidate_id).delete()
+            TechnicalQuestion.query.filter(
+                TechnicalQuestion.candidate_id == candidate_id).delete()
+            BehaviouralQuestion.query.filter(
+                BehaviouralQuestion.candidate_id == candidate_id).delete()
+            CodingQuestion.query.filter(
+                CodingQuestion.candidate_id == candidate_id).delete()
 
             db.session.commit()
 
-            candidate_info = ExtractedInfo.query.filter_by(resume_id=resume_id).one()
+            candidate_info = ExtractedInfo.query.filter_by(
+                resume_id=resume_id).one()
 
             if candidate_info:
                 technical_skills = candidate_info.tech_skill
@@ -193,14 +200,14 @@ def CHECK_Auto_assessment():
         resume_id = data.get('resume_id')
         no_tech_questions = data.get('no_tech_questions')
         no_behav_questions = data.get('no_behav_questions')
-        no_code_question=data.get('no_code_question')
+        no_code_question = data.get('no_code_question')
         print("check assesmet started")
         if not job_id or not resume_id:
             return jsonify({'error': 'Job ID and Resume ID  are required parameters.'}), 400
 
-        #candidate_name_formatted = candidate_name.lower().replace(" ", "")
-        #resume_score = ResumeScore.query.filter_by(job_id=job_id).filter(func.lower(
-            #func.replace(ResumeScore.name, " ", "")) == candidate_name_formatted).first()
+        # candidate_name_formatted = candidate_name.lower().replace(" ", "")
+        # resume_score = ResumeScore.query.filter_by(job_id=job_id).filter(func.lower(
+            # func.replace(ResumeScore.name, " ", "")) == candidate_name_formatted).first()
         resume_score = ResumeScore.query.filter_by(resume_id=resume_id).first()
 
         if resume_score:
@@ -209,7 +216,7 @@ def CHECK_Auto_assessment():
             print("thread fucntionis called")
             app = current_app._get_current_object()
             thread = Thread(target=generate_and_save_assessment, args=(
-                app, job_id, no_tech_questions, no_behav_questions,no_code_question,resume_score.id,resume_score.resume_id))
+                app, job_id, no_tech_questions, no_behav_questions, no_code_question, resume_score.id, resume_score.resume_id))
 
             thread.start()
 
@@ -230,40 +237,36 @@ def fetch_candidate_questions():
     if not resume_id or not job_id:
         return jsonify({'error': 'Resume ID and job_id are required parameters.'}), 400
 
-    
-    candidate = Candidate.query.filter_by(resume_id=resume_id,job_id=job_id).first()
+    candidate = Candidate.query.filter_by(
+        resume_id=resume_id, job_id=job_id).first()
 
     if not candidate:
         return jsonify({'error': 'Candidate not found for the given job_id.'}), 404
 
-    
-
     technical_questions = []
     for question in candidate.technical_questions:
-            technical_questions.append({
-                'question': question.question_text,
-                'options': json.loads(question.options),
-                'answer': question.correct_answer,
-                'tech_ques_id': question.id
-            })
+        technical_questions.append({
+            'question': question.question_text,
+            'options': json.loads(question.options),
+            'answer': question.correct_answer,
+            'tech_ques_id': question.id
+        })
 
     behavioural_questions = []
     for question in candidate.behavioural_questions:
-            behavioural_questions.append({
-                'b_question_id': question.id,
-                'b_question_text': question.question_text
-            })
+        behavioural_questions.append({
+            'b_question_id': question.id,
+            'b_question_text': question.question_text
+        })
 
     coding_questions = []
     for question in candidate.coding_questions:
-            coding_questions.append({
-                'question': question.question_text,
-                'sample_input': question.sample_input,
-                'sample_output': question.sample_output,
-                'coding_ques_id': question.id
-            })
-
-    
+        coding_questions.append({
+            'question': question.question_text,
+            'sample_input': question.sample_input,
+            'sample_output': question.sample_output,
+            'coding_ques_id': question.id
+        })
 
     return jsonify({
         'tech_questions': technical_questions,
