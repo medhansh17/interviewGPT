@@ -293,6 +293,7 @@ def fetch_candidate_questions():
         })
 
     return jsonify({
+        "candidate_id":candidate.id,
         'tech_questions': technical_questions,
         'Behaviour_q': behavioural_questions,
         'coding_question': coding_questions
