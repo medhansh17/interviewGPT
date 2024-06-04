@@ -143,7 +143,6 @@ const RespJdDash = () => {
       }
     };
     getCandList();
-    console.log("Refreshed");
   };
   // Calculate total number of pages
   const totalPages = Math.ceil(Data.length / itemsPerPage);
@@ -314,7 +313,7 @@ const RespJdDash = () => {
             >
               Refresh
             </button>
-            <ExampleComponent />
+            <ExampleComponent refresh={() => handleRefresh()} />
           </div>
 
           <div className="flex gap-[2rem]">
@@ -410,8 +409,8 @@ const RespJdDash = () => {
                             )}
                         </p>
                       </td>
-                      <td className="p-3 w-[300px]">
-                        <p className="">
+                      <td className="p-3 w-[300px] ">
+                        <p className="h-[100px] overflow-auto">
                           {item.Missing_Skills &&
                             item.Missing_Skills.map(
                               (skill: any, index: any) => (

@@ -9,7 +9,7 @@ interface MyObjectType {
   role: string | null;
   job_id: number | null;
 }
-const ExampleComponent: React.FC = () => {
+const ExampleComponent = ({ refresh }: { refresh: () => void }) => {
   const toast = useToast();
   const { id } = useParams();
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -58,12 +58,19 @@ const ExampleComponent: React.FC = () => {
         });
         localStorage.setItem("job_id", response.data.job_details.job_id);
       } catch (error: any) {
-        console.log(error);
+        toast.error({
+          type: "background",
+          duration: 3000,
+          status: "Error",
+          title: "Error fetching job details",
+          description: error.message,
+          open: true,
+        });
       }
     };
     getJobDetails();
   }, []);
-  const handleSubmit = async () => {
+  const handleSubmit = async (refresh: () => void) => {
     setSubmitting(true);
     try {
       const formData = new FormData();
@@ -78,7 +85,7 @@ const ExampleComponent: React.FC = () => {
 
       const response = await api.post("/upload_resume_to_job", formData);
       if (response.statusText === "OK") {
-        window.location.reload();
+        refresh();
         toast.success({
           type: "background",
           duration: 3000,
@@ -125,7 +132,7 @@ const ExampleComponent: React.FC = () => {
 
       {uploadedFiles.length > 0 && (
         <button
-          onClick={handleSubmit}
+          onClick={() => handleSubmit(refresh)}
           disabled={submitting}
           className="bg-green-500 text-white p-2 rounded-lg shadow"
         >
