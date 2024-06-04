@@ -1,6 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import Header from "./Header";
 import api from "./customAxios/Axios";
+import { useToast } from "./toast";
 import { useParams } from "react-router-dom";
 import { UserContext } from "../context/JobContext";
 import { setCandList, deleteCandidateByName } from "../context/JobContext";
@@ -47,6 +48,7 @@ interface TechnicalQuestion {
   answer: string;
 }
 const RespJdDash = () => {
+  const toast = useToast();
   const { state, dispatch } = useContext(UserContext)!;
   const [jobDetails, setJobDetails] = useState<MyObjectType | null>(null);
   const [file, setFile] = useState<any | null>(null);
@@ -72,26 +74,6 @@ const RespJdDash = () => {
   const gen = "";
   const pop = false;
   const [Resultdata, setResultData] = useState<any>(null);
-
-  // const handleCandidateSelect = async (resume_id: string, checked: boolean) => {
-  //   const updatedData = Data.map((item) => {
-  //     if (item.resume_id === resume_id) {
-  //       return { ...item, selected_status: checked };
-  //     }
-  //     return item;
-  //   });
-  //   try {
-  //     const check = checked ? "true" : "false";
-  //     const resp = await api.post("/update_resume_status", {
-  //       resume_id: resume_id,
-  //       status: check,
-  //     });
-  //     console.log(resp);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  //   setData(updatedData);
-  // };
 
   const handleRightArrowClick = (item: any) => {
     setShowPopup(true);
@@ -142,7 +124,6 @@ const RespJdDash = () => {
       (fileInputRef.current as HTMLInputElement).click();
     }
   };
-  // const [refreshStatus, setRefreshStatus] = useState<string>("Done");
   const handleRefresh = () => {
     const getCandList = async () => {
       try {
@@ -151,8 +132,14 @@ const RespJdDash = () => {
         console.log("Candidate Data:", candidateData);
         dispatch(setCandList(candidateData));
       } catch (err: any) {
-        alert("Error fetching data");
-        console.log(err);
+        toast.error({
+          type: "background",
+          duration: 3000,
+          status: "Error",
+          title: "Error fetching candidate details",
+          description: { err },
+          open: true,
+        });
       }
     };
     getCandList();
@@ -166,14 +153,16 @@ const RespJdDash = () => {
     setCurrentPage(page);
   };
 
-  // const otherActions = (id: number) => {
-  //   setAction(!action);
-  //   setRowAction(id);
-  // };
-
   const addResume = async () => {
     if (!file || !jobDetails) {
-      alert("Please select a file to upload or select a job");
+      toast.error({
+        type: "background",
+        duration: 3000,
+        status: "Error",
+        title: "No file selected",
+        description: "Please select a file to upload",
+        open: true,
+      });
       return;
     }
     const newResume = new FormData();
@@ -188,14 +177,26 @@ const RespJdDash = () => {
       const response = await api.post("/upload_resume_to_job", newResume);
       console.log("add", response);
       if (response.statusText === "OK") {
-        alert("Successfully added");
-        window.location.reload();
+        handleRefresh();
+        toast.success({
+          type: "background",
+          duration: 3000,
+          status: "Success",
+          title: "Resume uploaded successfully",
+          description: "",
+          open: true,
+        });
         setFile(null);
       }
-
-      console.log("Response:", response);
     } catch (error) {
-      console.error("Error uploading resume:", error);
+      toast.error({
+        type: "background",
+        duration: 3000,
+        status: "Error",
+        title: "Error uploading resume",
+        description: "",
+        open: true,
+      });
       setFile(null);
     }
   };
@@ -208,7 +209,14 @@ const RespJdDash = () => {
       console.log(resp);
       dispatch(deleteCandidateByName(item.candidate_name));
     } catch (error) {
-      console.log(error);
+      toast.error({
+        type: "background",
+        duration: 3000,
+        status: "Error Deleting Candidate",
+        title: { error },
+        description: "",
+        open: true,
+      });
     }
   };
 
@@ -219,7 +227,6 @@ const RespJdDash = () => {
 
   const closeDetails = () => {
     setShowDetails(false);
-    // setCandidateDetails(undefined);
   };
 
   const truncateJobDescription = (description: any) => {
@@ -231,28 +238,6 @@ const RespJdDash = () => {
 
     return lines.slice(0, maxLines).join("\n");
   };
-
-  // const handleProceed = async () => {
-  //   setShowPopup(false);
-  //   setGen("Generating Questions");
-  //   try {
-  //     const resp = await api.post("/CHECK_Auto_assessment", {
-  //       job_id: jobDetails?.job_id,
-  //       candidate_name: candName,
-  //       no_tech_questions: numMCQ,
-  //       no_behav_questions: numBehavioral,
-  //     });
-  //     if (resp.statusText == "OK") {
-  //       setPop(true);
-  //       setGen("");
-  //     }
-  //     setTimeout(() => {
-  //       handleRefresh();
-  //     }, 1000);
-  //   } catch (err: unknown) {
-  //     console.log(err);
-  //   }
-  // };
 
   useEffect(() => {
     const genQuestions = async () => {

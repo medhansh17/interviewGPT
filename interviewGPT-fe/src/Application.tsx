@@ -2,94 +2,52 @@ import TextArea from "./components/TextArea";
 import Table from "./components/Table";
 import { useState, useEffect } from "react";
 import Header from "./components/Header";
-import Modal from "react-modal";
+import { useToast } from "./components/toast";
 
-Modal.setAppElement("#root");
-
-// import html2canvas from 'html2canvas';
 import TechSkillTable from "./components/TechSkillTable";
 import { FetchSkillsData } from "./types";
 import api from "./components/customAxios/Axios";
 import { useNavigate } from "react-router-dom";
 import AddJd from "./components/AddJd";
 import TextArea2 from "./components/TextArea2";
-// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-// import {
-//   faCheckCircle,
-//   faTimesCircle,
-// } from "@fortawesome/free-solid-svg-icons";
 
 function Application() {
   const [file, setFile] = useState<any | null>(null);
-  // const [modalIsOpen, setModalIsOpen] = useState(false);
-  // const [success, setSuccess] = useState(false);
   const [mainData, setMainData] = useState<any | null>(null);
   const [mainTextArea, setMainTextArea] = useState<any | null>("");
   const [load, setLoad] = useState(false);
   const [mainData2, setMainData2] = useState<any | null>(null);
   const [mainTextArea2, setMainTextArea2] = useState<any | null>("");
-  // const [mainSkill, setMainSkill] = useState<any | null>(null);
-  // const [softSkill, setSoftSkill] = useState<any | null>(null);
-  // const [techSkill, setTechSkill] = useState<any | null>(null);
-  // const [techSkillOne, setTechSkillOne] = useState<any | null>(null);
-  // const [softSkillPercentage, setsoftSkillPercentage] = useState<any | null>(
-  // 	null,
-  // );
-  // const [isReportGenerated, setIsReportGenerated] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [empty, setEmpty] = useState<boolean>(false);
-  // const [showModal, setShowModal] = useState<boolean>(true);
-  // const [modalMessage, setModalMessage] = useState<string>("");
   const [fetchSkill] = useState<FetchSkillsData & { timestamp: number }>();
   console.log(mainData, mainTextArea);
   const [error, setError] = useState<string | null>(null);
-
   const [isLoading, setIsLoading] = useState(false);
   const [role, setRole] = useState<string>("");
   const [role2, setRole2] = useState<string>("");
   const [doc, setDoc] = useState(false);
   const [manual, setManual] = useState(true);
-
   const navigate = useNavigate();
+  const toast = useToast();
 
   useEffect(() => {
     const clearLocalStorage = () => {
       localStorage.clear();
     };
-
     window.addEventListener("beforeunload", clearLocalStorage);
-
     return () => {
       window.removeEventListener("beforeunload", clearLocalStorage);
     };
   }, []);
 
-  // const customStyles = {
-  //   content: {
-  //     top: "20%",
-  //     left: "50%",
-  //     right: "auto",
-  //     bottom: "auto",
-  //     marginRight: "0%",
-  //     transform: "translate(-50%, -50%)",
-  //     // width:"52%",
-  //     borderRadius: "5px",
-  //     // boxShadow:'0 2px 9px grey',
-  //     fontFamily: "sans-serif",
-
-  //     borderBottom: success ? "2px solid green" : "2px solid red",
-  //   },
-  // };
-
   const uploadJD = async () => {
     setIsHidden(true);
-    console.log(mainTextArea2, mainTextArea);
-    const wordCountRegex = /\S+/g; // Regular expression to match non-whitespace characters
+    const wordCountRegex = /\S+/g;
     const wordCount =
       (mainTextArea2.match(wordCountRegex) || []).length ||
       (mainTextArea.match(wordCountRegex) || []).length;
     if ((load == false && wordCount < 50) || wordCount > 10000) {
-      // If word count is not within the specified range, display an error message
       setError(wordCount);
       setTimeout(() => {
         setError(null);
@@ -97,26 +55,14 @@ function Application() {
       navigate("/dashboard");
       return;
     }
-
     setIsLoading(true);
-    // setModalIsOpen(true);
-    console.log("kere");
-    console.log("hhh", {
-      role: mainData?.role || mainData2?.role || role || "",
-      jd: mainData?.jd || mainData2?.jd || mainTextArea || mainTextArea2,
-    });
     try {
       const response = await api.post("/manual_upload_job", {
         role: mainData?.role || mainData2?.role || role || "",
         jd: mainData?.jd || mainData2?.jd || mainTextArea || mainTextArea2,
       });
-      console.log("kkkkk", response);
       if (response.data.message === "Job uploaded successfully.") {
         setIsLoading(false);
-        // Display modal for 3 seconds
-        // setSuccess(true);
-        // setModalMessage("Successfully added JD");
-        // setShowModal(true);
         setMainTextArea(null);
         setMainTextArea2(null);
         setMainData("");
@@ -124,76 +70,48 @@ function Application() {
         setEmpty(true);
         setRole("");
         setRole2("");
-        setTimeout(() => {
-          // setShowModal(false);
-        }, 5000);
         navigate("/dashboard");
       } else if (response.data.message == "Job JD already exists.") {
+        toast.error({
+          type: "background",
+          duration: 3000,
+          status: "Error",
+          title: "Error",
+          description: "Job JD already exists.",
+          open: true,
+        });
         setIsLoading(false);
-        // setSuccess(false);
         setEmpty(true);
-        // setModalMessage("Job JD already exists.");
-        // setShowModal(true);
         setMainTextArea(null);
         setMainTextArea2(null);
         setMainData(null);
         setRole("");
         setRole2("");
-        // setTimeout(() => {
-        //   // setShowModal(false);
-        // }, 5000);
       }
-      console.log("rr", response);
     } catch (error: any) {
-      alert("Error uploading JD");
-      // setError(error);
-      // setTimeout(() => {
-      // 	setError(null);
-      // }, 3000);
+      setIsLoading(false);
+      toast.error({
+        type: "background",
+        duration: 3000,
+        status: "Error",
+        title: "Error",
+        description: "Could not upload JD. Please try again.",
+        open: true,
+      });
     }
   };
-  // const fetchDataFetchSkill = async () => {
-  //   setIsLoading(true);
-  //   try {
-  //     const response = await api.post<FetchSkillsData>("/fetch_skills", {
-  //       role: mainData?.role || "",
-  //       job_description: mainData?.jd || mainTextArea,
-  //     });
-
-  //     setFetchSkill({ ...response.data, timestamp: Date.now() });
-  //     localStorage.setItem("mainSkill", JSON.stringify(response.data));
-  //     // setMainSkill(response.data);
-  //     await fetchSoftSkillQuestions(response.data);
-  //     // await fetchSoftTechQuestions(response.data);
-  //     setIsHidden(true);
-
-  //     // window.location.href = "#/app-submit"
-  //   } catch (error: any) {
-  //     console.error("Error fetching data:", error);
-  //     console.error("API Error:", error);
-  //     setError(error);
-  //     setTimeout(() => {
-  //       setError(null);
-  //     }, 3000);
-  //   }
-  //   setIsLoading(false);
-  // };
 
   const uploadDoc = async () => {
     if (!file || !role2) {
-      console.log("ree");
       return;
     }
-
     const newResume = new FormData();
     newResume.append("role", role2);
     newResume.append("jd_file", file);
 
     try {
       const response = await api.post("/file_upload_jd", newResume);
-
       if (response.statusText === "OK") {
-        // setSuccess(true);
         setMainTextArea(null);
         setMainTextArea2(null);
         setMainData(null);
@@ -201,141 +119,31 @@ function Application() {
         setRole2("");
         navigate("/dashboard");
       } else {
-        // setSuccess(false);
-        console.log("Error uploading jd");
+        toast.error({
+          type: "background",
+          duration: 3000,
+          status: "Error",
+          title: "Error",
+          description: "Could not upload JD. Please try again.",
+          open: true,
+        });
       }
-
-      console.log("Response:", response);
     } catch (error) {
-      console.error("Error uploading jd:", error);
-      alert("Error uploading JD");
+      toast.error({
+        type: "background",
+        duration: 3000,
+        status: "Error",
+        title: "Error",
+        description: "Could not upload JD. Please try again.",
+        open: true,
+      });
     }
   };
-  // const generateQuestion=async ()=>{
-  //   try {
-  //     const response = await axios.post(
-  //       "https://coops-backend.bluetickconsultants.com:8000/fetch_skills",
-  //       {
-  //         technical_skills:[
-  //           {
-  //             num_basic:"" ,
-  //             intermediate:"",
-  //             advance: "",
-  //           }
-  //         ],
-  //         name:"role"
-  //       },
-  //     );
-  //   }
-  //   catch(err){
-  //     console.error(err)
-  //   }
-  // }
-  // const fetchSoftSkillQuestions = async (data: any) => {
-  //   try {
-  //     const softSkillResponse = await api.post(
-  //       "/generate_soft_skill_questions",
-  //       {
-  //         name: mainData?.role,
-  //         soft_skills: data?.skills?.soft_skills.join(","), // Ensure soft_skills is an array
-  //         experience: data?.skills?.experience,
-  //       }
-  //     );
-
-  //     localStorage.setItem(
-  //       "softSkill",
-  //       JSON.stringify(softSkillResponse?.data)
-  //     );
-  //     // setSoftSkill(softSkillResponse?.data);
-  //   } catch (error: any) {
-  //     console.error("Error fetching soft skill questions:", error);
-  //     console.error("Error fetching data:", error);
-  //     console.error("API Error:", error);
-  //     setError(error);
-  //     setTimeout(() => {
-  //       setError(null);
-  //     }, 3000);
-  //   }
-  // };
-
-  //  const fetchSoftTechQuestions = async (data: any) => {
-  //  	try {
-  // 		const techSkillResponse = await axios.post(
-  // 			"https://coops-backend.bluetickconsultants.com:8000/generate_technical_questions",
-  // 			{
-  // 				name: mainData?.role,
-  // 				experience: data?.skills?.experience,
-  // 				technical_skills: data?.skills?.technical_skills.join(","),
-  // 			},
-  // 		);
-
-  // 		localStorage.setItem(
-  // 			"techSkill",
-  // 			JSON.stringify(techSkillResponse?.data),
-  // 		);
-
-  // 		// setTechSkill(techSkillResponse?.data);
-  // 	} catch (error: any) {
-  // 		console.error("Error fetching soft skill questions:", error);
-  // 		console.error("Error fetching data:", error);
-  // 		console.error("API Error:", error);
-  // 		setError(error);
-  // 		setTimeout(() => {
-  // 			setError(null);
-  // 		}, 3000);
-  // 	}
-  // };
 
   const handleReset = () => {
     setMainData(null);
-    // setMainSkill(null);
-    // setSoftSkill(null);
-    // setTechSkill(null);
-    // setsoftSkillPercentage(null);
-    // setTechSkillOne(null);
-    // setIsReportGenerated(false);
   };
 
-  // const storedData = localStorage.getItem("techSkillPercentages") ?? "{}";
-
-  // Object.keys(JSON.parse(storedData))?.map((itm) => {
-  // });
-
-  // const handleGenerateReport = () => {
-
-  //   setIsReportGenerated(true);
-  // };
-
-  // const handlePrintScreen = () => {
-
-  //   const mainContent = document.getElementById('main-content');
-
-  //   if (mainContent) {
-
-  //     html2canvas(mainContent).then((canvas) => {
-
-  //       const dataUrl = canvas.toDataURL('image/png');
-
-  //       const link = document.createElement('a');
-  //       link.href = dataUrl;
-  //       link.download = 'screenshot.png';
-
-  //       link.click();
-  //     });
-  //   }
-  // };
-
-  // const btnGenerate = () => {
-  //   if (techSkillOne && softSkillPercentage) {
-  //     return <button
-  //       className="mt-[0rem] px-6 py-2 w-[12rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-600 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80"
-  //       onClick={handleGenerateReport}
-  //     >
-  //       Generate Report
-  //     </button>
-  //   }
-  //   return ""
-  // }
   const docHanler = () => {
     setManual(false);
     setDoc(true);
@@ -486,39 +294,6 @@ function Application() {
           />
         </div>
       </div>
-      {/* {showModal && (
-        <Modal
-          isOpen={showModal}
-          onRequestClose={() => setShowModal(false)}
-          style={customStyles}
-        >
-          <div style={{ display: "flex", alignItems: "center" }}>
-            {success ? (
-              <FontAwesomeIcon
-                icon={faCheckCircle}
-                style={{
-                  color: "green",
-                  fontSize: "1.2rem",
-                  marginRight: "10px",
-                }}
-              />
-            ) : (
-              <FontAwesomeIcon
-                icon={faTimesCircle}
-                style={{
-                  color: "red",
-                  fontSize: "1.2rem",
-                  marginRight: "10px",
-                }}
-              />
-            )}
-            <span style={{ marginRight: "10px" }}>{modalMessage}</span>
-          </div>
-        </Modal>
-      )} */}
-
-      {/* {isLoading &&  */}
-
       <div style={{ display: isHidden ? "block" : "none" }}>
         <div className="flex  w-full flex-wrap">
           <div className="w-[100%]">
@@ -534,17 +309,6 @@ function Application() {
             )}
           </div>
         </div>
-        {/* <div className="flex justify-center items-center my-[1rem]">
-          <button
-            className={`mb-[0.5rem] px-6 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${
-              mainData || mainTextArea
-                ? "bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80"
-                : "bg-gray-400 cursor-not-allowed"
-            } rounded-lg focus:outline-none`}
-          >
-            Generate Questions
-          </button>
-        </div> */}
       </div>
 
       <div className="bg-deep-purple-accent-400 ">
