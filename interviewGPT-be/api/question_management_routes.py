@@ -23,14 +23,14 @@ def edit_candidate_question():
     # Contains the updated details of the question
     question_data = data.get('question_data')
 
-    
-
     if not question_id or not question_type or not question_data:
         return jsonify({'error': 'question_id, question_type, and question_data are required parameters.'}), 400
-    candidate = Candidate.query.filter_by(resume_id=resume_id,job_id=job_id).one()
+    candidate = Candidate.query.filter_by(
+        resume_id=resume_id, job_id=job_id).one()
     try:
         if question_type == 'technical':
-            question = TechnicalQuestion.query.filter_by(candidate_id=candidate.id,id=question_id).first()
+            question = TechnicalQuestion.query.filter_by(
+                candidate_id=candidate.id, id=question_id).first()
             if question:
                 question.question_text = question_data['question']
                 question.options = json.dumps(question_data['options'])
@@ -39,14 +39,16 @@ def edit_candidate_question():
                 return jsonify({'error': 'Technical question not found.'}), 404
 
         elif question_type == 'behavioral':
-            question = BehaviouralQuestion.query.filter_by(candidate_id=candidate.id,id=question_id).first()
+            question = BehaviouralQuestion.query.filter_by(
+                candidate_id=candidate.id, id=question_id).first()
             if question:
                 question.question_text = question_data['b_question_text']
             else:
                 return jsonify({'error': 'Behavioral question not found.'}), 404
 
         elif question_type == 'coding':
-            question = CodingQuestion.query.filter_by(candidate_id=candidate.id,id=question_id).first()
+            question = CodingQuestion.query.filter_by(
+                candidate_id=candidate.id, id=question_id).first()
             if question:
                 question.question_text = question_data['question']
                 question.sample_input = question_data['sample_input']
@@ -76,29 +78,31 @@ def delete_candidate_question():
     # 'technical', 'behavioral', 'coding'
     question_type = data.get('question_type').lower()
 
-    
-
     if not question_id or not question_type:
         return jsonify({'error': 'question_id and question_type are required parameters.'}), 400
 
-    candidate = Candidate.query.filter_by(resume_id=resume_id,job_id=job_id).one()
+    candidate = Candidate.query.filter_by(
+        resume_id=resume_id, job_id=job_id).one()
     try:
         if question_type == 'technical':
-            question = TechnicalQuestion.query.filter_by(candidate_id=candidate.id,id=question_id).first()
+            question = TechnicalQuestion.query.filter_by(
+                candidate_id=candidate.id, id=question_id).first()
             if question:
                 db.session.delete(question)
             else:
                 return jsonify({'error': 'Technical question not found.'}), 404
 
         elif question_type == 'behavioral':
-            question = BehaviouralQuestion.query.filter_by(candidate_id=candidate.id,id=question_id).first()
+            question = BehaviouralQuestion.query.filter_by(
+                candidate_id=candidate.id, id=question_id).first()
             if question:
                 db.session.delete(question)
             else:
                 return jsonify({'error': 'Behavioral question not found.'}), 404
 
         elif question_type == 'coding':
-            question = CodingQuestion.query.filter_by(candidate_id=candidate.id,id=question_id).first()
+            question = CodingQuestion.query.filter_by(
+                candidate_id=candidate.id, id=question_id).first()
             if question:
                 db.session.delete(question)
             else:
@@ -117,6 +121,28 @@ def delete_candidate_question():
 # to prompt the question topic and generate question for each one
 
 
+def generate_new_question(system_prompt, user_prompt):
+    message = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": f"Generate a technical question on the following topic: {user_prompt}"}
+    ]
+    client = OpenAI()
+    client.api_key = os.getenv("OPENAI_API_KEY")
+    response = client.chat.completions.create(
+        model=MODEL_NAME,
+        messages=message,
+        max_tokens=1000
+    )
+
+    response = dict(response)
+    response_data = dict(dict(response['choices'][0])['message'])[
+        'content'].replace("\n", " ")
+
+    response_content = ' '.join(response_data.split())
+    new_question = json.loads(response_content)
+    return new_question
+
+
 @question_management_bp.route('/update_candidate_question', methods=['POST'])
 def update_candidate_question():
     data = request.get_json()
@@ -130,96 +156,32 @@ def update_candidate_question():
     if not resume_id or not job_id or not question_type or not topic_prompt:
         return jsonify({'error': 'Candidate name, job_id, question_type, and topic_prompt are required parameters.'}), 400
 
-    candidate = Candidate.query.filter_by(resume_id=resume_id,job_id=job_id).one()
+    prompt_generator = {'technical': generate_CRUD_tech_prompt,
+                        'behavioral': generate_CRUD_behav_prompt, 'coding': generate_CRUD_code_prompt}
 
-    if question_type == 'technical':
-        new_question = generate_technical_question(topic_prompt)
-        update_technical_question(
-            question_id, new_question, candidate.id)
+    update_functions = {
+        'technical': update_technical_question,
+        'behavioral': update_behavioural_question,
+        'coding': update_coding_question
+    }
 
-    elif question_type == 'behavioral':
-        new_question = generate_behavioural_question(topic_prompt)
-        update_behavioural_question(
-            question_id, new_question, candidate.id)
+    if question_type not in prompt_generator:
+        return jsonify({'error': 'Invalid question_type provided.'}), 400
 
-    elif question_type == 'coding':
-        new_question = generate_coding_question(topic_prompt)
-        update_coding_question(question_id, new_question, candidate.id)
+    new_question = generate_new_question(
+        prompt_generator[question_type], topic_prompt)
 
-    else:
-        return jsonify({'error': 'Invalid question type.'}), 400
+    candidate = Candidate.query.filter_by(
+        resume_id=resume_id, job_id=job_id).one()
+
+    update_functions[question_type](question_id, new_question, candidate.id)
 
     return jsonify({'message': 'Question updated successfully.'}), 200
 
 
-def generate_technical_question(prompt):
-    message = [
-        {"role": "system", "content": generate_CRUD_tech_prompt},
-        {"role": "user", "content": f"Generate a technical question on the following topic: {prompt}"}
-    ]
-    client = OpenAI()
-    client.api_key = os.getenv("OPENAI_API_KEY")
-    response = client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=message,
-        max_tokens=1000
-    )
-
-    response = dict(response)
-    response_data = dict(dict(response['choices'][0])['message'])[
-        'content'].replace("\n", " ")
-
-    response_content = ' '.join(response_data.split())
-    new_question = json.loads(response_content)
-    return new_question
-
-
-def generate_behavioural_question(prompt):
-    message = [
-        {"role": "system", "content": generate_CRUD_behav_prompt},
-        {"role": "user", "content": f"Generate a behavioural question on the following topic: {prompt}"}
-    ]
-    client = OpenAI()
-    client.api_key = os.getenv("OPENAI_API_KEY")
-    response = client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=message,
-        max_tokens=1000
-    )
-
-    response = dict(response)
-    response_data = dict(dict(response['choices'][0])['message'])[
-        'content'].replace("\n", " ")
-
-    response_content = ' '.join(response_data.split())
-    new_question = json.loads(response_content)
-    return new_question
-
-
-def generate_coding_question(prompt):
-    message = [
-        {"role": "system", "content": generate_CRUD_code_prompt},
-        {"role": "user", "content": f"Generate a coding question on the following topic: {prompt}"}
-    ]
-    client = OpenAI()
-    client.api_key = os.getenv("OPENAI_API_KEY")
-    response = client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=message,
-        max_tokens=1000
-    )
-
-    response = dict(response)
-    response_data = dict(dict(response['choices'][0])['message'])[
-        'content'].replace("\n", " ")
-
-    response_content = ' '.join(response_data.split())
-    new_question = json.loads(response_content)
-    return new_question
-
-
 def update_technical_question(question_id, new_question, candidate_id):
-    tech_question = TechnicalQuestion.query.filter_by(candidate_id=candidate_id,id=question_id).first()
+    tech_question = TechnicalQuestion.query.filter_by(
+        candidate_id=candidate_id, id=question_id).first()
 
     if tech_question:
         tech_question.question_text = new_question['question']
@@ -229,7 +191,8 @@ def update_technical_question(question_id, new_question, candidate_id):
 
 
 def update_behavioural_question(question_id, new_question, candidate_id):
-    behav_question = BehaviouralQuestion.query.filter_by(candidate_id=candidate_id,id=question_id).first()
+    behav_question = BehaviouralQuestion.query.filter_by(
+        candidate_id=candidate_id, id=question_id).first()
 
     if behav_question:
         behav_question.question_text = new_question['b_question_text']
@@ -237,7 +200,8 @@ def update_behavioural_question(question_id, new_question, candidate_id):
 
 
 def update_coding_question(question_id, new_question, candidate_id):
-    coding_question = CodingQuestion.query.filter_by(candidate_id=candidate_id,id=question_id).first()
+    coding_question = CodingQuestion.query.filter_by(
+        candidate_id=candidate_id, id=question_id).first()
 
     if coding_question:
         coding_question.question_text = new_question['question']
@@ -258,19 +222,19 @@ def fetch_behavioural_questions():
     if not resume_id or not job_id:
         return jsonify({'error': 'Candidate name and job_id are required parameters.'}), 400
 
-    
-    candidate = Candidate.query.filter_by(resume_id=resume_id,job_id=job_id).first()
+    candidate = Candidate.query.filter_by(
+        resume_id=resume_id, job_id=job_id).first()
 
     if not candidate:
         return jsonify({'error': 'Candidate not found for the given job_id.'}), 404
 
     behavioural_questions = []
     for question in candidate.behavioural_questions:
-            behavioural_questions.append({
-                'b_question_id': question.id,
-                'b_question_text': question.question_text,
-                "candidate_id":candidate.id
-            })
+        behavioural_questions.append({
+            'b_question_id': question.id,
+            'b_question_text': question.question_text,
+            "candidate_id": candidate.id
+        })
 
     return jsonify({'Behaviour_q': behavioural_questions}), 200
 
@@ -284,21 +248,21 @@ def fetch_technical_questions():
     if not resume_id or not job_id:
         return jsonify({'error': 'Candidate name and job_id are required parameters.'}), 400
 
-    
-    candidate = Candidate.query.filter_by(resume_id=resume_id,job_id=job_id).first()
+    candidate = Candidate.query.filter_by(
+        resume_id=resume_id, job_id=job_id).first()
 
     if not candidate:
         return jsonify({'error': 'Candidate not found for the given job_id.'}), 404
 
     technical_questions = []
     for question in candidate.technical_questions:
-            technical_questions.append({
-                'question': question.question_text,
-                'options': json.loads(question.options),
-                'answer': question.correct_answer,
-                'tech_ques_id': question.id,
-                "candidate_id":candidate.id
-            })
+        technical_questions.append({
+            'question': question.question_text,
+            'options': json.loads(question.options),
+            'answer': question.correct_answer,
+            'tech_ques_id': question.id,
+            "candidate_id": candidate.id
+        })
 
     return jsonify({'tech_questions': technical_questions}), 200
 
@@ -312,20 +276,20 @@ def fetch_coding_question():
     if not resume_id or not job_id:
         return jsonify({'error': 'Candidate name and job_id are required parameters.'}), 400
 
-    
-    candidate = Candidate.query.filter_by(resume_id=resume_id,job_id=job_id).first()
+    candidate = Candidate.query.filter_by(
+        resume_id=resume_id, job_id=job_id).first()
 
     if not candidate:
         return jsonify({'error': 'Candidate not found for the given job_id.'}), 404
 
     coding_questions = []
     for question in candidate.coding_questions:
-            coding_questions.append({
-                'question': question.question_text,
-                'sample_input': question.sample_input,
-                'sample_output': question.sample_output,
-                'coding_ques_id': question.id,
-                "candidate_id":candidate.id
-            })
+        coding_questions.append({
+            'question': question.question_text,
+            'sample_input': question.sample_input,
+            'sample_output': question.sample_output,
+            'coding_ques_id': question.id,
+            "candidate_id": candidate.id
+        })
 
     return jsonify({'coding_question': coding_questions}), 200
