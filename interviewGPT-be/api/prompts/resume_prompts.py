@@ -23,7 +23,11 @@ Make sure not to change the key values in the output JSON
     "date_of_birth": "04-09-1998",
     "nationality": "Indian"
 }
-
+Mandatory to follow the same keys used in above example will all key in lower case letters\
+Please make sure the JSON data provided follows the correct JSON format as illustrated below. This will ensure that the JSON string can be parsed without errors. Pay attention to the following points:\
+Ensure all keys and string values are enclosed in double quotes.\
+Close all braces  and brackets  properly.\
+Avoid trailing commas after the last element in objects and arrays.
 """
 evaluate_task_prompt = """
 Hey, act like a skilled or very experienced job matching system with a deep understanding of the field.
@@ -49,9 +53,15 @@ The response should be in JSON format with the following structure:
   "candidate_experience": ,
   "required_experience":
 }
+Mandatory to follow the same keys used in above example will all key in lower case letters\
+Please make sure the JSON data provided follows the correct JSON format as illustrated below. This will ensure that the JSON string can be parsed without errors. Pay attention to the following points:\
+Ensure all keys and string values are enclosed in double quotes.\
+Close all braces  and brackets  properly.\
+Avoid trailing commas after the last element in objects and arrays.
 """
 
 user_prompt_evaluation = """
+{skill_set} are always given in string representation of a list.
 Use the given {skill_set}, {job_role}, {jd} (job description), and {total_experience} to evaluate the jd_match score by acting as a job matching system.
 The score should be able to differentiate between multiple skill sets.
 Candidate name should be the full name with the initial if present. If the initial is not present in the skill set, then it is fine.
@@ -104,4 +114,9 @@ NIL for No Skills: Clearly specify [] if no matching or missing skills are found
 
 Do not generate an example response unless you get skill set details in the {skill_set} variable.
 The response should only be in a JSON format, with proper structure as described above.
+Mandatory to follow the same keys used in above example will all key in lower case letters\
+Please make sure the JSON data provided follows the correct JSON format as illustrated below. This will ensure that the JSON string can be parsed without errors. Pay attention to the following points:\
+Ensure all keys and string values are enclosed in double quotes.\
+Close all braces  and brackets  properly.\
+Avoid trailing commas after the last element in objects and arrays.
 """
