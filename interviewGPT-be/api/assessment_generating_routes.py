@@ -32,7 +32,7 @@ def tech_question_mcq(jd13, no_tech_questions, Tech_skills):
     tech_response = client.chat.completions.create(
         model=MODEL_NAME,
         messages=message,
-        max_tokens=1000
+        max_tokens=1000,temperature=0.2
     )
     print("generating tech quest")
     tech_response = dict(tech_response)
@@ -59,7 +59,7 @@ def behaviour_questions(no_behav_questions, behav_skills):
     behav_response = client.chat.completions.create(
         model=MODEL_NAME,
         messages=message,
-        max_tokens=1000
+        max_tokens=1000,temperature=0.2
     )
     print("generating beh quest")
     behav_response = dict(behav_response)
@@ -86,7 +86,7 @@ def coding_question_generate(no_code_questions):
     coding_response = client.chat.completions.create(
         model=MODEL_NAME,
         messages=message,
-        max_tokens=1000
+        max_tokens=1000,temperature=0.2
     )
     print("generating code quest")
     coding_response = dict(coding_response)
@@ -293,6 +293,7 @@ def fetch_candidate_questions():
         })
 
     return jsonify({
+        "candidate_id":candidate.id,
         'tech_questions': technical_questions,
         'Behaviour_q': behavioural_questions,
         'coding_question': coding_questions

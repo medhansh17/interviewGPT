@@ -145,8 +145,14 @@ def extract_details_from_resume(text_resume):
     extract_candidate_info = [
         {"role": "system", "content": extract_resume_prompt},
         {"role": "user", "content": (
-            f"use the {text_resume} resume to extract details such as name, work experience, phone number, address, email id, LinkedIn id, and GitHub id. "
-            "Fetch all the technical skills and soft skills separately and give the details as per instructed. If years of experience are not explicitly mentioned, calculate the total years of experience based on the dates provided in the candidate's employment history and use it for work_exp"
+            f"""use the {text_resume} resume to extract details such as name, work experience, phone number, address, email id, LinkedIn id, and GitHub id. "
+            "Fetch all the technical skills and soft skills separately and give the details as per instructed. If years of experience are not explicitly mentioned, calculate the total years of experience based on the dates provided in the candidate's employment history and use it for work_exp.
+            Mandatory to follow the same keys used in above example will all key in lower case letters\
+        Please make sure the JSON data provided follows the correct JSON format as illustrated below. This will ensure that the JSON string can be parsed without errors. Pay attention to the following points:\
+        Ensure all keys and string values are enclosed in double quotes.\
+        Close all braces  and brackets  properly.\
+        Avoid trailing commas after the last element in objects and arrays.
+            """
         )}
     ]
 
@@ -226,6 +232,7 @@ def process_resumes(app, job_id, role, resume_list):
                         total_experience = existing_info.total_experience
 
                         print("Skill set -> ", skill_set)
+                        
                         AI_score_response = chatgpt_message(
                             app, job.jd, job.role, str(skill_set), str(total_experience))
                         print(
@@ -241,13 +248,13 @@ def process_resumes(app, job_id, role, resume_list):
                             resume_score.resume_filename = filename
                             resume_score.name = existing_info.name
                             resume_score.jd_match = resume_info.get(
-                                'JD_MATCH', None)
+                                'jd_match', None)
                             resume_score.match_status = resume_info.get(
-                                'MATCH_STATUS', None)
+                                'match_status', None)
                             resume_score.matching_skills = resume_info.get(
-                                'Matching_Skills', None)
+                                'matching_skills', None)
                             resume_score.missing_skills = resume_info.get(
-                                'Missing_Skills', None)
+                                'missing_skills', None)
                             resume_score.experience_match = resume_info.get(
                                 'experience_match', None)
                             resume_score.candidate_experience = resume_info.get(
@@ -406,9 +413,12 @@ def delete_resume():
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
         new_filename = f"{resume.filename}_{timestamp}.pdf"
         file_to_archive_path = os.path.join(archive_role_folder, new_filename)
-        shutil.move(os.path.join(RESUME_FOLDER, role,
-                    resume.filename), file_to_archive_path)
-
+        #shutil.move(os.path.join(RESUME_FOLDER, role,
+                  #  resume.filename), file_to_archive_path)
+        try:
+            shutil.move(os.path.join(RESUME_FOLDER, role, resume.filename), file_to_archive_path)
+        except FileNotFoundError:
+            pass  # Ignore the error if the file is not found
         # Delete the resume record
         db.session.delete(resume)
         db.session.commit()
