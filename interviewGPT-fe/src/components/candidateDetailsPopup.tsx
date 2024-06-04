@@ -2,6 +2,7 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import api from "@/components/customAxios/Axios";
+import { useToast } from "./toast";
 
 export interface CandidateDetails {
   candidate_name: string;
@@ -31,6 +32,7 @@ export default function CandidateDetailsPopup({
   setShowDetails,
   closeDetails,
 }: CandidateDetailsPopupProps) {
+  const toast = useToast();
   const [candidateDetails, setCandidateDetails] =
     useState<CandidateDetails | null>(null);
 
@@ -41,10 +43,16 @@ export default function CandidateDetailsPopup({
       );
       setCandidateDetails(res.data.extracted_info_details);
       setShowDetails(true);
-    } catch (err: unknown) {
-      alert("Error fetching candidate details");
+    } catch (error) {
+      toast.error({
+        type: "background",
+        duration: 3000,
+        status: "Error",
+        title: "Error fetching candidate details",
+        description: { error },
+        open: true,
+      });
       setShowDetails(false);
-      console.log(err);
     }
   };
 

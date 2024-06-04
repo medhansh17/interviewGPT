@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { submitAudio } from "@/api/audioSubmission";
+import { useToast } from "./toast";
 
 const AudioRecorder = ({
   question,
@@ -10,7 +11,7 @@ const AudioRecorder = ({
   canName: string;
   jobId: string | null;
 }) => {
-  // const [recordedUrl, setRecordedUrl] = useState<string>("");
+  const toast = useToast();
   const mediaStream = useRef<MediaStream | null>(null);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
@@ -29,7 +30,14 @@ const AudioRecorder = ({
         jobId: jobId,
       });
     } catch (error) {
-      console.error("Error submitting audio:", error);
+      toast.error({
+        type: "background",
+        duration: 3000,
+        status: "Error",
+        title: "Error submitting audio",
+        description: "",
+        open: true,
+      });
     }
   };
 
@@ -58,8 +66,14 @@ const AudioRecorder = ({
       setIsRunning(true);
       startTimer();
     } catch (error) {
-      alert("Error accessing microphone");
-      console.error("Error accessing microphone:", error);
+      toast.error({
+        type: "background",
+        duration: 3000,
+        status: "Error",
+        title: "Error starting recording",
+        description: "Kindly check your microphone permissions",
+        open: true,
+      });
     }
   };
 

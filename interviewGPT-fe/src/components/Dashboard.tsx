@@ -11,6 +11,7 @@ import {
 import { UserContext } from "../context/JobContext";
 import { deleteJob } from "../context/JobContext";
 import ConfirmButton from "./confirmationPopup";
+import { ConfirmDialog } from "primereact/confirmdialog";
 
 interface DataItem {
   id: number;
@@ -219,43 +220,45 @@ const Dashboard = () => {
         </div>
         <div className="bg-white dark:bg-zinc-700 rounded-lg shadow overflow-hidden">
           {data.length > 0 && (
-            <table className="w-full overflow-auto min-w-fit">
-              <thead className="bg-zinc-200 dark:bg-zinc-600">
-                <tr>
-                  <th className="p-3 text-left" style={{ width: "300px" }}>
-                    Job Title
-                  </th>
-                  <th className="p-3 text-left" style={{ width: "500px" }}>
-                    Job Description
-                  </th>
-                  <th className="p-3 text-left w-[250px]">Active</th>
-                  <th className="p-3 text-left w-[250px]">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentItems.map((item: DataItem) => (
-                  <tr className="border-b dark:border-zinc-600" key={item.id}>
-                    <td
-                      className="p-3 font-bold underline cursor-pointer"
-                      onClick={() => handleRowClick(item.id)}
-                    >
-                      {editableRow === item.id ? (
-                        <input
-                          type="text"
-                          value={item.role}
-                          onChange={(e) => handleRoleChange(e, item.id)}
-                        />
-                      ) : (
-                        <>
-                          {item.role}
-                          <FontAwesomeIcon
-                            icon={faArrowUpRightFromSquare}
-                            className=" ml-1 w-3 h-3"
+            <>
+              <ConfirmDialog />
+              <table className="w-full overflow-auto min-w-fit">
+                <thead className="bg-zinc-200 dark:bg-zinc-600">
+                  <tr>
+                    <th className="p-3 text-left" style={{ width: "300px" }}>
+                      Job Title
+                    </th>
+                    <th className="p-3 text-left" style={{ width: "500px" }}>
+                      Job Description
+                    </th>
+                    <th className="p-3 text-left w-[250px]">Active</th>
+                    <th className="p-3 text-left w-[250px]">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentItems.map((item: DataItem) => (
+                    <tr className="border-b dark:border-zinc-600" key={item.id}>
+                      <td
+                        className="p-3 font-bold underline cursor-pointer"
+                        onClick={() => handleRowClick(item.id)}
+                      >
+                        {editableRow === item.id ? (
+                          <input
+                            type="text"
+                            value={item.role}
+                            onChange={(e) => handleRoleChange(e, item.id)}
                           />
-                        </>
-                      )}
-                    </td>
-                    {/* <td className="p-3">
+                        ) : (
+                          <>
+                            {item.role}
+                            <FontAwesomeIcon
+                              icon={faArrowUpRightFromSquare}
+                              className=" ml-1 w-3 h-3"
+                            />
+                          </>
+                        )}
+                      </td>
+                      {/* <td className="p-3">
                             {editableRow === item.id ? (
                               <input type="text" value={item.jd} onChange={(e) => handleJdChange(e, item.id)} />
                             ) : (
@@ -263,117 +266,120 @@ const Dashboard = () => {
                             )}
                           </td> */}
 
-                    <td className="p-3">
-                      {(fullDescription && fullDescriptionId == item.id) ||
-                      item.jd.length <= 100 ? (
-                        <p className="">
-                          {item.jd}{" "}
-                          {fullDescription && fullDescriptionId == item.id && (
-                            <FontAwesomeIcon
-                              icon={faChevronUp}
-                              className="ml-1"
-                              onClick={() => toggleDescription(item.id)}
-                            />
-                          )}
-                        </p>
-                      ) : (
-                        <p className="">
-                          {item.jd.slice(0, 100)}...
-                          <span onClick={() => toggleDescription(item.id)}>
-                            {fullDescription && fullDescriptionId == item.id ? (
-                              <FontAwesomeIcon
-                                icon={faChevronUp}
-                                className="ml-1"
-                              />
-                            ) : (
-                              <FontAwesomeIcon
-                                icon={faChevronDown}
-                                className="ml-1"
-                              />
-                            )}
-                          </span>
-                        </p>
-                      )}
-                    </td>
-                    {/* <td className="p-3">
+                      <td className="p-3">
+                        {(fullDescription && fullDescriptionId == item.id) ||
+                        item.jd.length <= 100 ? (
+                          <p className="">
+                            {item.jd}{" "}
+                            {fullDescription &&
+                              fullDescriptionId == item.id && (
+                                <FontAwesomeIcon
+                                  icon={faChevronUp}
+                                  className="ml-1"
+                                  onClick={() => toggleDescription(item.id)}
+                                />
+                              )}
+                          </p>
+                        ) : (
+                          <p className="">
+                            {item.jd.slice(0, 100)}...
+                            <span onClick={() => toggleDescription(item.id)}>
+                              {fullDescription &&
+                              fullDescriptionId == item.id ? (
+                                <FontAwesomeIcon
+                                  icon={faChevronUp}
+                                  className="ml-1"
+                                />
+                              ) : (
+                                <FontAwesomeIcon
+                                  icon={faChevronDown}
+                                  className="ml-1"
+                                />
+                              )}
+                            </span>
+                          </p>
+                        )}
+                      </td>
+                      {/* <td className="p-3">
                             <span className="bg-green-200 text-green-700 py-1 px-3 rounded-full text-xs">
                               Active
                             </span>
                           </td> */}
-                    <td className="p-3">
-                      {editableRow === item.id ? (
-                        <select
-                          className="bg-green-200 text-green-700 py-1 px-3 rounded-full text-xs"
-                          onChange={(e) => statusChange(e, item.id)}
-                        >
-                          <option value="true">Active</option>
-                          <option value="false">Inactive</option>
-                        </select>
-                      ) : (
-                        <span
-                          className={`${
-                            item.active
-                              ? "bg-green-200 text-green-700"
-                              : "bg-red-600 text-black"
-                          }  py-1 px-3 rounded-full text-xs`}
-                        >
-                          {item.active === "true" ? "Active" : "Inactive"}
-                        </span>
-                      )}
-                    </td>
-                    <td className="p-3 text-zinc-500 dark:text-zinc-400 relative">
-                      {editableRow === item.id ? (
-                        <div className="flex items-center justify-around text-lg">
-                          <div>
-                            <button
-                              onClick={() => saveEditedRow(item)}
-                              className="cursor-pointer resp-btn "
-                              style={{ color: "green" }}
-                              title="Save"
-                            >
-                              Save
-                            </button>
+                      <td className="p-3">
+                        {editableRow === item.id ? (
+                          <select
+                            className="bg-green-200 text-green-700 py-1 px-3 rounded-full text-xs"
+                            onChange={(e) => statusChange(e, item.id)}
+                          >
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                          </select>
+                        ) : (
+                          <span
+                            className={`${
+                              item.active
+                                ? "bg-green-200 text-green-700"
+                                : "bg-red-600 text-black"
+                            }  py-1 px-3 rounded-full text-xs`}
+                          >
+                            {item.active === "true" ? "Active" : "Inactive"}
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-3 text-zinc-500 dark:text-zinc-400 relative">
+                        {editableRow === item.id ? (
+                          <div className="flex items-center justify-around text-lg">
+                            <div>
+                              <button
+                                onClick={() => saveEditedRow(item)}
+                                className="cursor-pointer resp-btn "
+                                style={{ color: "green" }}
+                                title="Save"
+                              >
+                                Save
+                              </button>
+                            </div>
+                            <div>
+                              <button
+                                onClick={() => cancelEditRow()}
+                                className="cursor-pointer resp-btn "
+                                style={{ color: "red" }}
+                                title="Save"
+                              >
+                                Cancel
+                              </button>
+                            </div>
                           </div>
-                          <div>
-                            <button
-                              onClick={() => cancelEditRow()}
-                              className="cursor-pointer resp-btn "
-                              style={{ color: "red" }}
-                              title="Save"
-                            >
-                              Cancel
-                            </button>
+                        ) : (
+                          <div className="flex items-center justify-around text-lg">
+                            <div>
+                              <button
+                                onClick={() => toggleEditRow(item.id)}
+                                className="cursor-pointer resp-btn "
+                                style={{ color: "green" }}
+                                title="Edit"
+                              >
+                                Edit
+                              </button>
+                            </div>
+                            <div>
+                              <ConfirmButton
+                                label="Delete"
+                                message="Do you want to delete this record?"
+                                header="Delete Confirmation"
+                                icon="pi pi-times"
+                                acceptClassName="p-button-danger"
+                                onConfirm={() => deleteJobHandler(item)}
+                              />
+                            </div>
                           </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-around text-lg">
-                          <div>
-                            <button
-                              onClick={() => toggleEditRow(item.id)}
-                              className="cursor-pointer resp-btn "
-                              style={{ color: "green" }}
-                              title="Edit"
-                            >
-                              Edit
-                            </button>
-                          </div>
-                          <div>
-                            <ConfirmButton
-                              label="Delete"
-                              message="Do you want to delete this record?"
-                              header="Delete Confirmation"
-                              icon="pi pi-times"
-                              acceptClassName="p-button-danger"
-                              onConfirm={() => deleteJobHandler(item)}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
           )}
         </div>
         {/* <div className="flex justify-center mt-4">
