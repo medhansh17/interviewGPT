@@ -77,6 +77,7 @@ def delete_candidate_question():
     question_id = data.get('question_id')
     # 'technical', 'behavioral', 'coding'
     question_type = data.get('question_type').lower()
+    
 
     if not question_id or not question_type:
         return jsonify({'error': 'question_id and question_type are required parameters.'}), 400
@@ -121,17 +122,26 @@ def delete_candidate_question():
 # to prompt the question topic and generate question for each one
 
 
-def generate_new_question(system_prompt, user_prompt):
+def generate_new_question(old_question,difficulty_level,system_prompt, user_prompt):
     message = [
         {"role": "system", "content": system_prompt},
-        {"role": "user", "content": f"Generate a technical question on the following topic: {user_prompt}"}
+        {"role": "user", "content": f"""
+         {old_question}: This is a JSON string representation of a previously generated question. If no question is provided, this will be an empty string.
+         {difficulty_level}: Indicates the difficulty level of the new question to be generated. It can be either "easy", "medium", or "hard". If no difficulty level is provided, this will be an empty string.
+        Use the already generated question {old_question}, get inference from it and if {difficulty_level} is given then, Generate a technical question based on the {difficulty_level}  level and {old_question} inference, of the following topic: {user_prompt}, 
+        Mandatory to follow the same keys used in above example will all key in lower case letters\
+        Please make sure the JSON data provided follows the correct JSON format as illustrated below. This will ensure that the JSON string can be parsed without errors. Pay attention to the following points:\
+        Ensure all keys and string values are enclosed in double quotes.\
+        Close all braces  and brackets  properly.\
+        Avoid trailing commas after the last element in objects and arrays.
+         """}
     ]
     client = OpenAI()
     client.api_key = os.getenv("OPENAI_API_KEY")
     response = client.chat.completions.create(
         model=MODEL_NAME,
         messages=message,
-        max_tokens=1000
+        max_tokens=1000,temperature=0.2
     )
 
     response = dict(response)
@@ -151,8 +161,9 @@ def update_candidate_question():
     question_id = data.get('question_id')
     # 'technical', 'behavioral', 'coding'
     question_type = data.get('question_type').lower()
-    topic_prompt = data.get('topic_prompt')
-
+    topic_prompt = data.get('topic_prompt'," ")
+    difficulty_level=data.get("difficulty_level"," ") ## easy, medium, hard
+    print(data)
     if not resume_id or not job_id or not question_type or not topic_prompt:
         return jsonify({'error': 'Candidate name, job_id, question_type, and topic_prompt are required parameters.'}), 400
 
@@ -167,17 +178,47 @@ def update_candidate_question():
 
     if question_type not in prompt_generator:
         return jsonify({'error': 'Invalid question_type provided.'}), 400
-
-    new_question = generate_new_question(
-        prompt_generator[question_type], topic_prompt)
-
+    
     candidate = Candidate.query.filter_by(
         resume_id=resume_id, job_id=job_id).one()
+    
+    old_question = str(fetch_question_details(question_id, question_type))
+    if not old_question:
+        return jsonify({'error': 'Question not found.'}), 404
+
+    new_question = generate_new_question(old_question,difficulty_level,
+        prompt_generator[question_type], topic_prompt)
+
+    
 
     update_functions[question_type](question_id, new_question, candidate.id)
 
     return jsonify({'message': 'Question updated successfully.'}), 200
 
+# For gettign the old question 
+def fetch_question_details(question_id, question_type):
+    if question_type == 'technical':
+        question = TechnicalQuestion.query.filter_by(id=question_id).first()
+        if question:
+            return {
+                'question_text': question.question_text,
+                'options': question.options
+            }
+    elif question_type == 'behavioral':
+        question = BehaviouralQuestion.query.filter_by(id=question_id).first()
+        if question:
+            return {
+                'question_text': question.question_text,
+            }
+    elif question_type == 'coding':
+        question = CodingQuestion.query.filter_by(id=question_id).first()
+        if question:
+            return {
+                'question_text': question.question_text,
+                'sample_input': question.sample_input,
+                'sample_output': question.sample_output
+            }
+    return None
 
 def update_technical_question(question_id, new_question, candidate_id):
     tech_question = TechnicalQuestion.query.filter_by(
