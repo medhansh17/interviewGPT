@@ -14,8 +14,8 @@ interface Toast {
   type?: "foreground" | "background";
   duration: number;
   status: string;
-  description: string;
-  title: string;
+  description: string | any;
+  title: string | any;
   open: boolean;
 }
 

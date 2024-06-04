@@ -1,6 +1,7 @@
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
+import { useToast } from "./toast";
 import api from "@/components/customAxios/Axios";
 
 interface GenerateQuestionsPopupProps {
@@ -14,12 +15,20 @@ export default function GenerateQuestionsPopup({
   job_id,
   setPop,
 }: GenerateQuestionsPopupProps) {
+  const toast = useToast();
   const [numBehavioral, setNumBehavioral] = useState(1);
   const [numMCQ, setNumMCQ] = useState(1);
   const [numCoding, setNumCoding] = useState(0);
 
   if (job_id === null) {
-    alert("Job id not found");
+    toast.error({
+      type: "background",
+      duration: 3000,
+      status: "Error",
+      title: "Error fetching job details",
+      description: "Job ID is null",
+      open: true,
+    });
     return null;
   }
 
@@ -34,9 +43,15 @@ export default function GenerateQuestionsPopup({
         no_code_question: numCoding,
       });
       if (resp.statusText === "OK") window.location.reload();
-      console.log(resp);
     } catch (err) {
-      console.error(err);
+      toast.error({
+        type: "background",
+        duration: 3000,
+        status: "Error",
+        title: "Error fetching candidate details",
+        description: { err },
+        open: true,
+      });
     }
   };
 

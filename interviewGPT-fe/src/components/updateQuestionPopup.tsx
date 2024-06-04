@@ -35,7 +35,7 @@ export default function UpdateQuestionPopup({
           }
           toast.success({
             type: "background",
-            duration: 1000,
+            duration: 3000,
             status: "Success",
             title: "Question Updated Successfully",
             description: "",
