@@ -1,5 +1,4 @@
 import api from "@/components/customAxios/Axios";
-
 export async function updateQuestion({
   question,
   jobId,
@@ -14,7 +13,6 @@ export async function updateQuestion({
     });
     return response.data;
   } catch (error) {
-    console.error("Error updating question:", error);
     return null;
   }
 }

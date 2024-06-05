@@ -55,6 +55,14 @@ const Dashboard = () => {
         id: item.id,
       });
       if (resp.status === 200) {
+        toast.success({
+          type: "background",
+          duration: 3000,
+          status: "Success",
+          title: "Job Deleted Successfully",
+          description: "",
+          open: true,
+        });
         dispatch(deleteJob(item.id));
         setData(data.filter((job) => job.id !== item.id));
       }
@@ -343,7 +351,7 @@ const Dashboard = () => {
                                 : "bg-red-600 text-black"
                             }  py-1 px-3 rounded-full text-xs`}
                           >
-                            {item.active === "true" ? "Active" : "Inactive"}
+                            {item.active === "true" ? "Inactive" : "Active"}
                           </span>
                         )}
                       </td>
