@@ -535,6 +535,7 @@ const RespJdDash = () => {
           behavioralQuestions={behavioralQuestions}
           codingQuestion={codingQuestion}
           technicalQuestions={technicalQuestions}
+          resume_id={resume_id}
           onClose={() => setApproval(false)}
         />
       )}

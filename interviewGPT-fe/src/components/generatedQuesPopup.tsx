@@ -14,6 +14,7 @@ export default function GeneratedQuesPopup({
   behavioralQuestions,
   technicalQuestions,
   codingQuestion,
+  resume_id,
   onClose,
 }: {
   behavioralQuestions: { b_question_id: string; b_question_text: string }[];
@@ -29,6 +30,7 @@ export default function GeneratedQuesPopup({
     sample_input: string;
     sample_output: string;
   }[];
+  resume_id: string;
   onClose: () => void;
 }) {
   const [updateStatus, setUpdateStatus] = useState(false);
@@ -64,8 +66,8 @@ export default function GeneratedQuesPopup({
                 <button
                   onClick={() => {
                     setData({
-                      resume_id: "0e8f99fc-35bc-4b14-a14b-2c970190d813",
-                      job_id: "4e28f781-a5e4-4f14-92aa-029825be89e2",
+                      resume_id: resume_id,
+                      job_id: localStorage.getItem("job_id") || "",
                       question_id: question.b_question_id,
                       question_type: "behavioral",
                     });
