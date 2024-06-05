@@ -3,12 +3,12 @@ import { submitAudio } from "@/api/audioSubmission";
 import { useToast } from "./toast";
 
 const AudioRecorder = ({
-  question,
-  canName,
+  question_id,
+  candidate_id,
   jobId,
 }: {
-  question: string;
-  canName: string;
+  question_id: string;
+  candidate_id: string;
   jobId: string | null;
 }) => {
   const toast = useToast();
@@ -25,8 +25,8 @@ const AudioRecorder = ({
     try {
       await submitAudio({
         audioBlob: blob,
-        question: question,
-        canName: canName,
+        question_id: question_id,
+        candidate_id: candidate_id,
         jobId: jobId,
       });
     } catch (error) {

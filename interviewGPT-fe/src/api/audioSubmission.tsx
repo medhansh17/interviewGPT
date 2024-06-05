@@ -2,19 +2,19 @@ import api from "@/components/customAxios/Axios";
 
 export async function submitAudio({
   audioBlob,
-  question,
-  canName,
+  question_id,
+  candidate_id,
   jobId,
 }: {
   audioBlob: Blob;
-  question: string;
-  canName: string;
+  question_id: string;
+  candidate_id: string;
   jobId: string | null;
 }) {
   const formData = new FormData();
   formData.append("audio", audioBlob);
-  formData.append("question", question);
-  formData.append("candidate_name", canName);
+  formData.append("question_id", question_id);
+  formData.append("candidate_id", candidate_id);
   formData.append("job_id", jobId ?? "");
 
   try {

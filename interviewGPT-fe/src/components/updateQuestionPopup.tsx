@@ -55,7 +55,14 @@ export default function UpdateQuestionPopup({
           setUpdating(false);
         });
     } catch (err) {
-      console.log(err);
+      toast.error({
+        type: "background",
+        duration: 3000,
+        status: "Error",
+        title: "Error updating question",
+        description: "",
+        open: true,
+      });
       setUpdating(false);
     }
   };

@@ -11,6 +11,7 @@ import {
 import { UserContext } from "../context/JobContext";
 import { deleteJob } from "../context/JobContext";
 import ConfirmButton from "./confirmationPopup";
+import { useToast } from "./toast";
 import { ConfirmDialog } from "primereact/confirmdialog";
 
 interface DataItem {
@@ -21,6 +22,7 @@ interface DataItem {
 }
 
 const Dashboard = () => {
+  const toast = useToast();
   const [data, setData] = useState<DataItem[]>([]);
   const { dispatch } = useContext(UserContext)!;
   const [editableRow, setEditableRow] = useState<number | null>(null);
@@ -37,9 +39,7 @@ const Dashboard = () => {
       try {
         const response = await api.get("/export_jobs_json");
         setData(response.data);
-      } catch (error) {
-        console.log(error);
-      }
+      } catch (error) {}
     };
     getJobList();
   }, []);
@@ -59,7 +59,14 @@ const Dashboard = () => {
         setData(data.filter((job) => job.id !== item.id));
       }
     } catch (error) {
-      console.log(error);
+      toast.error({
+        type: "background",
+        duration: 3000,
+        status: "Error",
+        title: "Error deleting job",
+        description: { error },
+        open: true,
+      });
     }
   };
 
@@ -86,9 +93,25 @@ const Dashboard = () => {
         jd: item.jd,
         active: active,
       });
-      console.log(response);
+      if (response.status === 200) {
+        toast.success({
+          type: "background",
+          duration: 3000,
+          status: "Success",
+          title: "Job Updated Successfully",
+          description: "",
+          open: true,
+        });
+      }
     } catch (error: unknown) {
-      console.log(error);
+      toast.error({
+        type: "background",
+        duration: 3000,
+        status: "Error",
+        title: "Error updating job",
+        description: { error },
+        open: true,
+      });
     }
     setEditableRow(null);
   };
@@ -135,7 +158,6 @@ const Dashboard = () => {
   ) => {
     const newData: DataItem[] = data.map((item: DataItem) => {
       if (item.id === id) {
-        console.log(item);
         return {
           ...item,
           active: event.target.value === "true" ? "true" : "false",
@@ -143,7 +165,6 @@ const Dashboard = () => {
       }
       return item;
     });
-    console.log(newData);
     setData(newData);
   };
 

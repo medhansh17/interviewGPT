@@ -86,8 +86,6 @@ const RespJdDash = () => {
     const getJobDetails = async () => {
       try {
         const response = await api.get(`/jobs/${id}`);
-        console.log("API Response:", response.data);
-
         setJobDetails({
           role: response.data.job_details.role,
           jd: response.data.job_details.jd,
@@ -95,7 +93,14 @@ const RespJdDash = () => {
         });
         localStorage.setItem("job_id", response.data.job_details.job_id);
       } catch (error: any) {
-        console.log(error);
+        toast.error({
+          type: "background",
+          duration: 3000,
+          status: "Error",
+          title: "Error fetching job details",
+          description: { error },
+          open: true,
+        });
       }
     };
     getJobDetails();
@@ -104,9 +109,15 @@ const RespJdDash = () => {
         const res = await api.get(`/get_resume_scores?job_id=${id}`);
         const candidateData = res.data.resume_scores;
         dispatch(setCandList(candidateData));
-        console.log("Candidate Data:", candidateData);
       } catch (err: any) {
-        console.log(err);
+        toast.error({
+          type: "background",
+          duration: 3000,
+          status: "Error",
+          title: "Error fetching candidate details",
+          description: { err },
+          open: true,
+        });
       }
     };
     getCandList();
@@ -129,7 +140,6 @@ const RespJdDash = () => {
       try {
         const res = await api.get(`/get_resume_scores?job_id=${id}`);
         const candidateData = res.data.resume_scores;
-        console.log("Candidate Data:", candidateData);
         dispatch(setCandList(candidateData));
       } catch (err: any) {
         toast.error({
@@ -174,7 +184,6 @@ const RespJdDash = () => {
 
     try {
       const response = await api.post("/upload_resume_to_job", newResume);
-      console.log("add", response);
       if (response.statusText === "OK") {
         handleRefresh();
         toast.success({
@@ -205,7 +214,16 @@ const RespJdDash = () => {
       const resp = await api.get(
         `/delete_resume?resume_id=${item.resume_id}&job_id=${jobDetails?.job_id}`
       );
-      console.log(resp);
+      if (resp.statusText === "OK") {
+        toast.success({
+          type: "background",
+          duration: 3000,
+          status: "Success",
+          title: "Candidate deleted successfully",
+          description: "",
+          open: true,
+        });
+      }
       dispatch(deleteCandidateByName(item.candidate_name));
     } catch (error) {
       toast.error({
@@ -264,7 +282,14 @@ const RespJdDash = () => {
       setResultData(resp.data);
       setshow_Result(!show_Result);
     } catch (error: unknown) {
-      console.log(error);
+      toast.error({
+        type: "background",
+        duration: 3000,
+        status: "Error",
+        title: "Error fetching result",
+        description: { error },
+        open: true,
+      });
     }
   };
   const indexOfLastItem = currentPage * itemsPerPage;
