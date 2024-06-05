@@ -4,6 +4,7 @@ import { useState } from "react";
 import { UpdateQuestionData } from "./generatedQuesPopup";
 import api from "@/components/customAxios/Axios";
 import { useToast } from "./toast";
+
 export default function UpdateQuestionPopup({
   onClose,
   data,
@@ -13,7 +14,9 @@ export default function UpdateQuestionPopup({
 }) {
   const toast = useToast();
   const [question, setQuestion] = useState("");
+  const [difficulty, setDifficulty] = useState("easy");
   const [updating, setUpdating] = useState(false);
+
   const handleUpdate = () => {
     if (!data) return;
     setUpdating(true);
@@ -23,6 +26,7 @@ export default function UpdateQuestionPopup({
       question_id: data.question_id,
       question_type: data.question_type,
       topic_prompt: question,
+      difficult_level: difficulty,
     };
     try {
       api
@@ -69,7 +73,7 @@ export default function UpdateQuestionPopup({
           Update Question
         </h2>
         <div className="mb-4">
-          <label htmlFor="question" className="block">
+          <label htmlFor="question" className="block mb-2">
             Enter Prompt:
           </label>
           <textarea
@@ -79,6 +83,24 @@ export default function UpdateQuestionPopup({
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
           ></textarea>
+        </div>
+        <div className="mb-4">
+          <label className="block mb-2">Select Difficulty Level:</label>
+          <div className="flex space-x-4">
+            {["easy", "medium", "hard"].map((level) => (
+              <button
+                key={level}
+                className={`px-4 py-2 rounded ${
+                  difficulty === level
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-black"
+                }`}
+                onClick={() => setDifficulty(level)}
+              >
+                {level.charAt(0).toUpperCase() + level.slice(1)}
+              </button>
+            ))}
+          </div>
         </div>
         <div className="flex justify-end">
           <button

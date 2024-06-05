@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import { useToast } from "./components/toast";
 
-import TechSkillTable from "./components/TechSkillTable";
-import { FetchSkillsData } from "./types";
+// import TechSkillTable from "./components/TechSkillTable";
+// import { FetchSkillsData } from "./types";
 import api from "./components/customAxios/Axios";
 import { useNavigate } from "react-router-dom";
 import AddJd from "./components/AddJd";
@@ -18,11 +18,10 @@ function Application() {
   const [load, setLoad] = useState(false);
   const [mainData2, setMainData2] = useState<any | null>(null);
   const [mainTextArea2, setMainTextArea2] = useState<any | null>("");
-  const [isHidden, setIsHidden] = useState(false);
+  // const [isHidden, setIsHidden] = useState(false);
   const [empty, setEmpty] = useState<boolean>(false);
-  const [fetchSkill] = useState<FetchSkillsData & { timestamp: number }>();
-  console.log(mainData, mainTextArea);
-  const [error, setError] = useState<string | null>(null);
+  // const [fetchSkill] = useState<FetchSkillsData & { timestamp: number }>();
+  // const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [role, setRole] = useState<string>("");
   const [role2, setRole2] = useState<string>("");
@@ -42,17 +41,20 @@ function Application() {
   }, []);
 
   const uploadJD = async () => {
-    setIsHidden(true);
     const wordCountRegex = /\S+/g;
     const wordCount =
       (mainTextArea2.match(wordCountRegex) || []).length ||
       (mainTextArea.match(wordCountRegex) || []).length;
     if ((load == false && wordCount < 50) || wordCount > 10000) {
-      setError(wordCount);
-      setTimeout(() => {
-        setError(null);
-      }, 10000);
-      navigate("/dashboard");
+      toast.error({
+        type: "background",
+        duration: 3000,
+        status: "Error",
+        title: "Error",
+        description:
+          "JD should be between 50 and 10000 words. Please try again.",
+        open: true,
+      });
       return;
     }
     setIsLoading(true);
@@ -71,6 +73,14 @@ function Application() {
         setRole("");
         setRole2("");
         navigate("/dashboard");
+        toast.success({
+          type: "background",
+          duration: 3000,
+          status: "Error",
+          title: "Success",
+          description: "Job JD added.",
+          open: true,
+        });
       } else if (response.data.message == "Job JD already exists.") {
         toast.error({
           type: "background",
@@ -142,6 +152,13 @@ function Application() {
 
   const handleReset = () => {
     setMainData(null);
+    setMainTextArea(null);
+    setMainData2(null);
+    setMainTextArea2(null);
+    setEmpty(true);
+    setRole("");
+    setRole2("");
+    setFile(null);
   };
 
   const docHanler = () => {
@@ -162,7 +179,7 @@ function Application() {
       <div className="flex justify-end"></div>
       <div
         onClick={() => navigate("/dashboard")}
-        className="w-[10rem] text-center bg-gray-200 px-4 py-2 rounded-md shadow-md hover:bg-gray-300 cursor-pointer mt-[-3rem] mb-[2rem] ml-[3rem] font-bold"
+        className="absolute right-[5rem] w-[10rem] text-center bg-gray-200 px-4 py-2 rounded-md shadow-md hover:bg-gray-300 cursor-pointer  mb-[2rem]  font-bold"
       >
         JD Dashboard
       </div>
@@ -199,7 +216,7 @@ function Application() {
                       required
                       type="text"
                       onChange={(e) => setRole2(e.target.value)}
-                      value={role2}
+                      // value={role2}
                       className="border my-4 border-zinc-300 shadow-sm w-[700px] px-3 py-2 placeholder-zinc-400 text-zinc-700 bg-white rounded-lg focus:outline-none focus:shadow-outline"
                       placeholder="Enter Role"
                     />
@@ -213,18 +230,18 @@ function Application() {
                       required
                       type="text"
                       onChange={(e) => setRole(e.target.value)}
-                      value={role}
+                      // value={role}
                       className="border my-4 border-zinc-300 shadow-sm w-full px-3 py-2 placeholder-zinc-400 text-zinc-700 bg-white rounded-lg focus:outline-none focus:shadow-outline"
                       placeholder="Enter Role"
                     />
-                    {error && (
+                    {/* {error && (
                       <span style={{ fontSize: "0.9rem" }}>
                         <span style={{ color: "red", fontSize: "1rem" }}>
                           *
                         </span>
                         {error}
                       </span>
-                    )}
+                    )} */}
                     <TextArea2
                       setEmpty={setEmpty}
                       empty={empty}
@@ -265,6 +282,7 @@ function Application() {
                   </button>
 
                   <button
+                    type="reset"
                     className={`h-[40px] ml-[1rem] mt-[1rem] px-6 py-2 w-[6rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform ${
                       mainData ||
                       mainTextArea ||
@@ -274,8 +292,8 @@ function Application() {
                         ? "bg-blue-600 hover:bg-blue-500 focus:ring focus:ring-blue-300 focus:ring-opacity-80"
                         : "bg-gray-400 cursor-not-allowed"
                     } rounded-lg focus:outline-none`}
-                    onClick={handleReset}
-                    disabled={!mainData || mainTextArea}
+                    onClick={() => handleReset()}
+                    // disabled={!mainData}
                   >
                     Reset
                   </button>
@@ -294,7 +312,7 @@ function Application() {
           />
         </div>
       </div>
-      <div style={{ display: isHidden ? "block" : "none" }}>
+      {/* <div style={{ display: isHidden ? "block" : "none" }}>
         <div className="flex  w-full flex-wrap">
           <div className="w-[100%]">
             <p className=" text-center md:text-[2rem] text-[1rem] my-[1rem]">
@@ -309,7 +327,7 @@ function Application() {
             )}
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div className="bg-deep-purple-accent-400 ">
         <svg
