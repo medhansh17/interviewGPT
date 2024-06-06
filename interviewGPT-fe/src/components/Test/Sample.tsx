@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMicrophone } from "@fortawesome/free-solid-svg-icons";
 import AudioRecorder from "../audio_recorder";
-// import api from "../customAxios/Axios";
 import { useNavigate } from "react-router-dom";
 import New_Sidebar from "../navbar.component";
 
@@ -12,31 +11,16 @@ const Sample: React.FC = () => {
   const [canName, setCanname] = useState("");
   const [behavioralQuestions, setBehavioralQuestions] = useState<any[]>([]);
   const jobId = localStorage.getItem("job_id");
+  const beha = sessionStorage.getItem("question");
 
   useEffect(() => {
     const storedItemString = localStorage.getItem("item");
     if (storedItemString) {
       const storedItem = JSON.parse(storedItemString);
-      console.log(storedItem);
       setCanname(storedItem?.candidate_name);
     }
 
     const fetchBehavioralQuestions = async () => {
-      //   console.log(canName, jobId);
-      //   try {
-      //     if (canName && jobId) {
-      //       const resp = await api.post("/fetch_behavioural_questions", {
-      //         candidate_name: canName,
-      //         job_id: jobId,
-      //       });
-      //       setBehavioralQuestions(resp.data.Behaviour_q);
-      //     }
-      //   } catch (error) {
-      //     console.error("Error fetching behavioral questions:", error);
-      //   }
-      //   console.log("Fired");
-      // };
-      const beha = sessionStorage.getItem("question");
       setBehavioralQuestions(beha ? JSON.parse(beha).Behaviour_q : []);
     };
     fetchBehavioralQuestions();
@@ -59,8 +43,13 @@ const Sample: React.FC = () => {
         <div className="bg-zinc-200 dark:bg-zinc-900 p-4">
           <div className="flex justify-between items-center">
             <div className="text-lg font-semibold text-zinc-800 dark:text-white">
-              Online Coding Assessment
+              Online Behavioural Assessment
             </div>
+            <h1 className="text-lg font-semibold ">
+              {localStorage.getItem("item")
+                ? JSON.parse(localStorage.getItem("item")!).candidate_name
+                : ""}
+            </h1>
           </div>
         </div>
         <div className="mx-auto py-8" style={{ width: "84%" }}>
@@ -85,10 +74,10 @@ const Sample: React.FC = () => {
           </div>
           <div className="flex justify-center items-center mt-4">
             <AudioRecorder
-              question={
-                behavioralQuestions[currentQuestionIndex]?.b_question_text
+              question_id={
+                behavioralQuestions[currentQuestionIndex]?.b_question_id
               }
-              canName={canName}
+              candidate_id={beha ? JSON.parse(beha).candidate_id : ""}
               jobId={localStorage?.getItem("job_id")}
             />
           </div>

@@ -85,14 +85,21 @@ const QuestionAccordion = ({
   };
 
   return (
-    <div className="border rounded shadow-sm p-4 mt-4 mx-[1rem] md:w-[100%] " style={{backgroundColor:"rgba(173, 216, 230, 0.25)"}}>
+    <div
+      className="border rounded shadow-sm p-4 mt-4 mx-[1rem] md:w-[100%] "
+      style={{ backgroundColor: "rgba(173, 216, 230, 0.25)" }}
+    >
       <div className="cursor-pointer">
         <div className="flex flex-col items-baseline gap-4 flex-wrap">
-          <div className={`inline-block h-3.5 w-3.5 rounded-full  ${getDifficultyColor()}`}>
+          <div
+            className={`inline-block h-3.5 w-3.5 rounded-full  ${getDifficultyColor()}`}
+          >
             {/* {type} */}
           </div>
           <div className="flex items-center justify-between gap-2 w-full">
-            <p className="text-lg  cursor-pointer font-medium mb-4">{question}</p>
+            <p className="text-lg  cursor-pointer font-medium mb-4">
+              {question}
+            </p>
             <Popover data={answer} />
           </div>
         </div>
@@ -101,7 +108,15 @@ const QuestionAccordion = ({
           <button
             title="correct"
             onClick={() => handleOptionClick("Correct")}
-            className={`cursor-pointer bg-slate-50 ${selectedOption === "Correct" ? "bg-green-500 text-white" : "hover:bg-green-500 text-green-500 hover:text-white"} h-[2rem] py-0 px-4 border ${selectedOption === "Correct" ? "border-green-500" : "border-green-500 hover:border-transparent"} rounded font-medium`}
+            className={`cursor-pointer bg-slate-50 ${
+              selectedOption === "Correct"
+                ? "bg-green-500 text-white"
+                : "hover:bg-green-500 text-green-500 hover:text-white"
+            } h-[2rem] py-0 px-4 border ${
+              selectedOption === "Correct"
+                ? "border-green-500"
+                : "border-green-500 hover:border-transparent"
+            } rounded font-medium`}
           >
             <img
               width="25"
@@ -118,7 +133,15 @@ const QuestionAccordion = ({
           <button
             title="PartiallyCorrect"
             onClick={() => handleOptionClick("PartiallyCorrect")}
-            className={`cursor-pointer bg-slate-50 ${selectedOption === "PartiallyCorrect" ? "bg-yellow-500 text-white" : "hover:bg-yellow-500 text-yellow-500 hover:text-white"} h-[2rem] py-0 px-4 border ${selectedOption === "PartiallyCorrect" ? "border-yellow-500" : "border-yellow-500 hover:border-transparent"} rounded font-medium`}
+            className={`cursor-pointer bg-slate-50 ${
+              selectedOption === "PartiallyCorrect"
+                ? "bg-yellow-500 text-white"
+                : "hover:bg-yellow-500 text-yellow-500 hover:text-white"
+            } h-[2rem] py-0 px-4 border ${
+              selectedOption === "PartiallyCorrect"
+                ? "border-yellow-500"
+                : "border-yellow-500 hover:border-transparent"
+            } rounded font-medium`}
           >
             <img
               width="25"
@@ -135,7 +158,15 @@ const QuestionAccordion = ({
           <button
             title="Incorrect"
             onClick={() => handleOptionClick("Incorrect")}
-            className={`cursor-pointer bg-slate-50 ${selectedOption === "Incorrect" ? "bg-red-500 text-white" : "hover:bg-red-500 text-red-500 hover:text-white"} h-[2rem] py-0 px-4 border ${selectedOption === "Incorrect" ? "border-red-500" : "border-red-500 hover:border-transparent"} rounded font-medium`}
+            className={`cursor-pointer bg-slate-50 ${
+              selectedOption === "Incorrect"
+                ? "bg-red-500 text-white"
+                : "hover:bg-red-500 text-red-500 hover:text-white"
+            } h-[2rem] py-0 px-4 border ${
+              selectedOption === "Incorrect"
+                ? "border-red-500"
+                : "border-red-500 hover:border-transparent"
+            } rounded font-medium`}
           >
             <img
               width="16"
@@ -147,7 +178,6 @@ const QuestionAccordion = ({
               }
               alt="external-incorrect"
             />
-            
           </button>
         </div>
       </div>
@@ -223,7 +253,7 @@ const Accordion = ({ title, softSkill, updatePercentage }: any) => {
 
   const getDifficultyColor = () => {
     const difficulty = softSkill?.soft_skills?.soft_skills[0]?.questions?.find(
-      (item: { question: string }) => item.question === title,
+      (item: { question: string }) => item.question === title
     )?.type;
 
     console.log("difficulty", difficulty);
@@ -241,10 +271,15 @@ const Accordion = ({ title, softSkill, updatePercentage }: any) => {
   };
 
   return (
-    <div className="border rounded shadow-sm " style={{backgroundColor:"#add8e640"}}>
+    <div
+      className="border rounded shadow-sm "
+      style={{ backgroundColor: "#add8e640" }}
+    >
       <div className="mx-[1rem]">
         <div className="flex flex-col items-baseline gap-4 flex-wrap">
-          <div className={`inline-block mt-3 h-3.5 w-3.5 rounded-full  ${getDifficultyColor()}`}>
+          <div
+            className={`inline-block mt-3 h-3.5 w-3.5 rounded-full  ${getDifficultyColor()}`}
+          >
             {/* {type} */}
           </div>
           <div className="flex items-center justify-between mb-3 gap-8 w-full">
@@ -252,7 +287,7 @@ const Accordion = ({ title, softSkill, updatePercentage }: any) => {
             <Popover
               data={
                 softSkill?.soft_skills?.soft_skills[0]?.questions?.find(
-                  (item: { question: string }) => item.question === title,
+                  (item: { question: string }) => item.question === title
                 )?.answer
               }
             />
@@ -263,7 +298,15 @@ const Accordion = ({ title, softSkill, updatePercentage }: any) => {
           <button
             title="correct"
             onClick={() => handleOptionClick("Correct")}
-            className={`cursor-pointer bg-slate-50 ${selectedOption === "Correct" ? "bg-green-500 text-white" : "hover:bg-green-500 text-green-500 hover:text-white"} h-[2rem] py-0 px-4 border ${selectedOption === "Correct" ? "border-green-500" : "border-green-500 hover:border-transparent"} rounded font-medium`}
+            className={`cursor-pointer bg-slate-50 ${
+              selectedOption === "Correct"
+                ? "bg-green-500 text-white"
+                : "hover:bg-green-500 text-green-500 hover:text-white"
+            } h-[2rem] py-0 px-4 border ${
+              selectedOption === "Correct"
+                ? "border-green-500"
+                : "border-green-500 hover:border-transparent"
+            } rounded font-medium`}
           >
             <img
               width="25"
@@ -280,7 +323,15 @@ const Accordion = ({ title, softSkill, updatePercentage }: any) => {
           <button
             title="PartiallyCorrect"
             onClick={() => handleOptionClick("PartiallyCorrect")}
-            className={`cursor-pointer bg-slate-50 ${selectedOption === "PartiallyCorrect" ? "bg-yellow-500 text-white" : "hover:bg-yellow-500 text-yellow-500 hover:text-white"} h-[2rem] py-0 px-4 border ${selectedOption === "PartiallyCorrect" ? "border-yellow-500" : "border-yellow-500 hover:border-transparent"} rounded font-medium`}
+            className={`cursor-pointer bg-slate-50 ${
+              selectedOption === "PartiallyCorrect"
+                ? "bg-yellow-500 text-white"
+                : "hover:bg-yellow-500 text-yellow-500 hover:text-white"
+            } h-[2rem] py-0 px-4 border ${
+              selectedOption === "PartiallyCorrect"
+                ? "border-yellow-500"
+                : "border-yellow-500 hover:border-transparent"
+            } rounded font-medium`}
           >
             <img
               width="25"
@@ -297,7 +348,15 @@ const Accordion = ({ title, softSkill, updatePercentage }: any) => {
           <button
             title="Incorrect"
             onClick={() => handleOptionClick("Incorrect")}
-            className={`cursor-pointer bg-slate-50 ${selectedOption === "Incorrect" ? "bg-red-500 text-white" : "hover:bg-red-500 text-red-500 hover:text-white"} h-[2rem] py-0 px-4 border ${selectedOption === "Incorrect" ? "border-red-500" : "border-red-500 hover:border-transparent"} rounded font-medium`}
+            className={`cursor-pointer bg-slate-50 ${
+              selectedOption === "Incorrect"
+                ? "bg-red-500 text-white"
+                : "hover:bg-red-500 text-red-500 hover:text-white"
+            } h-[2rem] py-0 px-4 border ${
+              selectedOption === "Incorrect"
+                ? "border-red-500"
+                : "border-red-500 hover:border-transparent"
+            } rounded font-medium`}
           >
             <img
               width="19"
@@ -327,7 +386,7 @@ const Accordion = ({ title, softSkill, updatePercentage }: any) => {
                 <span className="text-green-600">Keywords</span>:{" "}
                 {
                   softSkill?.soft_skills?.soft_skills[0]?.questions?.find(
-                    (item: { question: string }) => item.question === title,
+                    (item: { question: string }) => item.question === title
                   )?.keywords
                 }
               </p>
@@ -373,32 +432,36 @@ const Tabs: React.FC<TabsProps> = ({
 
   const updateOverallPercentage = (percentage: number) => {
     setOverallPercentage(
-      (prevOverallPercentage: any) => prevOverallPercentage + percentage,
+      (prevOverallPercentage: any) => prevOverallPercentage + percentage
     );
   };
 
   return (
     <div>
       <div className="mb-1 md:mx-[2rem] shadow-lg">
-        < div style={{backgroundColor:"lightblue"}}>
-        <TETabs className="hover-style">
-          <TETabsItem
-            onClick={() => handleBasicClick("tab1")}
-            active={basicActive === "tab1"}
-            style={{ fontWeight: "bold", fontSize: "0.8rem",paddingTop:'0!important'}}
-            className="font-bold"
-          >
-            Behavioural Assessment
-          </TETabsItem>
-          <TETabsItem
-            onClick={() => handleBasicClick("tab2")}
-            active={basicActive === "tab2"}
-            style={{ fontWeight: "bold", fontSize: "0.8rem" }}
-            className="font-bold"
-          >
-            Technical Assessment
-          </TETabsItem>
-        </TETabs>
+        <div style={{ backgroundColor: "lightblue" }}>
+          <TETabs className="hover-style">
+            <TETabsItem
+              onClick={() => handleBasicClick("tab1")}
+              active={basicActive === "tab1"}
+              style={{
+                fontWeight: "bold",
+                fontSize: "0.8rem",
+                paddingTop: "0!important",
+              }}
+              className="font-bold"
+            >
+              Behavioural Assessment
+            </TETabsItem>
+            <TETabsItem
+              onClick={() => handleBasicClick("tab2")}
+              active={basicActive === "tab2"}
+              style={{ fontWeight: "bold", fontSize: "0.8rem" }}
+              className="font-bold"
+            >
+              Technical Assessment
+            </TETabsItem>
+          </TETabs>
         </div>
 
         <TETabsContent>
@@ -428,7 +491,7 @@ const Tabs: React.FC<TabsProps> = ({
                           softSkill={softSkill}
                           updatePercentage={updateOverallPercentage}
                         />
-                      ),
+                      )
                     )}
                   </div>
                 </TETabsPane>
@@ -437,20 +500,22 @@ const Tabs: React.FC<TabsProps> = ({
           </TETabsPane>
 
           <TETabsPane show={basicActive === "tab2"}>
-            <TETabs style={{display:"flex",gap:"20px",alignItems:"center"}} className="">
+            <TETabs
+              style={{ display: "flex", gap: "20px", alignItems: "center" }}
+              className=""
+            >
               {techSkill?.technical_skills?.technical_skills?.map(
                 (item: { name: string }, index: number) => (
-             
                   <TETabsItem
                     key={index}
                     onClick={() => handleNestedClick(item.name)}
                     active={nestedActive === item.name}
-                    style={{ fontWeight: "bold" ,backgroundColor:"lightgray" }}
+                    style={{ fontWeight: "bold", backgroundColor: "lightgray" }}
                     className="font-bold "
                   >
                     {item?.name}
                   </TETabsItem>
-                ),
+                )
               )}
 
               {/* <TETabsItem
@@ -461,38 +526,37 @@ const Tabs: React.FC<TabsProps> = ({
                         </TETabsItem> */}
             </TETabs>
             <div className="flex" style={{ flexDirection: "row" }}>
-            <TETabsContent>
-              {techSkill?.technical_skills?.technical_skills?.map(
-                (item: { name: string; questions: any }, index: number) => (
-                  // <TechAccordion
-                  //     key={index}
-                  //     title={item?.name}
-                  //     techSkill={techSkill}
-                  //     updateTechSkillPercentage={updateTechSkillPercentage}
-                  // />
-                  <TETabsPane key={index} show={nestedActive === item.name}>
-                    <div className="md:grid md:grid-cols-2 gap-8 mx-[3rem] mb-4">
-                    {item.questions?.map(
-                      (question: any, questionIndex: number) => (
-                        <QuestionAccordion
-                          key={questionIndex}
-                          question={question.question}
-                          type={question.type}
-                          answer={question.answer}
-                          keywords={question.keywords}
-                        />
-                      ),
-                    )}
-                    </div>
-                  </TETabsPane>
-                ),
-              )}
+              <TETabsContent>
+                {techSkill?.technical_skills?.technical_skills?.map(
+                  (item: { name: string; questions: any }, index: number) => (
+                    // <TechAccordion
+                    //     key={index}
+                    //     title={item?.name}
+                    //     techSkill={techSkill}
+                    //     updateTechSkillPercentage={updateTechSkillPercentage}
+                    // />
+                    <TETabsPane key={index} show={nestedActive === item.name}>
+                      <div className="md:grid md:grid-cols-2 gap-8 mx-[3rem] mb-4">
+                        {item.questions?.map(
+                          (question: any, questionIndex: number) => (
+                            <QuestionAccordion
+                              key={questionIndex}
+                              question={question.question}
+                              type={question.type}
+                              answer={question.answer}
+                              keywords={question.keywords}
+                            />
+                          )
+                        )}
+                      </div>
+                    </TETabsPane>
+                  )
+                )}
 
-              <TETabsPane show={nestedActive === "nestedTab2"}>
-                Nested Tab 2 content
-              </TETabsPane>
-              
-            </TETabsContent>
+                <TETabsPane show={nestedActive === "nestedTab2"}>
+                  Nested Tab 2 content
+                </TETabsPane>
+              </TETabsContent>
             </div>
           </TETabsPane>
           <TETabsPane show={basicActive === "tab3"}>Tab 3 content</TETabsPane>

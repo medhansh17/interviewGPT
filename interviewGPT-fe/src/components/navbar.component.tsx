@@ -22,7 +22,7 @@ interface TechnicalQuestion {
 
 interface InterviewQuestions {
   Behaviour_q: BehavioralQuestion[];
-  coding_questions?: CodingQuestion[];
+  coding_question?: CodingQuestion[];
   tech_questions: TechnicalQuestion[];
 }
 
@@ -30,8 +30,6 @@ const New_Sidebar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const pathname = location.pathname;
-  console.log(pathname);
-
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
@@ -40,7 +38,7 @@ const New_Sidebar = () => {
     sessionStorage.getItem("question") || "{}"
   ) as InterviewQuestions;
   const bhq = questions?.Behaviour_q;
-  const codingQuestions = questions?.coding_questions;
+  const codingQuestions = questions?.coding_question;
   const tech = questions?.tech_questions;
 
   return (
@@ -57,14 +55,11 @@ const New_Sidebar = () => {
         id="sidebar"
         className={`sidebar md:block ${
           sidebarOpen ? "block" : "hidden"
-        } top-0 bottom-0 lg:left-0 p-2 w-[300px] overflow-y-auto text-center bg-white border-r-[1px] border-gray-900`}
+        } top-0 bottom-0 lg:left-0 p-2 w-[300px]  overflow-y-auto text-center bg-white border-r-[1px] border-gray-900`}
       >
         <div className="text-black text-xl">
-          <div className="p-2.5 mt-1 flex items-center">
-            <i className="bi bi-app-indicator px-2 py-1 rounded-md bg-blue-600"></i>
-            <h1 className={`font-bold text-black text-[15px] ml-3 }`}>
-              Problems
-            </h1>
+          <div className="p-2.5 mt-1 ">
+            <img src="./assets/blueticklogo.webp" alt="logo" />
             <i
               className="bi bi-x cursor-pointer ml-28 lg:hidden"
               onClick={toggleSidebar}
@@ -146,7 +141,7 @@ const New_Sidebar = () => {
                 key={question.coding_ques_id}
                 className="cursor-pointer p-2 hover:bg-blue-600 rounded-md mt-1 font-medium"
               >
-                Question {index + 1} : {question.question}
+                Question {index + 1}
               </h1>
             ))}
         </div>

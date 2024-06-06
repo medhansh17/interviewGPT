@@ -14,7 +14,6 @@ const MainAssessment = () => {
         job_id: "3b410f8c-3abc-4d22-ac96-fe2f98cae6be",
       });
       setTechnicalQuestions(resp.data.tech_questions);
-      console.log(resp);
     };
     fetchTechnicalQuestions();
   }, []);

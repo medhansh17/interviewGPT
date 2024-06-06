@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../customAxios/Axios";
-import Timer from "./Timer";
+// import Timer from "./Timer";
+
 interface QuestionProps {
+  candidate_id: string;
   questions: any[];
   currentIndex: number;
   setCurrentIndex: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const McqMain: React.FC<QuestionProps> = ({
+  candidate_id,
   questions,
   currentIndex,
   setCurrentIndex,
@@ -16,31 +19,23 @@ const McqMain: React.FC<QuestionProps> = ({
   const [selectedOptions, setSelectedOptions] = useState<{
     [key: number]: string;
   }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-  const [canName, setCanname] = useState("");
-  // const [id, setId] = useState<number>();
 
   useEffect(() => {
-    const storedItemString = localStorage.getItem("item");
-    if (storedItemString) {
-      const storedItem = JSON.parse(storedItemString);
-      setCanname(storedItem?.candidate_name);
-      // setId(storedItem?.job_id);
-    }
-    // Initialize selected options when questions change
     setSelectedOptions({});
   }, [questions]);
 
   const previousbtn = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? questions.length - 1 : prevIndex - 1
-    );
+    if (currentIndex > 0) {
+      setCurrentIndex((prevIndex) => prevIndex - 1);
+    }
   };
 
   const nextbtn = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === questions.length - 1 ? 0 : prevIndex + 1
-    );
+    if (currentIndex < questions.length - 1) {
+      setCurrentIndex((prevIndex) => prevIndex + 1);
+    }
   };
 
   const handleOptionChange = (value: string) => {
@@ -51,33 +46,49 @@ const McqMain: React.FC<QuestionProps> = ({
   };
 
   const submitMcq = async () => {
+    setIsSubmitting(true);
     const payload = {
-      name: canName, // Replace with the actual name
-      job_id: localStorage.getItem("job_id"), // Replace with the actual job ID
-      question: {
-        tech_questions: questions.map((question, index) => ({
-          user_choice: selectedOptions[index] || "",
-          options: question.options,
-          question: question.question,
-        })),
-      },
+      candidate_id: candidate_id,
+      job_id: localStorage.getItem("job_id"),
+      answers: questions.map((question, index) => ({
+        user_answer: selectedOptions[index] || "",
+        question_id: question.tech_ques_id,
+      })),
     };
-    navigate("/code");
-    const resp = await api.post("/store_tech_response", payload);
-    console.log(resp);
+    try {
+      const resp = await api.post("/store_tech_response", payload);
+      if (resp.status === 200) {
+        navigate("/code");
+      } else {
+        console.log("Error submitting answers");
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Check if all questions have been answered
-  const allQuestionsAnswered =
-    Object.keys(selectedOptions).length === questions.length;
+  const allQuestionsAnswered = questions.every(
+    (_, index) => selectedOptions[index] !== undefined
+  );
 
   return (
-    <div className="flex-1">
+    <div className="w-full">
       {questions ? (
-        <div className="p-4">
-          <div className="flex justify-between items-center mb-3 py-3 border-b-2 border-zinc-400">
-            <h1 className="text-lg font-semibold ">MCQ Assessment</h1>
-            <Timer />
+        <>
+          <div className="bg-zinc-200 dark:bg-zinc-900 p-4">
+            <div className="flex justify-between items-center">
+              <div className="text-lg font-semibold text-zinc-800 dark:text-white">
+                Online Technical Assessment
+              </div>
+              <h1 className="text-lg font-semibold ">
+                {localStorage.getItem("item")
+                  ? JSON.parse(localStorage.getItem("item")!).candidate_name
+                  : ""}
+              </h1>
+            </div>
           </div>
           <div className="mx-auto p-4">
             <h2 className="text-xl font-bold mb-4">
@@ -103,37 +114,47 @@ const McqMain: React.FC<QuestionProps> = ({
                 )
               )}
             </form>
-            <div className="flex" style={{ justifyContent: "space-between" }}>
-              <div>
+            <div className="flex justify-between mt-4">
+              <span>
                 <button
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md"
+                  className={` text-white px-3 py-1 rounded-md ${
+                    currentIndex === 0
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-600"
+                  }`}
                   onClick={previousbtn}
+                  disabled={currentIndex === 0}
                 >
                   PREVIOUS
                 </button>
                 <button
-                  className="bg-green-500 ml-8 hover:bg-green-600 text-white px-3 py-1 rounded-md mr-2"
+                  className={` text-white px-3 py-1 rounded-md ml-4 ${
+                    currentIndex === questions.length - 1
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-green-500 hover:bg-green-600"
+                  }`}
                   onClick={nextbtn}
+                  disabled={currentIndex === questions.length - 1}
                 >
                   NEXT
                 </button>
-              </div>
-              <div>
-                <button
-                  className={`bg-blue-500 text-white px-4 py-2 rounded ${
-                    allQuestionsAnswered ? "" : "bg-gray-400 cursor-not-allowed"
-                  }`}
-                  disabled={!allQuestionsAnswered}
-                  onClick={submitMcq}
-                >
-                  Submit
-                </button>
-              </div>
+              </span>
+              <button
+                className={`bg-blue-500 text-white px-4 py-2 rounded ${
+                  allQuestionsAnswered
+                    ? "hover:bg-blue-600"
+                    : "bg-gray-400 cursor-not-allowed"
+                }`}
+                disabled={!allQuestionsAnswered || isSubmitting}
+                onClick={submitMcq}
+              >
+                {isSubmitting ? "Submitting..." : "Submit"}
+              </button>
             </div>
           </div>
-        </div>
+        </>
       ) : (
-        <div>helloooo</div>
+        <div>Loading questions...</div>
       )}
     </div>
   );

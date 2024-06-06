@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import MonacoEditor from "react-monaco-editor";
 import api from "../customAxios/Axios";
 import { useNavigate } from "react-router-dom";
-import Timer from "../McqComp/Timer";
+// import Timer from "../McqComp/Timer";
 import New_Sidebar from "../navbar.component";
 
 interface CodingQuestion {
+  coding_ques_id: number;
   question: string;
   sample_input: string;
   sample_output: string;
@@ -16,11 +17,12 @@ const Code = () => {
   const navigate = useNavigate();
   const [canName, setCanname] = useState("");
   const [id, setId] = useState<number>();
-  const [codingQuestion, setCodingQuestion] = useState<CodingQuestion>({
-    question: "",
-    sample_input: "",
-    sample_output: "",
-  });
+  const beha = sessionStorage.getItem("question");
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [codingQuestions, setCodingQuestions] = useState<CodingQuestion[]>([]);
+  const [codeResponses, setCodeResponses] = useState<
+    { question_id: number; user_code: string }[]
+  >([]);
 
   useEffect(() => {
     const storedItemString = localStorage.getItem("item");
@@ -30,32 +32,78 @@ const Code = () => {
       setId(storedItem?.job_id);
     }
     const codeQues = async () => {
-      // const job_id = localStorage.getItem("job_id");
-      // const resp = await api.post("/fetch_coding_question", {
-      //   candidate_name: canName,
-      //   job_id: job_id,
-      // });
-      // console.log(resp);
-      const beha = sessionStorage.getItem("question");
-      setCodingQuestion(beha ? JSON.parse(beha).coding_question : []);
+      setCodingQuestions(beha ? JSON.parse(beha).coding_question : []);
     };
     codeQues();
   }, [canName, id]);
 
-  const codeSubmit = async () => {
-    const resp = await api.post("/store_code_response", {
-      name: canName,
-      job_id: localStorage.getItem("job_id"),
-      question: codingQuestion.question,
-      code: code,
+  const handleNext = () => {
+    if (currentQuestionIndex < codingQuestions.length - 1) {
+      saveCurrentCode();
+      setCode(""); // Clear the code editor for the next question
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentQuestionIndex > 0) {
+      saveCurrentCode();
+      setCode(""); // Clear the code editor for the previous question
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
+    }
+  };
+
+  const saveCurrentCode = () => {
+    setCodeResponses((prevResponses) => {
+      const updatedResponses = [...prevResponses];
+      const currentResponseIndex = updatedResponses.findIndex(
+        (response) =>
+          response.question_id ===
+          codingQuestions[currentQuestionIndex].coding_ques_id
+      );
+
+      if (currentResponseIndex > -1) {
+        updatedResponses[currentResponseIndex].user_code = code;
+      } else {
+        updatedResponses.push({
+          question_id: codingQuestions[currentQuestionIndex].coding_ques_id,
+          user_code: code,
+        });
+      }
+
+      return updatedResponses;
     });
-    if (resp.statusText == "OK") {
+  };
+
+  const codeSubmit = async () => {
+    saveCurrentCode();
+    const resp = await api.post("/store_code_response", {
+      candidate_id: beha ? JSON.parse(beha).candidate_id : "",
+      job_id: localStorage.getItem("job_id"),
+      code: codeResponses,
+    });
+    if (resp.statusText === "OK") {
       navigate("/success");
     }
   };
+
+  useEffect(() => {
+    const currentResponse = codeResponses.find(
+      (response) =>
+        response.question_id ===
+        codingQuestions[currentQuestionIndex]?.coding_ques_id
+    );
+    setCode(currentResponse ? currentResponse.user_code : "");
+  }, [currentQuestionIndex]);
+
+  if (codingQuestions.length === 0) {
+    return <div>Loading...</div>;
+  }
+
+  const currentQuestion = codingQuestions[currentQuestionIndex];
+
   return (
     <div className="flex h-screen">
-      {/* <New_Sidebar /> */}
       <New_Sidebar />
       <div className="w-fit">
         <div className="bg-zinc-200 dark:bg-zinc-900 p-4">
@@ -63,58 +111,31 @@ const Code = () => {
             <div className="text-lg font-semibold text-zinc-800 dark:text-white">
               Online Coding Assessment
             </div>
-            <Timer />
+            <h1 className="text-lg font-semibold ">
+              {localStorage.getItem("item")
+                ? JSON.parse(localStorage.getItem("item")!).candidate_name
+                : ""}
+            </h1>
+            {/* <Timer /> */}
           </div>
         </div>
 
-        <div className=" md:flex-row bg-white-600 text-zinc-900 dark:text-zinc-100 ">
-          <div className="flex ">
+        <div className="md:flex-row bg-white-600 text-zinc-900 dark:text-zinc-100">
+          <div className="flex">
             <div
               className="md:w-1/3 p-4 border-r border-zinc-300 dark:border-zinc-700"
               style={{ height: "100%", overflowY: "scroll" }}
             >
               <h2 className="font-bold text-lg mb-2">Question</h2>
-              <p className="mb-4">{codingQuestion.question}</p>
-              {/* <h2 className="font-bold text-lg mb-2">Output Format</h2>
-    <p>Print the following two lines of output:</p>
-    <ol className="list-decimal ml-4">
-      <li>
-        On the first line, print{' '}
-        <span className="font-mono bg-zinc-200 dark:bg-zinc-700 p-1 rounded">Hello, World!</span>
-      </li>
-      <li>
-        On the second line, print the contents of <span className="italic">parameterVariable</span>.
-      </li>
-    </ol> */}
-
-              <h2 className="font-bold text-lg mt-4 mb-2">Sample Input </h2>
+              <p className="mb-4">{currentQuestion.question}</p>
+              <h2 className="font-bold text-lg mt-4 mb-2">Sample Input</h2>
               <p className="mb-4 font-mono bg-zinc-200 dark:bg-zinc-700 p-1 rounded">
-                {codingQuestion.sample_input}
+                {currentQuestion.sample_input}
               </p>
-
-              <h2 className="font-bold text-lg mt-4 mb-2">Sample Output </h2>
+              <h2 className="font-bold text-lg mt-4 mb-2">Sample Output</h2>
               <div className="font-mono bg-zinc-200 dark:bg-zinc-700 p-1 rounded">
-                {codingQuestion.sample_output}
+                {currentQuestion.sample_output}
               </div>
-
-              <h2 className="font-bold text-lg mt-4 mb-2">Explanation 0</h2>
-              <p>We printed two lines of output:</p>
-              {/* <ol className="list-decimal ml-4">
-      <li>
-        We printed the literal string{' '}
-        <span className="font-mono bg-zinc-200 dark:bg-zinc-700 p-1 rounded">Hello, World!</span> using
-        the code provided in the editor.
-      </li>
-      <li>
-        The value of <span className="italic">parameterVariable</span> passed to our main function in
-        this Sample Case was{' '}
-        <span className="font-mono bg-zinc-200 dark:bg-zinc-700 p-1 rounded">
-          Welcome to 10 Days of JavaScript!
-        </span>
-        . We then passed our variable to <span className="font-mono">console.log</span>, which printed
-        the contents of <span className="italic">parameterVariable</span>.
-      </li>
-    </ol> */}
             </div>
 
             <div
@@ -126,25 +147,42 @@ const Code = () => {
                   height="100%"
                   language="javascript" // Set the language mode according to your requirement
                   theme="vs-dark" // Set the theme (dark, light, etc.)
-                  value="" // You can initialize it with some code if needed
+                  value={code} // Initialize with the current code state
                   options={{
                     automaticLayout: true, // Adjust layout automatically
                     minimap: { enabled: false }, // Disable minimap
                   }}
                   onChange={(newValue) => {
-                    setCode(newValue); // Handle code changes if needed
+                    setCode(newValue); // Handle code changes
                   }}
                 />
               </div>
             </div>
           </div>
-          <div className="flex justify-end w-[95%]">
-            <button
-              onClick={codeSubmit}
-              className="bg-green-500 text-white px-3 py-1 rounded"
-            >
-              Submit Code
-            </button>
+          <div className="flex justify-end w-[95%] mt-4">
+            {currentQuestionIndex > 0 && (
+              <button
+                onClick={handlePrevious}
+                className="bg-gray-500 text-white px-3 py-1 rounded mr-2"
+              >
+                Previous
+              </button>
+            )}
+            {currentQuestionIndex < codingQuestions.length - 1 ? (
+              <button
+                onClick={handleNext}
+                className="bg-blue-500 text-white px-3 py-1 rounded"
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                onClick={codeSubmit}
+                className="bg-green-500 text-white px-3 py-1 rounded"
+              >
+                Submit Final
+              </button>
+            )}
           </div>
         </div>
       </div>
