@@ -1,7 +1,11 @@
 # new models.py
 import uuid
 from datetime import datetime, timezone
+from itsdangerous import URLSafeTimedSerializer
+from flask_login import UserMixin
 from . import db
+# user login package
+
 
 
 class Job(db.Model):
@@ -218,3 +222,29 @@ class TechResponse(db.Model):
         db.DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(
         timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+class User(db.Model, UserMixin):
+    __tablename__ = 'users'
+    id = id = db.Column(db.String(36), primary_key=True,
+                   default=lambda: str(uuid.uuid4()))
+    first_name = db.Column(db.String(80), nullable=True)
+    last_name = db.Column(db.String(80), nullable=True)
+    email = db.Column(db.String(100), nullable=False, unique=True)
+    password = db.Column(db.String(80), nullable=True)
+    email_confirmed = db.Column(db.Boolean, nullable=True, default=False)
+    email_confirmation_sent_on = db.Column(db.DateTime, nullable=True)
+    email_confirmed_on = db.Column(db.DateTime, nullable=True)
+    last_login = db.Column(db.DateTime, nullable=True)
+
+    def get_reset_token(self,secret_key, expires_sec=1800):
+        s = URLSafeTimedSerializer(secret_key, expires_sec)
+        return s.dumps({'user_id': self.id}).decode('utf-8')
+
+    @staticmethod
+    def verify_reset_token(token,secret_key):
+        s = URLSafeTimedSerializer(secret_key)
+        try:
+            user_id = s.loads(token)['user_id']
+        except:
+            return None
+        return User.query.get(user_id)
