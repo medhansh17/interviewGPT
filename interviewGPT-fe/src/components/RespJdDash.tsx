@@ -7,7 +7,7 @@ import { UserContext } from "../context/JobContext";
 import { setCandList, deleteCandidateByName } from "../context/JobContext";
 import InterviewDataDisplay from "./candidateResult";
 import ExampleComponent from "./multipleFileUpload";
-import { getTestQuestion } from "@/api/question";
+import { GetTestQuestion } from "@/api/question";
 import GeneratedQuesPopup from "./generatedQuesPopup";
 import GenerateQuestionsPopup from "./generateQuestionsPopup";
 import CandidateDetailsPopup from "./candidateDetailsPopup";
@@ -259,7 +259,7 @@ const RespJdDash = () => {
   useEffect(() => {
     const genQuestions = async () => {
       if (jobDetails?.job_id) {
-        const resp = await getTestQuestion(resume_id, jobDetails?.job_id);
+        const resp = await GetTestQuestion(resume_id, jobDetails?.job_id);
         setBehavioralQuestions(resp.Behaviour_q);
         setCodingQuestion(resp.coding_question);
         setTechnicalQuestions(resp.tech_questions);

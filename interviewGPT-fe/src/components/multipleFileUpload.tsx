@@ -70,6 +70,7 @@ const ExampleComponent = ({ refresh }: { refresh: () => void }) => {
     };
     getJobDetails();
   }, []);
+
   const handleSubmit = async (refresh: () => void) => {
     setSubmitting(true);
     try {

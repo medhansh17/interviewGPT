@@ -1,8 +1,15 @@
-import { faRedo, faTimes } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEdit,
+  faRedo,
+  faTimes,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UpdateQuestionPopup from "./updateQuestionPopup";
+import { deleteQuestion } from "@/api/deleteCandidateQuestion";
+import { useToast } from "./toast";
 
 export interface UpdateQuestionData {
   resume_id: string;
@@ -10,6 +17,7 @@ export interface UpdateQuestionData {
   question_id: string;
   question_type: "behavioral" | "technical" | "coding";
 }
+
 export default function GeneratedQuesPopup({
   behavioralQuestions,
   technicalQuestions,
@@ -33,6 +41,7 @@ export default function GeneratedQuesPopup({
   resume_id: string;
   onClose: () => void;
 }) {
+  const toast = useToast();
   const [updateStatus, setUpdateStatus] = useState(false);
   const [data, setData] = useState<UpdateQuestionData | undefined>();
   const navigate = useNavigate();
@@ -63,26 +72,38 @@ export default function GeneratedQuesPopup({
             {behavioralQuestions.map((question, index) => (
               <li key={index} className="relative flex items-center">
                 <span className="flex-grow">{question.b_question_text}</span>
-                <button
-                  onClick={() => {
-                    setData({
-                      resume_id: resume_id,
-                      job_id: localStorage.getItem("job_id") || "",
-                      question_id: question.b_question_id,
-                      question_type: "behavioral",
-                    });
-                    setUpdateStatus(true);
-                  }}
-                  className="ml-2"
-                >
-                  <FontAwesomeIcon icon={faRedo} />
-                </button>
-                {/* <button>
-                  <FontAwesomeIcon icon={faEdit} />
-                </button>
-                <button>
-                  <FontAwesomeIcon icon={faDumpster} />
-                </button> */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setData({
+                        resume_id: resume_id,
+                        job_id: localStorage.getItem("job_id") || "",
+                        question_id: question.b_question_id,
+                        question_type: "behavioral",
+                      });
+                      setUpdateStatus(true);
+                    }}
+                    className="ml-2"
+                  >
+                    <FontAwesomeIcon icon={faRedo} color="black" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      deleteQuestion({
+                        resume_id: resume_id,
+                        jobId: localStorage.getItem("job_id") || "",
+                        question_id: question.b_question_id,
+                        question_type: "behavioral",
+                        toast: toast,
+                      });
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faTrash} color="red" />
+                  </button>
+                  <button>
+                    <FontAwesomeIcon icon={faEdit} color="green" />
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
@@ -96,26 +117,38 @@ export default function GeneratedQuesPopup({
                   <span className="font-semibold">Question:</span>{" "}
                   {question.question}
                 </p>
-                <button
-                  onClick={() => {
-                    setData({
-                      resume_id: "0e8f99fc-35bc-4b14-a14b-2c970190d813",
-                      job_id: "4e28f781-a5e4-4f14-92aa-029825be89e2",
-                      question_id: question.tech_ques_id,
-                      question_type: "technical",
-                    });
-                    setUpdateStatus(true);
-                  }}
-                  className="ml-2"
-                >
-                  <FontAwesomeIcon icon={faRedo} />
-                </button>
-                {/* <button>
-                  <FontAwesomeIcon icon={faEdit} />
-                </button>
-                <button>
-                  <FontAwesomeIcon icon={faDumpster} />
-                </button> */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setData({
+                        resume_id: resume_id,
+                        job_id: localStorage.getItem("job_id") || "",
+                        question_id: question.tech_ques_id,
+                        question_type: "technical",
+                      });
+                      setUpdateStatus(true);
+                    }}
+                    className="ml-2"
+                  >
+                    <FontAwesomeIcon icon={faRedo} />
+                  </button>
+                  <button
+                    onClick={() =>
+                      deleteQuestion({
+                        resume_id: resume_id,
+                        jobId: localStorage.getItem("job_id") || "",
+                        question_id: question.tech_ques_id,
+                        question_type: "technical",
+                        toast: toast,
+                      })
+                    }
+                  >
+                    <FontAwesomeIcon icon={faTrash} color="red" />
+                  </button>
+                  <button>
+                    <FontAwesomeIcon icon={faEdit} color="green" />
+                  </button>
+                </div>
               </div>
               <ul className="list-disc pl-4">
                 {Object.entries(question.options).map(([key, value]) => (
@@ -130,44 +163,61 @@ export default function GeneratedQuesPopup({
             </div>
           ))}
         </div>
-        {codingQuestion &&
-          codingQuestion.map((question, index) => (
-            <div key={index} className="mb-8">
-              <h2 className="text-xl font-semibold mb-2">Coding Question:</h2>
-              <p>
-                <span className="font-semibold">Question:</span>{" "}
-                {question.question}
-              </p>
-              <button
-                onClick={() => {
-                  setData({
-                    resume_id: "0e8f99fc-35bc-4b14-a14b-2c970190d813",
-                    job_id: "4e28f781-a5e4-4f14-92aa-029825be89e2",
-                    question_id: question.coding_ques_id,
-                    question_type: "coding",
-                  });
-                  setUpdateStatus(true);
-                }}
-                className="ml-2"
-              >
-                <FontAwesomeIcon icon={faRedo} />
-              </button>
-              {/* <button>
-                <FontAwesomeIcon icon={faEdit} />
-              </button>
-              <button>
-                <FontAwesomeIcon icon={faDumpster} />
-              </button> */}
-              <p>
-                <span className="font-semibold">Sample Input:</span>{" "}
-                {question.sample_input}
-              </p>
-              <p>
-                <span className="font-semibold">Sample Output:</span>{" "}
-                {question.sample_output}
-              </p>
-            </div>
-          ))}
+        {codingQuestion && (
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold mb-2">Coding Question:</h2>
+            {codingQuestion.map((question, index) => (
+              <div key={index} className="mb-4 relative">
+                <div className="flex justify-between items-center mb-2">
+                  <p>
+                    <span className="font-semibold">Question:</span>{" "}
+                    {question.question}
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        setData({
+                          resume_id: resume_id,
+                          job_id: localStorage.getItem("job_id") || "",
+                          question_id: question.coding_ques_id,
+                          question_type: "coding",
+                        });
+                        setUpdateStatus(true);
+                      }}
+                      className="ml-2"
+                    >
+                      <FontAwesomeIcon icon={faRedo} />
+                    </button>
+                    <button
+                      onClick={() =>
+                        deleteQuestion({
+                          resume_id: resume_id,
+                          jobId: localStorage.getItem("job_id") || "",
+                          question_id: question.coding_ques_id,
+                          question_type: "coding",
+                          toast: toast,
+                        })
+                      }
+                    >
+                      <FontAwesomeIcon icon={faTrash} color="red" />
+                    </button>
+                    <button>
+                      <FontAwesomeIcon icon={faEdit} color="green" />
+                    </button>
+                  </div>
+                </div>
+                <p>
+                  <span className="font-semibold">Sample Input:</span>{" "}
+                  {question.sample_input}
+                </p>
+                <p>
+                  <span className="font-semibold">Sample Output:</span>{" "}
+                  {question.sample_output}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="flex justify-between mt-4">
           <button
             className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600"
