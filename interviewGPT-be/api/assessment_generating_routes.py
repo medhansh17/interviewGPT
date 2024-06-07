@@ -254,6 +254,7 @@ def CHECK_Auto_assessment():
         return jsonify({'error': str(e)}), 500
 
 
+
 @assessment_bp.route('/fetch_candidate_questions_after_selected', methods=['POST'])
 @token_required
 def fetch_candidate_questions():

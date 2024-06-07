@@ -179,4 +179,5 @@ def get_job_details(job_id):
         'role': job.role,
         'jd': job.jd
     }
+    
     return jsonify({'job_details': job_details}), 200

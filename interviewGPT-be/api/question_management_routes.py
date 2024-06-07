@@ -90,6 +90,7 @@ def delete_candidate_question():
     if not question_id or not question_type:
         return jsonify({'error': 'question_id and question_type are required parameters.'}), 400
 
+
     candidate = Candidate.query.filter_by(
         resume_id=resume_id, job_id=job_id).one()
     try:

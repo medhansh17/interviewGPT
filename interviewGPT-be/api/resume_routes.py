@@ -439,7 +439,6 @@ def delete_resume():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-
 @ats_bp.route('/update_resume_status', methods=['POST'])
 @token_required
 def update_resume_status():
