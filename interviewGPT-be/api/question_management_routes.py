@@ -1,18 +1,25 @@
 import json
 import os
-from flask import Blueprint, request, jsonify
+import jwt
+from datetime import datetime,timedelta
+from flask import Blueprint, request, jsonify,render_template_string
+from flask_mail import Message
+from api import mail
+from api.auth import SECRET_KEY,EMAIL_USER,FRONTEND_URL
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
-from .models import db, Candidate, TechnicalQuestion, BehaviouralQuestion, CodingQuestion
+from .models import db, Candidate, TechnicalQuestion, BehaviouralQuestion, CodingQuestion,ResumeScore,ExtractedInfo
 from openai import OpenAI
 from .config import MODEL_NAME
 from .prompts.question_management_prompts import generate_CRUD_tech_prompt, generate_CRUD_behav_prompt, generate_CRUD_code_prompt
+from .auth import token_required,create_assessment_email_body
 question_management_bp = Blueprint('question_management', __name__)
 
 # To edit the questions in approval screen
 
 
 @question_management_bp.route('/edit_candidate_question', methods=['POST'])
+@token_required
 def edit_candidate_question():
     data = request.get_json()
     question_id = data.get('question_id')
@@ -70,6 +77,7 @@ def edit_candidate_question():
 
 
 @question_management_bp.route('/delete_candidate_question', methods=['DELETE'])
+@token_required
 def delete_candidate_question():
     data = request.get_json()
     resume_id = data.get('resume_id')
@@ -154,6 +162,7 @@ def generate_new_question(old_question,difficulty_level,system_prompt, user_prom
 
 
 @question_management_bp.route('/update_candidate_question', methods=['POST'])
+@token_required
 def update_candidate_question():
     data = request.get_json()
     resume_id = data.get('resume_id')
@@ -334,3 +343,109 @@ def fetch_coding_question():
         })
 
     return jsonify({'coding_question': coding_questions}), 200
+
+
+### APPROVAL SCREEN
+## token link genration for assessment
+
+
+def generate_assessment_token(candidate_id, candidate_name, job_id, validity_hours=2):
+    payload = {
+        'candidate_id': candidate_id,
+        'candidate_name': candidate_name,
+        'job_id': job_id,
+        'exp': datetime.utcnow() + timedelta(hours=validity_hours), # Expiry time
+        'iat': datetime.utcnow()  # Issued at time
+    }
+    token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+    return token
+
+@question_management_bp.route('/approve_candidate', methods=['POST'])
+@token_required
+def approve_candidate():
+    data = request.get_json()
+    candidate_id = data.get('candidate_id')
+    #candidate = Candidate.query.get(id=candidate_id)
+    candidate = Candidate.query.filter_by(id=candidate_id).one()
+    
+    if not candidate:
+        return jsonify({'error': 'Candidate not found.'}), 404
+    
+    extracted_info = ExtractedInfo.query.filter_by(resume_id=candidate.resume_id).first()
+
+    token = generate_assessment_token(candidate.id, candidate.name, candidate.job_id)
+    link = f'{FRONTEND_URL}/online-assess/{token}'
+    
+    html_content = create_assessment_email_body(candidate.name, link)
+    
+    msg = Message('Assessment Link', sender=EMAIL_USER, recipients=[extracted_info.email_id], html=html_content)
+    mail.send(msg)
+
+    
+
+    resume_score = ResumeScore.query.filter_by(resume_id=candidate.resume_id).first()
+
+    if resume_score:
+        resume_score.status = 'Assessment link send to candidate'
+        db.session.commit()
+    
+    return jsonify({'message': 'Assessment link has been sent to the candidate.'}), 200
+
+## Assessment sheet send to candidate 
+
+@question_management_bp.route('/assessment_sheet', methods=['GET'])
+def assessment_sheet():
+    token = request.args.get('token')
+    
+    if not token:
+        return jsonify({'error': 'Token is required.'}), 400
+    
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+    except jwt.ExpiredSignatureError:
+        return jsonify({'error': 'The link has expired.'}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({'error': 'Invalid token.'}), 401
+
+    candidate_id = payload['candidate_id']
+    candidate_name = payload['candidate_name']
+    job_id = payload['job_id']
+
+    candidate = Candidate.query.filter_by(id=candidate_id,job_id=job_id).first()
+    
+    if not candidate:
+        return jsonify({'error': 'Candidate not found.'}), 404
+    
+    technical_questions = []
+    for question in candidate.technical_questions:
+        technical_questions.append({
+            'question': question.question_text,
+            'options': json.loads(question.options),
+            'answer': question.correct_answer,
+            'tech_ques_id': question.id
+        })
+
+    behavioural_questions = []
+    for question in candidate.behavioural_questions:
+        behavioural_questions.append({
+            'b_question_id': question.id,
+            'b_question_text': question.question_text
+        })
+
+    coding_questions = []
+    for question in candidate.coding_questions:
+        coding_questions.append({
+            'question': question.question_text,
+            'sample_input': question.sample_input,
+            'sample_output': question.sample_output,
+            'coding_ques_id': question.id
+        })
+
+    return jsonify({
+        "candidate_id": candidate_id,
+        "candidate_name":candidate_name,
+        "job_id":job_id,
+        'tech_questions': technical_questions,
+        'Behaviour_q': behavioural_questions,
+        'coding_question': coding_questions
+    }), 200

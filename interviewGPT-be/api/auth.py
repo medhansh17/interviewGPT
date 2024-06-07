@@ -347,3 +347,42 @@ def email_verified_success_html(link):
         "Thank you for verifying your email. You're now ready to start using InterviewGPT.",
         link, "Log In and Get Started"
     )
+
+def create_assessment_email_body(candidate_name, link):
+    return f"""
+    <html>
+    <body>
+        <p>Dear {candidate_name},</p>
+        <p>Congratulations! You have been approved to move forward to the next stage of our selection process. We are excited to invite you to participate in an online assessment designed to evaluate your skills and qualifications for the position.</p>
+
+        <h4>Assessment Details:</h4>
+        <ul>
+            <li><strong>Assessment Type:</strong> [Specify the type of assessment, e.g., technical, behavioral, coding]</li>
+            <li><strong>Duration:</strong> [Specify the duration of the assessment, e.g., 1 hour, 2 hours]</li>
+            <li><strong>Link:</strong> <a href="{link}">Take Your Test</a></li>
+        </ul>
+
+        <p>To begin your assessment, please click "Take Your Test" above.</p>
+
+        <h4>Important Information:</h4>
+        <ul>
+            <li><strong>Link Expiry:</strong> The assessment link will expire in 2 hours from the time of this email. Please ensure to complete the assessment within this timeframe.</li>
+            <li><strong>Preparation:</strong> Ensure you have a stable internet connection and a quiet environment to complete the assessment without interruptions.</li>
+            <li><strong>Support:</strong> If you encounter any issues or have any questions, please do not hesitate to reach out to us at [support email/phone number].</li>
+        </ul>
+
+        <h4>What to Expect:</h4>
+        <ul>
+            <li><strong>Technical Questions:</strong> You will be asked to solve problems related to the technical skills required for the role.</li>
+            <li><strong>Behavioral Questions:</strong> We will assess your fit with our company culture and your problem-solving approach.</li>
+            <li><strong>Coding Challenges:</strong> You may be required to write code to solve specific problems.</li>
+        </ul>
+
+        <p>This assessment is a crucial part of our selection process, allowing us to understand your skills and how you approach problems. It provides you with an opportunity to showcase your abilities and stand out as a top candidate for the position.</p>
+
+        <p>Thank you for your interest in joining Bluetick Consultants. We look forward to your participation and wish you the best of luck.</p>
+
+        <p>Best regards,<br>BLUETICK CONSULTANTS</p>
+    </body>
+    </html>
+    """
