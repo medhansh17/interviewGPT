@@ -4,6 +4,7 @@ from . import db
 from .config import JD_FOLDER
 from flask import Blueprint, request, jsonify
 from .models import Job, ExtractedInfo, ResumeScore, Resume
+from .auth import token_required
 
 job_bp = Blueprint('job', __name__)
 
@@ -11,6 +12,7 @@ job_bp = Blueprint('job', __name__)
 
 
 @job_bp.route('/manual_upload_job', methods=['POST'])
+@token_required
 def manual_upload_job():
     """
     Manually upload a job description (JD) and create a new job entry if it doesn't exist.
@@ -36,6 +38,7 @@ def manual_upload_job():
 
 
 @job_bp.route('/file_upload_jd', methods=['POST'])
+@token_required
 def file_upload_job_description():
     """
     Upload a job description (JD) file and create a new job entry if it doesn't exist.
@@ -85,6 +88,7 @@ def extract_text_from_pdf(file_path):
 
 
 @job_bp.route('/export_jobs_json', methods=['GET'])
+@token_required
 def export_jobs_as_json():
     """
     Fetch all jobs from the database and return them in JSON format.
@@ -103,6 +107,7 @@ def export_jobs_as_json():
 
 
 @job_bp.route('/edit_job/<string:job_id>', methods=['PUT'])
+@token_required
 def edit_job(job_id):
     """
     Edit an existing job's details based on the provided job ID.
@@ -132,6 +137,7 @@ def edit_job(job_id):
 
 
 @job_bp.route('/delete_job', methods=['POST'])
+@token_required
 def delete_job():
     """
     Delete a job and its related data based on the provided role and ID.
@@ -159,6 +165,7 @@ def delete_job():
 
 
 @job_bp.route('/jobs/<string:job_id>', methods=['GET'])
+@token_required
 def get_job_details(job_id):
     """
     Retrieve the details of a specific job based on the provided job ID.

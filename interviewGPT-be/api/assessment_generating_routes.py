@@ -8,6 +8,7 @@ from .models import Job, Candidate, TechnicalQuestion, BehaviouralQuestion, Codi
 from . import db
 from .prompts.assessment_prompts import tech_question_mcq_prompt, behaviour_question_prompt, coding_question_prompt, tech_question_mcq_prompt, behaviour_question_prompt, coding_question_prompt
 from .config import MODEL_NAME
+from .auth import token_required
 assessment_bp = Blueprint('assessment', __name__)
 
 # QUESTION GENERATION
@@ -214,6 +215,7 @@ def generate_and_save_assessment(app, job_id, no_tech_questions, no_behav_questi
 
 
 @assessment_bp.route('/CHECK_Auto_assessment', methods=['POST'])
+@token_required
 def CHECK_Auto_assessment():
     try:
         data = request.get_json()
@@ -253,6 +255,7 @@ def CHECK_Auto_assessment():
 
 
 @assessment_bp.route('/fetch_candidate_questions_after_selected', methods=['POST'])
+@token_required
 def fetch_candidate_questions():
     data = request.get_json()
     resume_id = data.get('resume_id')
@@ -298,3 +301,5 @@ def fetch_candidate_questions():
         'Behaviour_q': behavioural_questions,
         'coding_question': coding_questions
     }), 200
+
+

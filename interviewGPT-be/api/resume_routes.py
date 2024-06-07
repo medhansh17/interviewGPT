@@ -19,11 +19,13 @@ from .config import RESUME_FOLDER, ARCHIVE_FOLDER, MODEL_NAME
 from .prompts.resume_prompts import extract_resume_prompt, evaluate_task_prompt, user_prompt_evaluation
 # from .agents_resume import create_agents
 import time
+from .auth import token_required
 
 ats_bp = Blueprint('ats', __name__)
 
 
 @ats_bp.route('/extracted_info', methods=['GET'])
+@token_required
 def get_extracted_info():
     """
     Fetch details from the ExtractedInfo table based on Resume ID.
@@ -61,6 +63,7 @@ def get_extracted_info():
 
 
 @ats_bp.route('/search_jobs', methods=['GET'])
+@token_required
 def search_jobs():
     job_id = request.args.get('job_id')
 
@@ -278,6 +281,7 @@ def process_resumes(app, job_id, role, resume_list):
 
 
 @ats_bp.route('/upload_resume_to_job', methods=['POST'])
+@token_required
 def upload_resume_to_job():
     """
     Upload resumes to a job and start processing for information extraction and scoring.
@@ -337,6 +341,7 @@ def upload_resume_to_job():
 
 
 @ats_bp.route('/get_resume_scores', methods=['GET'])
+@token_required
 def get_resume_scores():
     """
     Retrieve resume scores for a specific job based on the provided job ID.
@@ -390,6 +395,7 @@ def get_resume_scores():
 
 
 @ats_bp.route('/delete_resume', methods=['GET'])
+@token_required
 def delete_resume():
     """
     Delete a resume and associated data based on the resume ID.
@@ -435,6 +441,7 @@ def delete_resume():
 
 
 @ats_bp.route('/update_resume_status', methods=['POST'])
+@token_required
 def update_resume_status():
     data = request.get_json()
     resume_id = data.get('resume_id')
