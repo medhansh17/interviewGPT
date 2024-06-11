@@ -9,6 +9,7 @@ const Sample: React.FC = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const navigate = useNavigate();
   const [canName, setCanname] = useState("");
+  const [tabSwitchCount, setTabSwitchCount] = useState<number>(0);
   const [behavioralQuestions, setBehavioralQuestions] = useState<any[]>([]);
   const jobId = localStorage.getItem("job_id");
   const beha = sessionStorage.getItem("question");
@@ -35,21 +36,68 @@ const Sample: React.FC = () => {
       setCurrentQuestionIndex((prev) => prev + 1);
     }
   };
+  useEffect(() => {
+    const handleBackNavigation = (event: any) => {
+      event.preventDefault();
+      window.history.forward();
+    };
 
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // User switched tabs or minimized the window
+        alert("Please stay on this page to complete the quiz.");
+        setTabSwitchCount((prevCount) => prevCount + 1);
+      }
+    };
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = ""; // This text will be shown in the confirmation dialog (not all browsers support this)
+    };
+
+    window.addEventListener("popstate", handleBackNavigation);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("popstate", handleBackNavigation);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (tabSwitchCount >= 3) {
+      navigate("/dashboard");
+    }
+  }, [tabSwitchCount, navigate]);
   return (
     <div className="flex h-screen">
       <New_Sidebar />
       <div style={{ width: "-webkit-fill-available" }}>
-        <div className="bg-zinc-200 dark:bg-zinc-900 p-4">
+        <div className="bg-zinc-200 dark:bg-zinc-900 p-2">
           <div className="flex justify-between items-center">
             <div className="text-lg font-semibold text-zinc-800 dark:text-white">
               Online Behavioural Assessment
             </div>
-            <h1 className="text-lg font-semibold ">
-              {localStorage.getItem("item")
-                ? JSON.parse(localStorage.getItem("item")!).candidate_name
-                : ""}
-            </h1>
+            <div className="flex gap-4 ">
+              <h1 className="text-lg font-semibold h-fit my-auto">
+                {localStorage.getItem("item")
+                  ? JSON.parse(localStorage.getItem("item")!).candidate_name
+                  : ""}
+              </h1>
+              {localStorage.getItem("userSelfie") ? (
+                <img
+                  src={localStorage.getItem("userSelfie")!}
+                  alt="selfie"
+                  width={"100px"}
+                  height={"100px"}
+                  className="p-0"
+                />
+              ) : (
+                ""
+              )}
+            </div>
           </div>
         </div>
         <div className="mx-auto py-8" style={{ width: "84%" }}>

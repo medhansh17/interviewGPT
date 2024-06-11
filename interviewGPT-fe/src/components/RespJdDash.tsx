@@ -186,6 +186,9 @@ const RespJdDash = () => {
       const response = await api.post("/upload_resume_to_job", newResume);
       if (response.statusText === "OK") {
         handleRefresh();
+        setTimeout(() => {
+          handleRefresh();
+        }, 5000);
         toast.success({
           type: "background",
           duration: 3000,
@@ -268,8 +271,10 @@ const RespJdDash = () => {
     genQuestions();
   }, [approval]);
 
-  const popHandle = (resume_id: string) => {
-    setResume_id(resume_id);
+  const popHandle = (item: DataItem) => {
+    const itemString = JSON.stringify(item);
+    localStorage.setItem("item", itemString);
+    setResume_id(item.resume_id);
     setApproval(true);
   };
 
@@ -415,12 +420,12 @@ const RespJdDash = () => {
                   return (
                     <tr className="border-b dark:border-zinc-600" key={index}>
                       <td
-                        className="p-3  font-bold underline"
+                        className="p-2  underline"
                         onClick={() => showCandDetails(item.resume_id)}
                       >
                         {item.candidate_name}
                       </td>
-                      <td className="p-3 w-[300px]">
+                      <td className="p-2 w-[300px]">
                         <p className="">
                           {item.Matching_Skills &&
                             item.Matching_Skills.map(
@@ -434,7 +439,7 @@ const RespJdDash = () => {
                             )}
                         </p>
                       </td>
-                      <td className="p-3 w-[300px] ">
+                      <td className="p-2 w-[300px] ">
                         <p className="h-[100px] overflow-auto">
                           {item.Missing_Skills &&
                             item.Missing_Skills.map(
@@ -448,10 +453,10 @@ const RespJdDash = () => {
                             )}
                         </p>
                       </td>
-                      <td className="p-3 text-center">
+                      <td className="p-2 text-center">
                         {item.experience_match == 1 ? "Match" : "Mismatch"}
                       </td>
-                      <td className="p-3 text-center">
+                      <td className=" text-center">
                         <p>{item.JD_MATCH}</p>
                         <span
                           className={`text-green-700 py-1 px-3 rounded-full text-xs ${
@@ -470,8 +475,8 @@ const RespJdDash = () => {
                         </span>
                       </td>
 
-                      <td className="p-3 text-center">{`${item.status}`}</td>
-                      <td className="p-3 text-zinc-500 dark:text-zinc-400 relative">
+                      <td className="text-center">{`${item.status}`}</td>
+                      <td className="p-2 text-zinc-500 dark:text-zinc-400 relative">
                         <div
                           className="flex flex-col items-center justify-around text-lg"
                           style={{ gap: "4px" }}
@@ -504,7 +509,7 @@ const RespJdDash = () => {
                             item.status == "assessment_generated" && (
                               <button
                                 className="resp-btn"
-                                onClick={() => popHandle(item.resume_id)}
+                                onClick={() => popHandle(item)}
                               >
                                 Generated
                               </button>

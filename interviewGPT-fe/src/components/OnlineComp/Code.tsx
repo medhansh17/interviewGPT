@@ -106,16 +106,29 @@ const Code = () => {
     <div className="flex h-screen">
       <New_Sidebar />
       <div className="w-fit">
-        <div className="bg-zinc-200 dark:bg-zinc-900 p-4">
+        <div className="bg-zinc-200 dark:bg-zinc-900 p-2">
           <div className="flex justify-between items-center">
             <div className="text-lg font-semibold text-zinc-800 dark:text-white">
               Online Coding Assessment
             </div>
-            <h1 className="text-lg font-semibold ">
-              {localStorage.getItem("item")
-                ? JSON.parse(localStorage.getItem("item")!).candidate_name
-                : ""}
-            </h1>
+            <div className="flex gap-4 ">
+              <h1 className="text-lg font-semibold h-fit my-auto">
+                {localStorage.getItem("item")
+                  ? JSON.parse(localStorage.getItem("item")!).candidate_name
+                  : ""}
+              </h1>
+              {localStorage.getItem("userSelfie") ? (
+                <img
+                  src={localStorage.getItem("userSelfie")!}
+                  alt="selfie"
+                  width={"100px"}
+                  height={"100px"}
+                  className="p-0"
+                />
+              ) : (
+                ""
+              )}
+            </div>
             {/* <Timer /> */}
           </div>
         </div>
