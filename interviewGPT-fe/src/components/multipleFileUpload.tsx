@@ -87,6 +87,9 @@ const ExampleComponent = ({ refresh }: { refresh: () => void }) => {
       const response = await api.post("/upload_resume_to_job", formData);
       if (response.statusText === "OK") {
         refresh();
+        setTimeout(() => {
+          refresh();
+        }, 2000);
         toast.success({
           type: "background",
           duration: 3000,
