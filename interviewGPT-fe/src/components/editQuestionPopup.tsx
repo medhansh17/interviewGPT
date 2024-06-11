@@ -1,11 +1,11 @@
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState, useEffect } from "react";
-import { EditQuestionData } from "./generatedQuesPopup";
+import { useState } from "react";
 import api from "@/components/customAxios/Axios";
 import { useToast } from "./toast";
+import { EditQuestionData } from "./generatedQuesPopup";
 
-export default function EditQuestionDataPopup({
+export default function EditQuestionPopup({
   onClose,
   data,
 }: {
@@ -13,41 +13,37 @@ export default function EditQuestionDataPopup({
   data: EditQuestionData | undefined;
 }) {
   const toast = useToast();
-  const [question, setQuestion] = useState("");
-  const [options, setOptions] = useState<{ [key: string]: string }>({});
-  const [sampleInput, setSampleInput] = useState("");
-  const [sampleOutput, setSampleOutput] = useState("");
+  const [question, setQuestion] = useState(data?.question || "");
+  const [sampleInput, setSampleInput] = useState(data?.sample_input || "");
+  const [sampleOutput, setSampleOutput] = useState(data?.sample_output || "");
+  const [options, setOptions] = useState(data?.options || {});
   const [updating, setUpdating] = useState(false);
-
-  useEffect(() => {
-    if (data) {
-      setQuestion(data.question || "");
-      setOptions(data.options || {});
-      setSampleInput(data.sample_input || "");
-      setSampleOutput(data.sample_output || "");
-    }
-  }, [data]);
 
   const handleUpdate = () => {
     if (!data) return;
     setUpdating(true);
+
     const payload = {
       resume_id: data.resume_id,
       job_id: data.job_id,
       question_id: data.question_id,
       question_type: data.question_type,
-      question: question,
-      options: data.question_type === "technical" ? options : undefined,
-      sample_input: data.question_type === "coding" ? sampleInput : undefined,
-      sample_output: data.question_type === "coding" ? sampleOutput : undefined,
+      question_data: {
+        question: question,
+        ...(data.question_type === "coding" && {
+          sample_input: sampleInput,
+          sample_output: sampleOutput,
+        }),
+        ...(data.question_type === "technical" && { options: options }),
+      },
     };
+
     api
-      .post("/update_candidate_question", payload, {
+      .post("/edit_candidate_question", payload, {
         headers: { "Content-Type": "application/json" },
       })
       .then((response) => {
         if (response.status === 200) {
-          onClose();
           toast.success({
             type: "background",
             duration: 3000,
@@ -56,24 +52,40 @@ export default function EditQuestionDataPopup({
             description: "",
             open: true,
           });
+          onClose();
         }
-        setUpdating(false);
       })
       .catch((error) => {
+        console.error(
+          "Error updating question:",
+          error.response ? error.response.data : error.message
+        );
         toast.error({
           type: "background",
           duration: 3000,
           status: "Error",
           title: "Error updating question",
-          description: error.response ? error.response.data.message : "",
+          description: "",
           open: true,
         });
+      })
+      .finally(() => {
         setUpdating(false);
       });
   };
 
-  const handleOptionChange = (key: string, value: string) => {
-    setOptions((prevOptions) => ({ ...prevOptions, [key]: value }));
+  const renderOptions = () => {
+    return Object.keys(options).map((key) => (
+      <div key={key} className="mb-2">
+        <label className="block mb-1">{`Option ${key}`}</label>
+        <input
+          type="text"
+          value={options[key]}
+          onChange={(e) => setOptions({ ...options, [key]: e.target.value })}
+          className="border border-gray-300 rounded px-2 py-1 w-full"
+        />
+      </div>
+    ));
   };
 
   return (
@@ -90,7 +102,7 @@ export default function EditQuestionDataPopup({
         </h2>
         <div className="mb-4">
           <label htmlFor="question" className="block mb-2">
-            Question:
+            Enter Question:
           </label>
           <textarea
             id="question"
@@ -102,18 +114,8 @@ export default function EditQuestionDataPopup({
         </div>
         {data?.question_type === "technical" && (
           <div className="mb-4">
-            <h3 className="text-lg font-semibold mb-2">Options:</h3>
-            {Object.entries(options).map(([key, value]) => (
-              <div key={key} className="flex items-center mb-2">
-                <label className="mr-2">{key}:</label>
-                <input
-                  type="text"
-                  value={value}
-                  className="border border-gray-300 rounded px-2 py-1 flex-grow"
-                  onChange={(e) => handleOptionChange(key, e.target.value)}
-                />
-              </div>
-            ))}
+            <label className="block mb-2">Options:</label>
+            {renderOptions()}
           </div>
         )}
         {data?.question_type === "coding" && (
