@@ -276,18 +276,18 @@ const RespJdDash = () => {
   const showResult = async (itemName: string) => {
     try {
       const resp = await api.post("/fetch_user_responses", {
-        candidate_name: itemName,
+        candidate_id: itemName,
         job_id: jobDetails?.job_id,
       });
       setResultData(resp.data);
       setshow_Result(!show_Result);
-    } catch (error: unknown) {
+    } catch (err: any) {
       toast.error({
         type: "background",
         duration: 3000,
         status: "Error",
         title: "Error fetching result",
-        description: { error },
+        description: err.response.error,
         open: true,
       });
     }
@@ -449,7 +449,7 @@ const RespJdDash = () => {
                         </p>
                       </td>
                       <td className="p-3 text-center">
-                        {item.experience_match}
+                        {item.experience_match == 1 ? "Match" : "Mismatch"}
                       </td>
                       <td className="p-3 text-center">
                         <p>{item.JD_MATCH}</p>
@@ -513,7 +513,7 @@ const RespJdDash = () => {
                           {item.assessment_status == 1 && (
                             <button
                               className="resp-btn"
-                              onClick={() => showResult(item.candidate_name)}
+                              onClick={() => showResult(item.resume_id)}
                             >
                               Result
                             </button>

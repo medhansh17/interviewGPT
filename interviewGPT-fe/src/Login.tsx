@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import api from "./components/customAxios/Axios";
+import { useToast } from "./components/toast";
 
 const Login: React.FC = () => {
+  const toast = useToast();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,12 +19,26 @@ const Login: React.FC = () => {
         email: email,
         password: password,
       });
-
       if (res.statusText == "OK") {
+        localStorage.setItem("authToken", res.data.token);
+        localStorage.setItem("user", JSON.stringify(res.data.user_id));
         navigate("/app");
-      } else alert(res.data.message);
+      } else
+        toast.error({
+          title: "Error",
+          description: res.data.message,
+          duration: 5000,
+          open: true,
+          status: "error",
+        });
     } catch (err) {
-      console.log(err);
+      toast.error({
+        title: "Error",
+        description: "Invalid Credentials!",
+        duration: 5000,
+        open: true,
+        status: "error",
+      });
     }
   };
 
