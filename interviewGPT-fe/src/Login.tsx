@@ -38,8 +38,6 @@ const Login: React.FC = () => {
     <div className="bg-gray-100 flex h-screen items-center justify-center p-4">
       {/* <div className="w-full max-w-md">
         <div className="bg-white shadow-md rounded-md p-8">
-         
-
           <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
             Sign in to your account
           </h2>

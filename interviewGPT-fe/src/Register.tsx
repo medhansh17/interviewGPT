@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "./components/customAxios/Axios";
+import { useToast } from "./components/toast";
+
 const Register: React.FC = () => {
+  const toast = useToast();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,7 +23,14 @@ const Register: React.FC = () => {
       });
 
       if (res.statusText == "OK") {
-        navigate("/app");
+        navigate("/login");
+        toast.success({
+          title: "Verify Email ",
+          description: "",
+          duration: 3000,
+          open: true,
+          status: "success",
+        });
       } else alert(res.data.message);
     } catch (err) {
       console.log(err);
