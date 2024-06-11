@@ -13,6 +13,8 @@ import GenerateQuestionsPopup from "./generateQuestionsPopup";
 import CandidateDetailsPopup from "./candidateDetailsPopup";
 import ConfirmButton from "./confirmationPopup";
 import { ConfirmDialog } from "primereact/confirmdialog";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 
 interface MyObjectType {
   jd: string | null;
@@ -74,6 +76,17 @@ const RespJdDash = () => {
   const gen = "";
   const pop = false;
   const [Resultdata, setResultData] = useState<any>(null);
+  const [fullDescription, setFullDescription] = useState<boolean>(false);
+  const [fullDescriptionId, setFullDescriptionId] = useState<number | null>(
+    null
+  );
+
+  const toggleDescription = (id: number) => {
+    setFullDescriptionId(id);
+    setFullDescription((prevState) =>
+      prevState && fullDescriptionId === id ? false : true
+    );
+  };
 
   const handleRightArrowClick = (item: any) => {
     setShowPopup(true);
@@ -317,7 +330,7 @@ const RespJdDash = () => {
         <Header />
       </p>
       <div
-        className="max-w-[1400px] w-[95%] mx-auto mt-[-2rem] p-6"
+        className="max-w-[1400px] w-[95%] mx-auto mt-[2rem] p-6"
         style={{ paddingTop: 0 }}
       >
         <div className="mb-4">
@@ -426,33 +439,123 @@ const RespJdDash = () => {
                         {item.candidate_name}
                       </td>
                       <td className="p-2 w-[300px]">
-                        <p className="">
-                          {item.Matching_Skills &&
-                            item.Matching_Skills.map(
-                              (skill: any, index: any) => (
-                                <span key={index}>
-                                  {skill}
-                                  {index !== item.Matching_Skills.length - 1 &&
-                                    ", "}
-                                </span>
-                              )
-                            )}
-                        </p>
+                        {item.Matching_Skills &&
+                          ((fullDescription &&
+                            fullDescriptionId == item.resume_id) ||
+                          item.Matching_Skills.length <= 8 ? (
+                            <p className="">
+                              {item.Matching_Skills.map(
+                                (skill: any, index: any) => (
+                                  <span key={index}>
+                                    {skill}
+                                    {index !==
+                                      item.Matching_Skills.length - 1 && ", "}
+                                  </span>
+                                )
+                              )}
+                              {fullDescription &&
+                                fullDescriptionId == item.resume_id && (
+                                  <FontAwesomeIcon
+                                    icon={faChevronUp}
+                                    className="ml-1"
+                                    onClick={() =>
+                                      toggleDescription(item.resume_id)
+                                    }
+                                  />
+                                )}
+                            </p>
+                          ) : (
+                            <p className="">
+                              {item.Matching_Skills.slice(0, 5).map(
+                                (skill: any, index: any) => (
+                                  <span key={index}>
+                                    {skill}
+                                    {index !== 4 && ", "}
+                                  </span>
+                                )
+                              )}
+                              ...
+                              <span
+                                onClick={() =>
+                                  toggleDescription(item.resume_id)
+                                }
+                              >
+                                {fullDescription &&
+                                fullDescriptionId == item.resume_id ? (
+                                  <FontAwesomeIcon
+                                    icon={faChevronUp}
+                                    className="ml-1"
+                                  />
+                                ) : (
+                                  <FontAwesomeIcon
+                                    icon={faChevronDown}
+                                    className="ml-1"
+                                  />
+                                )}
+                              </span>
+                            </p>
+                          ))}
                       </td>
-                      <td className="p-2 w-[300px] ">
-                        <p className="h-[100px] overflow-auto">
-                          {item.Missing_Skills &&
-                            item.Missing_Skills.map(
-                              (skill: any, index: any) => (
-                                <span key={index}>
-                                  {skill}
-                                  {index !== item.Missing_Skills.length - 1 &&
-                                    ", "}
-                                </span>
-                              )
-                            )}
-                        </p>
+
+                      <td className="p-2 w-[300px]">
+                        {item.Missing_Skills &&
+                          ((fullDescription &&
+                            fullDescriptionId == item.resume_id) ||
+                          item.Missing_Skills.length <= 8  ? (
+                            <p className="">
+                              {item.Missing_Skills.map(
+                                (skill: any, index: any) => (
+                                  <span key={index}>
+                                    {skill}
+                                    {index !== item.Missing_Skills.length - 1 &&
+                                      ", "}
+                                  </span>
+                                )
+                              )}
+                              {fullDescription &&
+                                fullDescriptionId == item.resume_id && (
+                                  <FontAwesomeIcon
+                                    icon={faChevronUp}
+                                    className="ml-1"
+                                    onClick={() =>
+                                      toggleDescription(item.resume_id)
+                                    }
+                                  />
+                                )}
+                            </p>
+                          ) : (
+                            <p className="">
+                              {item.Missing_Skills.slice(0, 5).map(
+                                (skill: any, index: any) => (
+                                  <span key={index}>
+                                    {skill}
+                                    {index !== 4 && ", "}
+                                  </span>
+                                )
+                              )}
+                              ...
+                              <span
+                                onClick={() =>
+                                  toggleDescription(item.resume_id)
+                                }
+                              >
+                                {fullDescription &&
+                                fullDescriptionId == item.resume_id ? (
+                                  <FontAwesomeIcon
+                                    icon={faChevronUp}
+                                    className="ml-1"
+                                  />
+                                ) : (
+                                  <FontAwesomeIcon
+                                    icon={faChevronDown}
+                                    className="ml-1"
+                                  />
+                                )}
+                              </span>
+                            </p>
+                          ))}
                       </td>
+
                       <td className="p-2 text-center">
                         {item.experience_match == 1 ? "Match" : "Mismatch"}
                       </td>
@@ -475,7 +578,7 @@ const RespJdDash = () => {
                         </span>
                       </td>
 
-                      <td className="text-center">{`${item.status}`}</td>
+                      <td className="text-center h-[100px] w-[70px]">{`${item.status}`}</td>
                       <td className="p-2 text-zinc-500 dark:text-zinc-400 relative">
                         <div
                           className="flex flex-col items-center justify-around text-lg"

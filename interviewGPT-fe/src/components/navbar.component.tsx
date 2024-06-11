@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface BehavioralQuestion {
   b_question_id: string;
@@ -28,7 +28,9 @@ interface InterviewQuestions {
 
 const New_Sidebar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
   const location = useLocation();
+  const [tabSwitchCount, setTabSwitchCount] = useState<number>(0);
   const pathname = location.pathname;
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -40,6 +42,42 @@ const New_Sidebar = () => {
   const bhq = questions?.Behaviour_q;
   const codingQuestions = questions?.coding_question;
   const tech = questions?.tech_questions;
+
+  useEffect(() => {
+    const handleBackNavigation = (event: any) => {
+      event.preventDefault();
+      window.history.forward();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // User switched tabs or minimized the window
+        alert("Please stay on this page to complete the quiz.");
+        setTabSwitchCount((prevCount) => prevCount + 1);
+      }
+    };
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = ""; // This text will be shown in the confirmation dialog (not all browsers support this)
+    };
+
+    window.addEventListener("popstate", handleBackNavigation);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("popstate", handleBackNavigation);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (tabSwitchCount >= 3) {
+      navigate("/dashboard");
+    }
+  }, [tabSwitchCount, navigate]);
 
   return (
     <>

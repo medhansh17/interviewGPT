@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "./components/customAxios/Axios";
 import { useToast } from "./components/toast";
+import Header from "./components/Header";
 
 const Register: React.FC = () => {
   const toast = useToast();
@@ -65,10 +66,10 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-100 flex h-screen items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className="bg-gray-100 flex h-screen items-center justify-center px-4 sm:px-6 lg:px-8 flex-col">
       <div className="w-full max-w-md space-y-8">
         <div className="bg-white shadow-md rounded-md p-6">
-          <h2 className="my-3 text-center text-3xl font-bold tracking-tight text-gray-900">
+          <h2 className="my-2 text-center text-3xl font-bold tracking-tight text-gray-900">
             Sign up for an account
           </h2>
 

@@ -9,7 +9,7 @@ const Sample: React.FC = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const navigate = useNavigate();
   const [canName, setCanname] = useState("");
-  const [tabSwitchCount, setTabSwitchCount] = useState<number>(0);
+  // const [tabSwitchCount, setTabSwitchCount] = useState<number>(0);
   const [behavioralQuestions, setBehavioralQuestions] = useState<any[]>([]);
   const jobId = localStorage.getItem("job_id");
   const beha = sessionStorage.getItem("question");
@@ -36,41 +36,43 @@ const Sample: React.FC = () => {
       setCurrentQuestionIndex((prev) => prev + 1);
     }
   };
-  useEffect(() => {
-    const handleBackNavigation = (event: any) => {
-      event.preventDefault();
-      window.history.forward();
-    };
+  // useEffect(() => {
+  //   const handleBackNavigation = (event: any) => {
+  //     event.preventDefault();
+  //     window.history.forward();
+  //   };
 
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        // User switched tabs or minimized the window
-        alert("Please stay on this page to complete the quiz.");
-        setTabSwitchCount((prevCount) => prevCount + 1);
-      }
-    };
+  //   const handleVisibilityChange = () => {
+  //     if (document.hidden) {
+  //       // User switched tabs or minimized the window
+  //       alert("Please stay on this page to complete the quiz.");
+  //       setTabSwitchCount((prevCount) => prevCount + 1);
+  //     }
+  //   };
 
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = ""; // This text will be shown in the confirmation dialog (not all browsers support this)
-    };
+  //   const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+  //     event.preventDefault();
+  //     event.returnValue = ""; // This text will be shown in the confirmation dialog (not all browsers support this)
+  //   };
 
-    window.addEventListener("popstate", handleBackNavigation);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("beforeunload", handleBeforeUnload);
+  //   window.addEventListener("popstate", handleBackNavigation);
+  //   document.addEventListener("visibilitychange", handleVisibilityChange);
+  //   window.addEventListener("beforeunload", handleBeforeUnload);
 
-    return () => {
-      window.removeEventListener("popstate", handleBackNavigation);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener("popstate", handleBackNavigation);
+  //     document.removeEventListener("visibilitychange", handleVisibilityChange);
+  //     window.removeEventListener("beforeunload", handleBeforeUnload);
+  //   };
+  // }, []);
 
-  useEffect(() => {
-    if (tabSwitchCount >= 3) {
-      navigate("/dashboard");
-    }
-  }, [tabSwitchCount, navigate]);
+  // useEffect(() => {
+  //   if (tabSwitchCount >= 3) {
+  //     navigate("/dashboard");
+  //   }
+  // }, [tabSwitchCount, navigate]);
+
+  if (behavioralQuestions.length === 0) navigate("/mcq-main ");
   return (
     <div className="flex h-screen">
       <New_Sidebar />

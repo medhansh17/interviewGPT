@@ -97,7 +97,8 @@ const Code = () => {
   }, [currentQuestionIndex]);
 
   if (codingQuestions.length === 0) {
-    return <div>Loading...</div>;
+    navigate("/success");
+    return null;
   }
 
   const currentQuestion = codingQuestions[currentQuestionIndex];

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
+import Header from "./components/Header";
 import api from "./components/customAxios/Axios";
 import { useToast } from "./components/toast";
 
@@ -51,7 +51,13 @@ const Login: React.FC = () => {
   // };
 
   return (
-    <div className="bg-gray-100 flex h-screen items-center justify-center p-4">
+    <div
+      className="bg-gray-100 flex w-screen h-screen items-center justify-center p-4 flex-col"
+      id="main-content"
+    >
+      <p className="sm:w-[93%] w-full mx-auto">
+        <Header />
+      </p>
       {/* <div className="w-full max-w-md">
         <div className="bg-white shadow-md rounded-md p-8">
           <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">

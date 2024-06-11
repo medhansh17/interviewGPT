@@ -176,10 +176,9 @@ function Application() {
   return (
     <main id="main-content">
       <Header />
-      <div className="flex justify-end"></div>
       <div
         onClick={() => navigate("/dashboard")}
-        className="absolute right-[5rem] w-[10rem] text-center bg-gray-200 px-4 py-2 rounded-md shadow-md hover:bg-gray-300 cursor-pointer  mb-[2rem]  font-bold"
+        className="absolute right-[5rem] w-[10rem] text-center bg-gray-200 px-4 py-2 rounded-md shadow-md hover:bg-gray-300 cursor-pointer  mb-[2rem]  font-bold "
       >
         JD Dashboard
       </div>
@@ -187,7 +186,7 @@ function Application() {
         <div className="">
           <div className="mx-[3rem]">
             <div>
-              <p className="flex justify-left items-center mb-2 font-bold md:text-[2rem] text-[1rem]">
+              <p className="flex justify-left items-center mb-2 font-bold md:text-[2rem] text-[1rem] mt-[2rem]">
                 Add Job Description
               </p>
               <p>
