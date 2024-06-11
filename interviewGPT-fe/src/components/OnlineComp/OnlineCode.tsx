@@ -310,7 +310,7 @@ const IntroScreen: React.FC = () => {
   return (
     <div>
       <h1 className="text-center font-semibold text-3xl p-[3rem]">
-        Welcom To Online Proctored Exam
+        Welcome To Online Proctored Exam
       </h1>
       <div className="w-[90%] mx-auto bg-white p-6 rounded-lg shadow">
         <h2
