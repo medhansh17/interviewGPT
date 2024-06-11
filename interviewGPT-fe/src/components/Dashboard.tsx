@@ -18,7 +18,7 @@ interface DataItem {
   id: number;
   jd: string;
   role: string;
-  active: string;
+  active: boolean;
 }
 
 const Dashboard = () => {
@@ -43,10 +43,6 @@ const Dashboard = () => {
     };
     getJobList();
   }, []);
-
-  // useEffect(() => {
-  //   setData(state.job_list);
-  // }, [state.job_list]);
 
   const deleteJobHandler = async (item: DataItem) => {
     try {
@@ -92,7 +88,7 @@ const Dashboard = () => {
 
   const saveEditedRow = async (item: any) => {
     let active: boolean;
-    if (item.active === "true") {
+    if (item.active === true) {
       active = true;
     } else active = false;
     try {
@@ -111,13 +107,13 @@ const Dashboard = () => {
           open: true,
         });
       }
-    } catch (error: unknown) {
+    } catch (error: any) {
       toast.error({
         type: "background",
         duration: 3000,
         status: "Error",
         title: "Error updating job",
-        description: { error },
+        description: error.response.error,
         open: true,
       });
     }
@@ -147,19 +143,6 @@ const Dashboard = () => {
     setData(newData);
   };
 
-  // const handleJdChange = (
-  //   event: React.ChangeEvent<HTMLInputElement>,
-  //   id: number
-  // ) => {
-  //   const newData = data.map((item) => {
-  //     if (item.id === id) {
-  //       return { ...item, jd: event.target.value };
-  //     }
-  //     return item;
-  //   });
-  //   setData(newData);
-  // };
-
   const statusChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
     id: number
@@ -168,7 +151,7 @@ const Dashboard = () => {
       if (item.id === id) {
         return {
           ...item,
-          active: event.target.value === "true" ? "true" : "false",
+          active: event.target.value === "true" ? true : false,
         };
       }
       return item;
@@ -338,6 +321,7 @@ const Dashboard = () => {
                         {editableRow === item.id ? (
                           <select
                             className="bg-green-200 text-green-700 py-1 px-3 rounded-full text-xs"
+                            value={item.active === true ? "true" : "false"}
                             onChange={(e) => statusChange(e, item.id)}
                           >
                             <option value="true">Active</option>
@@ -351,7 +335,7 @@ const Dashboard = () => {
                                 : "bg-red-600 text-black"
                             }  py-1 px-3 rounded-full text-xs`}
                           >
-                            {item.active === "true" ? "Inactive" : "Active"}
+                            {item.active === true ? "Active" : "Inactive"}
                           </span>
                         )}
                       </td>

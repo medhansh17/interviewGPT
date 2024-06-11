@@ -10,12 +10,24 @@ import { useNavigate } from "react-router-dom";
 import UpdateQuestionPopup from "./updateQuestionPopup";
 import { deleteQuestion } from "@/api/deleteCandidateQuestion";
 import { useToast } from "./toast";
+import EditQuestionPopup from "./editQuestionPopup";
 
 export interface UpdateQuestionData {
   resume_id: string;
   job_id: string;
   question_id: string;
   question_type: "behavioral" | "technical" | "coding";
+}
+
+export interface EditQuestionData {
+  resume_id: string;
+  job_id: string;
+  question_id: string;
+  question_type: "behavioral" | "technical" | "coding";
+  question: string;
+  sample_input?: string;
+  sample_output?: string;
+  options?: { [key: string]: string };
 }
 
 export default function GeneratedQuesPopup({
@@ -43,7 +55,9 @@ export default function GeneratedQuesPopup({
 }) {
   const toast = useToast();
   const [updateStatus, setUpdateStatus] = useState(false);
+  const [editStatus, setEditStatus] = useState(false);
   const [data, setData] = useState<UpdateQuestionData | undefined>();
+  const [editData, setEditData] = useState<EditQuestionData | undefined>();
   const navigate = useNavigate();
 
   const handleApproval = () => {
@@ -58,6 +72,12 @@ export default function GeneratedQuesPopup({
           <UpdateQuestionPopup
             onClose={() => setUpdateStatus(false)}
             data={data}
+          />
+        )}
+        {editStatus && editData && (
+          <EditQuestionPopup
+            onClose={() => setEditStatus(false)}
+            data={editData}
           />
         )}
         <button
@@ -100,7 +120,18 @@ export default function GeneratedQuesPopup({
                   >
                     <FontAwesomeIcon icon={faTrash} color="red" />
                   </button>
-                  <button>
+                  <button
+                    onClick={() => {
+                      setEditData({
+                        resume_id: resume_id,
+                        job_id: localStorage.getItem("job_id") || "",
+                        question_id: question.b_question_id,
+                        question_type: "behavioral",
+                        question: question.b_question_text,
+                      });
+                      setEditStatus(true);
+                    }}
+                  >
                     <FontAwesomeIcon icon={faEdit} color="green" />
                   </button>
                 </div>
@@ -145,7 +176,19 @@ export default function GeneratedQuesPopup({
                   >
                     <FontAwesomeIcon icon={faTrash} color="red" />
                   </button>
-                  <button>
+                  <button
+                    onClick={() => {
+                      setEditData({
+                        resume_id: resume_id,
+                        job_id: localStorage.getItem("job_id") || "",
+                        question_id: question.tech_ques_id,
+                        question_type: "technical",
+                        question: question.question,
+                        options: question.options,
+                      });
+                      setEditStatus(true);
+                    }}
+                  >
                     <FontAwesomeIcon icon={faEdit} color="green" />
                   </button>
                 </div>
@@ -201,7 +244,20 @@ export default function GeneratedQuesPopup({
                     >
                       <FontAwesomeIcon icon={faTrash} color="red" />
                     </button>
-                    <button>
+                    <button
+                      onClick={() => {
+                        setEditData({
+                          resume_id: resume_id,
+                          job_id: localStorage.getItem("job_id") || "",
+                          question_id: question.coding_ques_id,
+                          question_type: "coding",
+                          question: question.question,
+                          sample_input: question.sample_input,
+                          sample_output: question.sample_output,
+                        });
+                        setEditStatus(true);
+                      }}
+                    >
                       <FontAwesomeIcon icon={faEdit} color="green" />
                     </button>
                   </div>
