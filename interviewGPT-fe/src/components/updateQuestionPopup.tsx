@@ -48,10 +48,14 @@ export default function UpdateQuestionPopup({
           setUpdating(false);
         })
         .catch((error) => {
-          console.error(
-            "Error updating question:",
-            error.response ? error.response.data : error.message
-          );
+          toast.error({
+            type: "background",
+            duration: 3000,
+            status: "Error",
+            title: "Error updating question",
+            description: error.response.error,
+            open: true,
+          });
           setUpdating(false);
         });
     } catch (err) {
