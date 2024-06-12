@@ -4,6 +4,7 @@ from functools import wraps
 from dotenv import load_dotenv
 from itsdangerous import URLSafeTimedSerializer
 import jwt
+from .models import User
 
 load_dotenv()
 
@@ -12,8 +13,10 @@ EMAIL_PASS = os.getenv("EMAIL_PASS")
 EMAIL_USER = os.getenv("EMAIL_USER")
 EMAIL_VERIFY_URI = os.getenv("EMAIL_VERIFY_URI")
 FRONTEND_URL = os.getenv("FRONTEND_URL")
+TA_USER=os.getenv("TA_USER")
 
 s = URLSafeTimedSerializer(SECRET_KEY)
+
 
 def login_is_required(function):
     @wraps(function)
@@ -27,7 +30,6 @@ def login_is_required(function):
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = None
         token = request.headers.get('Authorization')
         if not token:
             return jsonify({'message': 'Token is missing !!'}), 401
@@ -35,8 +37,15 @@ def token_required(f):
         try:
             token = token.replace('Bearer ', '')
             data = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
-            current_user = data['user_id']
-            return f( *args, **kwargs)
+            current_user_id = data['user_id']
+            current_user = User.query.filter_by(id=current_user_id).first()
+            if not current_user:
+                return jsonify({'message': 'User not found !!'}), 401
+            return f(current_user, *args, **kwargs)
+        except jwt.ExpiredSignatureError:
+            return jsonify({'message': 'Token has expired !!'}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({'message': 'Token is invalid !!'}), 401
         except Exception as e:
             return jsonify({'message': 'Token is invalid !!'}), 401
     return decorated

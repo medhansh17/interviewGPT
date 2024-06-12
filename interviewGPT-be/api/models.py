@@ -13,6 +13,7 @@ class Job(db.Model):
                    default=lambda: str(uuid.uuid4()))
     role = db.Column(db.String(100), nullable=False)
     jd = db.Column(db.Text, nullable=False)
+    user_id = db.Column(db.String, db.ForeignKey('users.id'), nullable=False)
     active = db.Column(db.Boolean, default=True, nullable=False)
     resumes = db.relationship('Resume', backref='job', cascade='all, delete')
     candidates = db.relationship(
@@ -30,6 +31,7 @@ class Resume(db.Model):
     id = db.Column(db.String(36), primary_key=True,
                    default=lambda: str(uuid.uuid4()))
     filename = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.String, db.ForeignKey('users.id'), nullable=False)
     job_id = db.Column(db.String, db.ForeignKey('job.id'), nullable=False)
     extracted_info = db.relationship(
         'ExtractedInfo', backref='resume', cascade='all, delete')
@@ -51,6 +53,7 @@ class ExtractedInfo(db.Model):
                    default=lambda: str(uuid.uuid4()))
     resume_id = db.Column(db.String, db.ForeignKey(
         'resume.id'), nullable=False)
+    user_id = db.Column(db.String, db.ForeignKey('users.id'), nullable=False)
     name = db.Column(db.String(100))
     total_experience = db.Column(db.String(50))
     phone_number = db.Column(db.String(30))
@@ -73,6 +76,7 @@ class ResumeScore(db.Model):
                    default=lambda: str(uuid.uuid4()))
     resume_id = db.Column(db.String, db.ForeignKey(
         'resume.id'), nullable=False)
+    user_id = db.Column(db.String, db.ForeignKey('users.id'), nullable=False)
     resume_filename = db.Column(db.Text, nullable=True)
     name = db.Column(db.String(100), nullable=True)
     jd_match = db.Column(db.String(10), nullable=True)
@@ -98,6 +102,7 @@ class Candidate(db.Model):
     id = db.Column(db.String(36), primary_key=True,
                    default=lambda: str(uuid.uuid4()))
     name = db.Column(db.String(255), nullable=False)
+    user_id = db.Column(db.String, db.ForeignKey('users.id'), nullable=False)
     job_id = db.Column(db.String, db.ForeignKey('job.id'), nullable=False)
     resume_id = db.Column(db.String, db.ForeignKey(
         'resume.id'), nullable=False)
@@ -125,6 +130,7 @@ class TechnicalQuestion(db.Model):
     __tablename__ = 'technical_question'
     id = db.Column(db.String(36), primary_key=True,
                    default=lambda: str(uuid.uuid4()))
+    user_id = db.Column(db.String, db.ForeignKey('users.id'), nullable=False)
     question_text = db.Column(db.Text, nullable=False)
     options = db.Column(db.Text, nullable=False)
     correct_answer = db.Column(db.String(255), nullable=False)
@@ -142,6 +148,7 @@ class BehaviouralQuestion(db.Model):
     __tablename__ = 'behavioural_question'
     id = db.Column(db.String(36), primary_key=True,
                    default=lambda: str(uuid.uuid4()))
+    user_id = db.Column(db.String, db.ForeignKey('users.id'), nullable=False)
     question_text = db.Column(db.Text, nullable=False)
     candidate_id = db.Column(db.String, db.ForeignKey(
         'candidate.id'), nullable=False)
@@ -156,6 +163,7 @@ class CodingQuestion(db.Model):
     __tablename__ = 'coding_question'
     id = db.Column(db.String(36), primary_key=True,
                    default=lambda: str(uuid.uuid4()))
+    user_id = db.Column(db.String, db.ForeignKey('users.id'), nullable=False)
     question_text = db.Column(db.Text, nullable=False)
     sample_input = db.Column(db.Text, nullable=False)
     sample_output = db.Column(db.Text, nullable=False)
@@ -172,6 +180,7 @@ class CodingQuestion(db.Model):
 class CandidateQuestion(db.Model):
     id = db.Column(db.String(36), primary_key=True,
                    default=lambda: str(uuid.uuid4()))
+    user_id = db.Column(db.String, db.ForeignKey('users.id'), nullable=False)
     candidate_id = db.Column(db.String, db.ForeignKey(
         'candidate.id'), nullable=False)
     question_type = db.Column(db.String(50), nullable=False)
@@ -185,6 +194,7 @@ class AudioTranscription(db.Model):
     __tablename__ = 'audio_transcription'
     id = db.Column(db.String(36), primary_key=True,
                    default=lambda: str(uuid.uuid4()))
+    user_id = db.Column(db.String, db.ForeignKey('users.id'), nullable=False)
     # question_id = db.Column(db.String, db.ForeignKey('behavioural_question.id'), nullable=False)
     question = db.Column(db.String(255))
     candidate_id = db.Column(db.String, db.ForeignKey(
@@ -199,6 +209,7 @@ class AudioTranscription(db.Model):
 class CodeResponse(db.Model):
     id = db.Column(db.String(36), primary_key=True,
                    default=lambda: str(uuid.uuid4()))
+    user_id = db.Column(db.String, db.ForeignKey('users.id'), nullable=False)
     question_id = db.Column(db.String, db.ForeignKey(
         'coding_question.id'), nullable=False)
     code_response = db.Column(db.JSON, nullable=False)
@@ -213,6 +224,7 @@ class CodeResponse(db.Model):
 class TechResponse(db.Model):
     id = db.Column(db.String(36), primary_key=True,
                    default=lambda: str(uuid.uuid4()))
+    user_id = db.Column(db.String, db.ForeignKey('users.id'), nullable=False)
     question_id = db.Column(db.String, db.ForeignKey(
         'technical_question.id'), nullable=False)
     tech_response = db.Column(db.JSON, nullable=False)
@@ -222,6 +234,16 @@ class TechResponse(db.Model):
         db.DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(
         timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    
+class Role(db.Model):
+    __tablename__ = 'roles'
+    id = db.Column(db.String(36), primary_key=True,
+                   default=lambda: str(uuid.uuid4()))
+    name = db.Column(db.String(64), unique=True)
+
+    def __repr__(self):
+        return f'<Role {self.name}>'
+
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
@@ -231,6 +253,8 @@ class User(db.Model, UserMixin):
     last_name = db.Column(db.String(80), nullable=True)
     email = db.Column(db.String(100), nullable=False, unique=True)
     password = db.Column(db.String(80), nullable=True)
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
+    role = db.relationship('Role', backref=db.backref('users', lazy=True))
     email_confirmed = db.Column(db.Boolean, nullable=True, default=False)
     email_confirmation_sent_on = db.Column(db.DateTime, nullable=True)
     email_confirmed_on = db.Column(db.DateTime, nullable=True)
