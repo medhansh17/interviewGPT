@@ -146,6 +146,21 @@ def register_guest():
 
 @login_bp.route('/register_admin', methods=['POST'])
 def register_admin():
+    data = request.get_json()
+    email = data.get('email')
+    
+    if not email or '@bluetickconsultants.com' not in email:
+        return jsonify({'error': 'You are not authorized for admin access.'}), 403
+    
+    return register_user(role_name='bluetick-admin')
+
+def register_admin():
+    data = request.get_json()
+    email = data.get('email')
+    
+    if not email or '@bluetickconsultants.com' not in email:
+        return jsonify({'error': 'You are not authorized for admin access.'}), 403
+    
     return register_user(role_name='bluetick-admin')
 
 def register_user(role_name):
