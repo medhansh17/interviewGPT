@@ -75,7 +75,6 @@ const RespJdDash = () => {
     useState(false);
   const gen = "";
   const pop = false;
-  const [Resultdata, setResultData] = useState<any>(null);
   const [fullDescription, setFullDescription] = useState<boolean>(false);
   const [fullDescriptionId, setFullDescriptionId] = useState<number | null>(
     null
@@ -291,25 +290,11 @@ const RespJdDash = () => {
     setApproval(true);
   };
 
-  const showResult = async (itemName: string) => {
-    try {
-      const resp = await api.post("/fetch_user_responses", {
-        candidate_id: itemName,
-        job_id: jobDetails?.job_id,
-      });
-      setResultData(resp.data);
-      setshow_Result(!show_Result);
-    } catch (err: any) {
-      toast.error({
-        type: "background",
-        duration: 3000,
-        status: "Error",
-        title: "Error fetching result",
-        description: err.response.error,
-        open: true,
-      });
-    }
+  const showResult = async (resume_id: string) => {
+    setResume_id(resume_id);
+    setshow_Result(!show_Result);
   };
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentJobs = Data.slice(indexOfFirstItem, indexOfLastItem);
@@ -320,7 +305,8 @@ const RespJdDash = () => {
     >
       {show_Result && (
         <InterviewDataDisplay
-          data={Resultdata}
+          resume_id={resume_id}
+          jobId={localStorage.getItem("job_id") ?? ""}
           onClick={() => {
             setshow_Result(!show_Result);
           }}
@@ -501,7 +487,7 @@ const RespJdDash = () => {
                         {item.Missing_Skills &&
                           ((fullDescription &&
                             fullDescriptionId == item.resume_id) ||
-                          item.Missing_Skills.length <= 8  ? (
+                          item.Missing_Skills.length <= 8 ? (
                             <p className="">
                               {item.Missing_Skills.map(
                                 (skill: any, index: any) => (

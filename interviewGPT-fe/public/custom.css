@@ -55,11 +55,10 @@
   background-color: #0d6efd;
   color: #fff;
 }
-.pricing-card .btn:hover{
+.pricing-card .btn:hover {
   color: #000;
   border: 1px solid #0d6efd;
   background-color: #fff;
-
 }
 
 @media only screen and (max-width: 800px) {
@@ -74,13 +73,13 @@ table {
   width: 100%;
 }
 
-td, th {
+td,
+th {
   border: 1px solid #dddddd;
   text-align: left;
   padding: 8px;
 }
 
-tr:nth-child(even) {
+/* tr:nth-child(even) {
   background-color: #dddddd;
-}
-
+} */
