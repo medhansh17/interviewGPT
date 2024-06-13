@@ -316,7 +316,7 @@ const RespJdDash = () => {
         <Header />
       </p>
       <div
-        className="max-w-[1400px] w-[95%] mx-auto mt-[2rem] p-6"
+        className="max-w-[1400px] w-[95%] mx-auto  p-2"
         style={{ paddingTop: 0 }}
       >
         <div className="mb-4">

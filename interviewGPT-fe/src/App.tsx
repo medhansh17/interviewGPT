@@ -17,6 +17,7 @@ import Code from "./components/OnlineComp/Code";
 import MainAssessment from "./components/MainAssessment";
 import Success from "./components/OnlineComp/Sucess";
 import { Toasts } from "./components/toast";
+import RegisterAdmin from "./components/registerAdmin";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
             <Route path="/mcq-main" element={<Mcq />} />
             <Route path="/code" element={<Code />} />
             <Route path="/respective-dashboard/:id" element={<RespJdDash />} />
+            <Route path="/register-admin" element={<RegisterAdmin />} />
             <Route path="/assess-main" element={<MainAssessment />}>
               <Route path="audio-ques" element={<Sample />} />
               <Route path="mcq-main" element={<Mcq />} />

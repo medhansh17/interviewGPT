@@ -11,7 +11,7 @@ import UpdateQuestionPopup from "./updateQuestionPopup";
 import { deleteQuestion } from "@/api/deleteCandidateQuestion";
 import { useToast } from "./toast";
 import EditQuestionPopup from "./editQuestionPopup";
-import { approveCandidate } from "@/api/approveCandidate";
+// import { approveCandidate } from "@/api/approveCandidate";
 
 export interface UpdateQuestionData {
   resume_id: string;
