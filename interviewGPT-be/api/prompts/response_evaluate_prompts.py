@@ -117,3 +117,45 @@ evaluate_code_prompt="""
 }
 
     """
+evaluate_behavioural_prompt="""
+
+You are experienced person in interviewing where your tasked with evaluating a candidate's responses{transcript} to behavioral interview question{question_text}. The evaluation should be based on the following criteria:
+1. **Relevance**: Does the candidate address the question directly and provide relevant examples?
+2. **Clarity**: Are their responses clear and well-structured?
+3. **Depth**: Do they provide detailed and comprehensive answers, showing thorough understanding and experience?
+4. **Examples**: Do they use specific examples to illustrate their points?
+5. **Outcome**: Do they discuss the outcomes of their actions and reflect on what they learned or how they grew from the experience?
+6. **Grammar**: Are their responses grammatically correct and fluent?
+
+Each criterion should be scored on a scale from 1 to 5, where:
+- **0** = very Poor 
+- **1** = Poor
+- **2** = Fair
+- **3** = Good
+- **4** = Very Good
+- **5** = Excellent
+
+question : {question_text}
+transcripts: {transcript}
+
+Important Considerations:
+Make sure not to change the key values in the output JSON
+the response should like the below example json,
+{
+      "question": "Tell me about a time you faced a challenge at work.",
+      "scores": {
+        "relevance": 4,
+        "clarity": 5,
+        "depth": 4,
+        "examples": 4,
+        "outcome": 3,
+        "grammar": 4
+      }
+    }
+proper evalaution should be done, if not proper response is given or response is out of context then it is fine to give  zero (0) for the given criteria.
+Mandatory to follow the same keys used in above example will all key in lower case letters\
+Please make sure the JSON data provided follows the correct JSON format as illustrated below. This will ensure that the JSON string can be parsed without errors. Pay attention to the following points:\
+Ensure all keys and string values are enclosed in double quotes.\
+Close all braces  and brackets  properly.\
+Avoid trailing commas after the last element in objects and arrays.
+"""

@@ -128,7 +128,7 @@ def export_jobs_as_json(current_user):
 
 @job_bp.route('/edit_job/<string:job_id>', methods=['PUT'])
 @token_required
-def edit_job(job_id,current_user):
+def edit_job(current_user, job_id):
     """
     Edit an existing job's details based on the provided job ID.
     """
@@ -194,7 +194,7 @@ def delete_job(current_user):
 
 @job_bp.route('/jobs/<string:job_id>', methods=['GET'])
 @token_required
-def get_job_details(job_id,current_user):
+def get_job_details(current_user, job_id):
     """
     Retrieve the details of a specific job based on the provided job ID.
     """
@@ -202,7 +202,7 @@ def get_job_details(job_id,current_user):
     if not current_user_id:
         return jsonify({'message': 'Unauthorized access'}), 401
     
-    job = Job.query.get(job_id, user_id=current_user_id)
+    job = Job.query.filter_by(id=job_id, user_id=current_user_id).first()
     if not job:
         return jsonify({'error': 'Job not found or Unauthorized '}), 404
 

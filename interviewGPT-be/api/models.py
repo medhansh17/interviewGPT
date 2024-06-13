@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from itsdangerous import URLSafeTimedSerializer
 from flask_login import UserMixin
 from . import db
+from sqlalchemy import LargeBinary
 # user login package
 
 
@@ -153,6 +154,9 @@ class BehaviouralQuestion(db.Model):
     candidate_id = db.Column(db.String, db.ForeignKey(
         'candidate.id'), nullable=False)
     audio_transcript = db.Column(db.Text)
+    behav_eval = db.Column(db.JSON, nullable=True)
+    audio_file_path = db.Column(db.String(255), nullable=True)  # New column for audio file path
+    audio_data = db.Column(LargeBinary, nullable=True)  # New column for binary audio data
     created_at = db.Column(
         db.DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(
