@@ -109,7 +109,7 @@ def export_jobs_as_json(current_user):
     """
     Fetch all jobs from the database for the current user and return them in JSON format.
     """
-    current_user_id = current_user.id()
+    current_user_id = current_user.id
     if not current_user_id:
         return jsonify({'message': 'Unauthorized access'}), 401
     
@@ -132,7 +132,7 @@ def edit_job(job_id,current_user):
     """
     Edit an existing job's details based on the provided job ID.
     """
-    current_user_id = current_user.id()
+    current_user_id = current_user.id
     if not current_user_id:
         return jsonify({'message': 'Unauthorized access'}), 401
 
@@ -198,7 +198,7 @@ def get_job_details(job_id,current_user):
     """
     Retrieve the details of a specific job based on the provided job ID.
     """
-    current_user_id = current_user.id()
+    current_user_id = current_user.id
     if not current_user_id:
         return jsonify({'message': 'Unauthorized access'}), 401
     
