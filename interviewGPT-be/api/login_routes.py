@@ -6,7 +6,7 @@ from api.auth import (token_required, s, create_reset_password_body,
                       create_verification_email_body, password_reset_form_html, 
                       password_reset_success_html, email_verified_success_html, 
                       SECRET_KEY, EMAIL_PASS, EMAIL_USER, EMAIL_VERIFY_URI, FRONTEND_URL)
-from api.models import User
+from api.models import User,Role
 from api import db
 
 login_bp = Blueprint('login', __name__)
@@ -139,6 +139,59 @@ def register():
         except Exception as e:
             db.session.rollback()
             return jsonify({'error': str(e)}), 401
+
+@login_bp.route('/register_guest', methods=['POST'])
+def register_guest():
+    return register_user(role_name='guest')
+
+@login_bp.route('/register_admin', methods=['POST'])
+def register_admin():
+    data = request.get_json()
+    email = data.get('email')
+    
+    if not email or '@bluetickconsultants.com' not in email:
+        return jsonify({'error': 'You are not authorized for admin access.'}), 403
+    
+    return register_user(role_name='bluetick-admin')
+
+def register_admin():
+    data = request.get_json()
+    email = data.get('email')
+    
+    if not email or '@bluetickconsultants.com' not in email:
+        return jsonify({'error': 'You are not authorized for admin access.'}), 403
+    
+    return register_user(role_name='bluetick-admin')
+
+def register_user(role_name):
+    from api import bcrypt, mail
+    data = request.get_json()
+    email = data.get('email')
+    first_name = data.get('first_name')
+    last_name = data.get('last_name')
+    password = data.get('password')
+
+    if not email or not password:
+        return jsonify({'error': 'Email and password are required.'}), 400
+    existing_user_email = User.query.filter_by(email=email).first()
+    if existing_user_email:
+        return jsonify({'error': 'Email already exists.'}), 401
+
+    hashed_password = bcrypt.generate_password_hash(password.encode('utf-8'))
+    role = Role.query.filter_by(name=role_name).first()
+    new_user = User(email=email, password=hashed_password, first_name=first_name, last_name=last_name, role=role)
+
+    db.session.add(new_user)
+    db.session.commit()
+
+    token = s.dumps(email, salt='email-confirmation-link')
+    confirm_route = 'confirm'
+    link = f'{EMAIL_VERIFY_URI}/{confirm_route}/{token}'
+    html_content = create_verification_email_body(link)
+    msg = Message('verification', sender=EMAIL_USER, recipients=[email], html=html_content)
+    mail.send(msg)
+
+    return jsonify({"message": "created user successfully"}), 200
 
 @login_bp.route('/confirm/<token>')
 def confirm(token):

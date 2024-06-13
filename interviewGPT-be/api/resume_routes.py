@@ -26,48 +26,45 @@ ats_bp = Blueprint('ats', __name__)
 
 @ats_bp.route('/extracted_info', methods=['GET'])
 @token_required
-def get_extracted_info():
+def get_extracted_info(current_user):
     """
     Fetch details from the ExtractedInfo table based on Resume ID.
     """
-
     resume_id = request.args.get('resume_id')
     if not resume_id:
         return jsonify({'error': 'Resume ID are required in the query parameters'}), 400
 
-    # Query to fetch ExtractedInfo based on resume_id
-    extracted_info = ExtractedInfo.query.filter(
-        ExtractedInfo.resume_id.ilike(resume_id)
+    # Query to fetch ExtractedInfo based on resume_id and user_id
+    extracted_info = ExtractedInfo.query.filter_by(
+        resume_id=resume_id,
+        user_id=current_user.id
     ).first()
 
     if not extracted_info:
         return jsonify({'error': 'No extracted information found for the provided resume ID.'}), 404
 
-    if extracted_info:
-        extracted_info_details = {
-            'candidate_name': extracted_info.name,
-            'total_experience': extracted_info.total_experience,
-            'phone_number': extracted_info.phone_number,
-            'email_id': extracted_info.email_id,
-            'address': extracted_info.address,
-            'linkedin_id': extracted_info.linkedin_id,
-            'github_id': extracted_info.github_id,
-            'nationality': extracted_info.nationality,
-            'tech_skills': extracted_info.tech_skill,
-            'behaviour_skills': extracted_info.behaviour_skill,
-            'date_of_birth': extracted_info.date_of_birth
-        }
-        return jsonify({'extracted_info_details': extracted_info_details}), 200
-    else:
-        return jsonify({'error': 'Extracted info not found for the provided candidate name and job ID'}), 404
+    extracted_info_details = {
+        'candidate_name': extracted_info.name,
+        'total_experience': extracted_info.total_experience,
+        'phone_number': extracted_info.phone_number,
+        'email_id': extracted_info.email_id,
+        'address': extracted_info.address,
+        'linkedin_id': extracted_info.linkedin_id,
+        'github_id': extracted_info.github_id,
+        'nationality': extracted_info.nationality,
+        'tech_skills': extracted_info.tech_skill,
+        'behaviour_skills': extracted_info.behaviour_skill,
+        'date_of_birth': extracted_info.date_of_birth
+    }
+    return jsonify({'extracted_info_details': extracted_info_details}), 200
 
 
 @ats_bp.route('/search_jobs', methods=['GET'])
 @token_required
-def search_jobs():
+def search_jobs(current_user):
     job_id = request.args.get('job_id')
 
-    job = Job.query.get(job_id)
+    job = Job.query.filter_by(id=job_id, user_id=current_user.id).first()
     if job:
         job_details = {
             'job_id': job.id,
@@ -116,15 +113,18 @@ def chatgpt_message(app, jd, job_role, skill_set, total_experience):
         return response_data
 
 
-def create_extracted_info(extracted_info, resume_id):
+def create_extracted_info(extracted_info, resume_id, user_id):
     """
     Save extracted information to the database.
     """
     existing_info = ExtractedInfo.query.filter_by(
-        resume_id=resume_id).first()
+        resume_id=resume_id,
+        user_id=user_id
+    ).first()
     if not existing_info:
         extracted_record = ExtractedInfo(
             resume_id=resume_id,
+            user_id=user_id,
             name=extracted_info.get('candidate_name'),
             total_experience=extracted_info.get('work_exp'),
             phone_number=extracted_info.get('phone_number'),
@@ -177,12 +177,12 @@ def extract_details_from_resume(text_resume):
 
 
 @ retry(max_retries=2, delay=2)
-def process_resumes(app, job_id, role, resume_list):
+def process_resumes(app, job_id, role, resume_list, user_id):
     """
     Extract information from resumes, save it to the database, and calculate resume scores.
     """
     with app.app_context():
-        job = Job.query.filter_by(id=job_id).first()
+        job = Job.query.filter_by(id=job_id, user_id=user_id).first()
         if not job:
             return jsonify({'error': 'Job not found.'}), 404
 
@@ -194,12 +194,14 @@ def process_resumes(app, job_id, role, resume_list):
                     text_resume = extract_text_from_resume(app, role, filename)
                     print(f"Extracted text from resume:")
 
-                    resume_record = Resume.query.get(resume_id)
+                    resume_record = Resume.query.filter_by(id=resume_id, user_id=user_id).first()
                     if resume_record:
                         resume_id = resume_record.id
 
                     existing_info = ExtractedInfo.query.filter_by(
-                        resume_id=resume_id).first()
+                        resume_id=resume_id,
+                        user_id=user_id
+                    ).first()
                     if not existing_info:
                         response_data = extract_details_from_resume(
                             text_resume)
@@ -212,25 +214,27 @@ def process_resumes(app, job_id, role, resume_list):
                                 'candidate_name')
 
                             existing_candidate = Candidate.query.filter_by(
-                                name=candidate_name, job_id=job_id, resume_id=resume_id).first()
+                                name=candidate_name, job_id=job_id, resume_id=resume_id, user_id=user_id).first()
                             if not existing_candidate:
                                 new_candidate = Candidate(
-                                    name=candidate_name, job_id=job_id, resume_id=resume_id)
+                                    name=candidate_name, job_id=job_id, resume_id=resume_id, user_id=user_id)
                                 db.session.add(new_candidate)
                                 db.session.commit()
                             print(
                                 f"Saved candidate info to the database for: {candidate_name}")
 
-                            create_extracted_info(extracted_info, resume_id)
+                            create_extracted_info(extracted_info, resume_id, user_id)
                             print(
                                 f"Created extracted info for resume ID: {resume_id}")
 
                     resume_score = ResumeScore.query.filter_by(
-                        resume_id=resume_id, isfilled=False).first()
+                        resume_id=resume_id, user_id=user_id, isfilled=False).first()
 
                     if resume_score:
                         existing_info = ExtractedInfo.query.filter_by(
-                            resume_id=resume_id).first()
+                            resume_id=resume_id,
+                            user_id=user_id
+                        ).first()
                         skill_set = existing_info.tech_skill
                         total_experience = existing_info.total_experience
 
@@ -282,10 +286,18 @@ def process_resumes(app, job_id, role, resume_list):
 
 @ats_bp.route('/upload_resume_to_job', methods=['POST'])
 @token_required
-def upload_resume_to_job():
+def upload_resume_to_job(current_user):
     """
     Upload resumes to a job and start processing for information extraction and scoring.
     """
+    current_user_id = current_user.id
+
+    # Restrict guest users to upload only up to 10 resumes
+    if current_user.role.name == 'guest':
+        resume_count = Resume.query.filter_by(user_id=current_user_id).count()
+        if resume_count > 10:
+            return jsonify({'message': 'Guest users can only upload up to 10 resumes.'}), 403
+
     data = request.form
     role = data.get('role')
     job_id = data.get('id')
@@ -304,7 +316,7 @@ def upload_resume_to_job():
         if len(uploaded_files) > MAX_FILES:
             return jsonify({'message': f'Exceeded maximum number of files ({MAX_FILES}) allowed for upload.'}), 400
 
-        job = Job.query.filter_by(role=role, id=job_id).first()
+        job = Job.query.filter_by(role=role, id=job_id, user_id=current_user_id).first()
         if not job:
             return jsonify({'message': 'Specified job role or description does not exist.'}), 400
 
@@ -318,20 +330,20 @@ def upload_resume_to_job():
             resume_path = os.path.join(folder_path, resume_filename)
             resume_file.save(resume_path)
 
-            new_resume = Resume(filename=resume_filename, job_id=job.id)
+            new_resume = Resume(filename=resume_filename, job_id=job.id, user_id=current_user_id)
             db.session.add(new_resume)
             db.session.commit()
 
             resume_list.append((new_resume.id, resume_filename))
 
             resume_score = ResumeScore(
-                resume_id=new_resume.id, name="Fetching Details")
+                resume_id=new_resume.id, name="Fetching Details", user_id=current_user_id)
             db.session.add(resume_score)
             db.session.commit()
         print("thread is called")
         app = current_app._get_current_object()
         processing_thread = Thread(target=process_resumes, args=(
-            app, job.id, role, resume_list))
+            app, job.id, role, resume_list, current_user_id))
         processing_thread.start()
 
         return jsonify({'message': 'Resumes uploaded successfully and processing started.'}), 200
@@ -342,11 +354,13 @@ def upload_resume_to_job():
 
 @ats_bp.route('/get_resume_scores', methods=['GET'])
 @token_required
-def get_resume_scores():
+def get_resume_scores(current_user):
     """
     Retrieve resume scores for a specific job based on the provided job ID.
     Supports pagination and optional sorting by status and JD_MATCH.
     """
+    current_user_id = current_user.id
+
     job_id = request.args.get('job_id')
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
@@ -356,9 +370,9 @@ def get_resume_scores():
     if not job_id:
         return jsonify({'error': 'Job ID is a required parameter.'}), 400
 
-    # Query to fetch ResumeScore based on job_id
+    # Query to fetch ResumeScore based on job_id and user_id
     query = db.session.query(ResumeScore).join(
-        Resume).filter(Resume.job_id == job_id)
+        Resume).filter(Resume.job_id == job_id, Resume.user_id == current_user_id)
 
     if sort_by in ['status', 'jd_match']:
         if sort_order == 'desc':
@@ -396,16 +410,18 @@ def get_resume_scores():
 
 @ats_bp.route('/delete_resume', methods=['GET'])
 @token_required
-def delete_resume():
+def delete_resume(current_user):
     """
     Delete a resume and associated data based on the resume ID.
     """
+    current_user_id = current_user.id
+
     resume_id = request.args.get('resume_id')
 
     if not resume_id:
         return jsonify({'error': 'Resume ID is a required parameter.'}), 400
 
-    resume = Resume.query.filter_by(id=resume_id).first()
+    resume = Resume.query.filter_by(id=resume_id, user_id=current_user_id).first()
     if not resume:
         return jsonify({'error': 'No resume found for the provided resume ID.'}), 404
 
@@ -419,8 +435,6 @@ def delete_resume():
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
         new_filename = f"{resume.filename}_{timestamp}.pdf"
         file_to_archive_path = os.path.join(archive_role_folder, new_filename)
-        #shutil.move(os.path.join(RESUME_FOLDER, role,
-                  #  resume.filename), file_to_archive_path)
         try:
             shutil.move(os.path.join(RESUME_FOLDER, role, resume.filename), file_to_archive_path)
         except FileNotFoundError:
@@ -439,9 +453,12 @@ def delete_resume():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+
 @ats_bp.route('/update_resume_status', methods=['POST'])
 @token_required
-def update_resume_status():
+def update_resume_status(current_user):
+    current_user_id = current_user.id
+
     data = request.get_json()
     resume_id = data.get('resume_id')
     status = data.get('status')  # 'True' or 'False'
@@ -451,7 +468,7 @@ def update_resume_status():
 
     status_bool = status.lower() == 'true'
 
-    resume_score = ResumeScore.query.filter_by(resume_id=resume_id).first()
+    resume_score = ResumeScore.query.filter_by(resume_id=resume_id, user_id=current_user_id).first()
     if resume_score is None:
         return jsonify({'error': 'Resume score record not found.'}), 404
 

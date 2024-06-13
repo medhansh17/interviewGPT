@@ -29,7 +29,7 @@ def create_app(config_class=Config):
     app.config['MAIL_USE_SSL'] = False
     app.config['MAIL_USERNAME'] = os.getenv('EMAIL_USER')
     app.config['MAIL_PASSWORD'] = os.getenv('EMAIL_PASS')
-
+    app.config['TA_USER']= os.getenv('TA_USER')
 
     db.init_app(app)
     migrate.init_app(app, db)
@@ -38,8 +38,9 @@ def create_app(config_class=Config):
 
     with app.app_context():
         # Import models to register them with SQLAlchemy
-        from .models import Job, Resume, ExtractedInfo, ResumeScore, Candidate, TechnicalQuestion, BehaviouralQuestion, CodingQuestion, CandidateQuestion, User
+        from .models import Job, Resume, ExtractedInfo, ResumeScore, Candidate, TechnicalQuestion, BehaviouralQuestion, CodingQuestion, CandidateQuestion, User,Role
         db.create_all()
+        create_initial_roles()
 
         # Import and register blueprints
         from .job_routes import job_bp
@@ -59,3 +60,11 @@ def create_app(config_class=Config):
         app.register_blueprint(login_bp)
 
     return app
+def create_initial_roles():
+    from .models import Role
+    roles = ['guest', 'bluetick-admin']
+    for role in roles:
+        if not Role.query.filter_by(name=role).first():
+            new_role = Role(name=role)
+            db.session.add(new_role)
+    db.session.commit()

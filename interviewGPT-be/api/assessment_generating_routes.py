@@ -6,25 +6,26 @@ from sqlalchemy import func
 from openai import OpenAI
 from .models import Job, Candidate, TechnicalQuestion, BehaviouralQuestion, CodingQuestion, CandidateQuestion, ResumeScore, ExtractedInfo
 from . import db
-from .prompts.assessment_prompts import tech_question_mcq_prompt, behaviour_question_prompt, coding_question_prompt, tech_question_mcq_prompt, behaviour_question_prompt, coding_question_prompt
+from .prompts.assessment_prompts import tech_question_mcq_prompt, behaviour_question_prompt, coding_question_prompt
 from .config import MODEL_NAME
 from .auth import token_required
+
 assessment_bp = Blueprint('assessment', __name__)
 
 # QUESTION GENERATION
-# user defined function for each type of question
+# User defined function for each type of question
 
 
 def tech_question_mcq(jd13, no_tech_questions, Tech_skills):
     message = [
         {"role": "system", "content": tech_question_mcq_prompt},
-        {"role": "user", "content": f"""always mandatory to Generate {no_tech_questions} technical question, the difficulty level should be medium to hard, should not be easy questions,even question should not repeat.
-                important information, options sshould be too hard, so that candiate can get confuse easily with other choices.
-                Questions should be entirely based on job description {jd13} and candiate technical skills found from {Tech_skills}.
-                Mandatory to follow the same keys used in above example will all key in lower case letters\
-                Please make sure the JSON data provided follows the correct JSON format as illustrated below. This will ensure that the JSON string can be parsed without errors. Pay attention to the following points:\
-                Ensure all keys and string values are enclosed in double quotes.\
-                Close all braces  and brackets  properly.\
+        {"role": "user", "content": f"""always mandatory to generate {no_tech_questions} technical questions, the difficulty level should be medium to hard, should not be easy questions, and questions should not repeat. 
+                Important information, options should be too hard, so that candidates can get confused easily with other choices. 
+                Questions should be entirely based on job description {jd13} and candidate's technical skills found from {Tech_skills}. 
+                Mandatory to follow the same keys used in the above example with all keys in lower case letters. 
+                Please make sure the JSON data provided follows the correct JSON format as illustrated below. This will ensure that the JSON string can be parsed without errors. Pay attention to the following points: 
+                Ensure all keys and string values are enclosed in double quotes. 
+                Close all braces and brackets properly. 
                 Avoid trailing commas after the last element in objects and arrays.
                 """}
     ]
@@ -33,7 +34,8 @@ def tech_question_mcq(jd13, no_tech_questions, Tech_skills):
     tech_response = client.chat.completions.create(
         model=MODEL_NAME,
         messages=message,
-        max_tokens=1000,temperature=0.2
+        max_tokens=1000,
+        temperature=0.2
     )
     print("generating tech quest")
     tech_response = dict(tech_response)
@@ -47,11 +49,11 @@ def tech_question_mcq(jd13, no_tech_questions, Tech_skills):
 def behaviour_questions(no_behav_questions, behav_skills):
     message = [
         {"role": "system", "content": behaviour_question_prompt},
-        {"role": "user", "content": f"""always mandatory to Generate {no_behav_questions} behaivour questions not more than that,and based on behaviour skills which candidate have {behav_skills}, if they dont have,give a question by your choice.ie soft skill question.\
-         Mandatory to follow the same keys used in above example will all key in lower case letters\
-        Please make sure the JSON data provided follows the correct JSON format as illustrated below. This will ensure that the JSON string can be parsed without errors. Pay attention to the following points:\
-        Ensure all keys and string values are enclosed in double quotes.\
-        Close all braces  and brackets  properly.\
+        {"role": "user", "content": f"""always mandatory to generate {no_behav_questions} behaviour questions, not more than that, and based on behaviour skills which the candidate has {behav_skills}, if they don't have, give a question by your choice, i.e., soft skill question. 
+        Mandatory to follow the same keys used in the above example with all keys in lower case letters. 
+        Please make sure the JSON data provided follows the correct JSON format as illustrated below. This will ensure that the JSON string can be parsed without errors. Pay attention to the following points: 
+        Ensure all keys and string values are enclosed in double quotes. 
+        Close all braces and brackets properly. 
         Avoid trailing commas after the last element in objects and arrays.
          """}
     ]
@@ -60,7 +62,8 @@ def behaviour_questions(no_behav_questions, behav_skills):
     behav_response = client.chat.completions.create(
         model=MODEL_NAME,
         messages=message,
-        max_tokens=1000,temperature=0.2
+        max_tokens=1000,
+        temperature=0.2
     )
     print("generating beh quest")
     behav_response = dict(behav_response)
@@ -74,11 +77,11 @@ def behaviour_questions(no_behav_questions, behav_skills):
 def coding_question_generate(no_code_questions):
     message = [
         {"role": "system", "content": coding_question_prompt},
-        {"role": "user", "content": f"""always mandatory to Generate {no_code_questions} number of coding question, questions should not repeat.
-         Mandatory to follow the same keys used in above example will all key in lower case letters\
-        Please make sure the JSON data provided follows the correct JSON format as illustrated below. This will ensure that the JSON string can be parsed without errors. Pay attention to the following points:\
-        Ensure all keys and string values are enclosed in double quotes.\
-        Close all braces  and brackets  properly.\
+        {"role": "user", "content": f"""always mandatory to generate {no_code_questions} number of coding questions, questions should not repeat. 
+        Mandatory to follow the same keys used in the above example with all keys in lower case letters. 
+        Please make sure the JSON data provided follows the correct JSON format as illustrated below. This will ensure that the JSON string can be parsed without errors. Pay attention to the following points: 
+        Ensure all keys and string values are enclosed in double quotes. 
+        Close all braces and brackets properly. 
         Avoid trailing commas after the last element in objects and arrays.
          """}
     ]
@@ -87,7 +90,8 @@ def coding_question_generate(no_code_questions):
     coding_response = client.chat.completions.create(
         model=MODEL_NAME,
         messages=message,
-        max_tokens=1000,temperature=0.2
+        max_tokens=1000,
+        temperature=0.2
     )
     print("generating code quest")
     coding_response = dict(coding_response)
@@ -100,8 +104,8 @@ def coding_question_generate(no_code_questions):
     return coding_response
 
 
-def save_assessment_to_db(job_id, role, candidate_id, tech_questions, behaviour_questions, coding_questions):
-    job = Job.query.get(job_id)
+def save_assessment_to_db(job_id, role, candidate_id, tech_questions, behaviour_questions, coding_questions, user_id):
+    job = Job.query.filter_by(id=job_id, user_id=user_id).first()
     if not job:
         return jsonify({'error': 'Invalid job ID.'}), 400
     print("save assesmnet to db fucnstatred")
@@ -109,29 +113,29 @@ def save_assessment_to_db(job_id, role, candidate_id, tech_questions, behaviour_
 
     for question in tech_questions:
         tech_question = TechnicalQuestion(question_text=question['question'], options=json.dumps(
-            question['options']), correct_answer=question['answer'], candidate_id=candidate_id, user_answer="", tech_eval="")
+            question['options']), correct_answer=question['answer'], candidate_id=candidate_id, user_id=user_id, user_answer="", tech_eval="")
         db.session.add(tech_question)
         db.session.commit()
         candidate_question = CandidateQuestion(
-            candidate_id=candidate_id, question_type='technical')
+            candidate_id=candidate_id, question_type='technical', user_id=user_id)
         db.session.add(candidate_question)
 
     for question in behaviour_questions:
         behav_question = BehaviouralQuestion(
-            question_text=question['b_question_text'], candidate_id=candidate_id, audio_transcript="")
+            question_text=question['b_question_text'], candidate_id=candidate_id, user_id=user_id, audio_transcript="")
         db.session.add(behav_question)
         db.session.commit()
         candidate_question = CandidateQuestion(
-            candidate_id=candidate_id, question_type='behavioural')
+            candidate_id=candidate_id, question_type='behavioural', user_id=user_id)
         db.session.add(candidate_question)
 
     for question in coding_questions:
         code_question = CodingQuestion(question_text=question['question'], sample_input=question['sample_input'],
-                                       sample_output=question['sample_output'], candidate_id=candidate_id, user_code="", code_eval="")
+                                       sample_output=question['sample_output'], candidate_id=candidate_id, user_id=user_id, user_code="", code_eval="")
         db.session.add(code_question)
         db.session.commit()
         candidate_question = CandidateQuestion(
-            candidate_id=candidate.id, question_type='coding')
+            candidate_id=candidate_id, question_type='coding', user_id=user_id)
         db.session.add(candidate_question)
 
     db.session.commit()
@@ -139,7 +143,7 @@ def save_assessment_to_db(job_id, role, candidate_id, tech_questions, behaviour_
     return jsonify({'message': 'Assessment data saved successfully.'}), 200
 
 
-def generate_and_save_assessment(app, job_id, no_tech_questions, no_behav_questions, no_code_questions, resume_score_id, resume_id):
+def generate_and_save_assessment(app, job_id, no_tech_questions, no_behav_questions, no_code_questions, resume_score_id, resume_id, user_id):
     with app.app_context():
         try:
             print("entered genrate and save assessment")
@@ -147,29 +151,25 @@ def generate_and_save_assessment(app, job_id, no_tech_questions, no_behav_questi
             if resume_score is None:
                 raise ValueError("ResumeScore not found")
 
-            # selected_status = resume_score.selected_status
-            # if not selected_status:
-            #     resume_score.status = 'candidate_rejected'
-            #     db.session.commit()
-            #     return
-
-            job = Job.query.get(job_id)
+            job = Job.query.filter_by(id=job_id, user_id=user_id).first()
             jd = job.jd
             role = job.role
+
             # To fetch candidate id based on resume id
-            candidate = Candidate.query.filter_by(resume_id=resume_id).one()
+            candidate = Candidate.query.filter_by(resume_id=resume_id, user_id=user_id).one()
             candidate_id = candidate.id
+
             TechnicalQuestion.query.filter(
-                TechnicalQuestion.candidate_id == candidate_id).delete()
+                TechnicalQuestion.candidate_id == candidate_id, TechnicalQuestion.user_id == user_id).delete()
             BehaviouralQuestion.query.filter(
-                BehaviouralQuestion.candidate_id == candidate_id).delete()
+                BehaviouralQuestion.candidate_id == candidate_id, BehaviouralQuestion.user_id == user_id).delete()
             CodingQuestion.query.filter(
-                CodingQuestion.candidate_id == candidate_id).delete()
+                CodingQuestion.candidate_id == candidate_id, CodingQuestion.user_id == user_id).delete()
 
             db.session.commit()
 
             candidate_info = ExtractedInfo.query.filter_by(
-                resume_id=resume_id).one()
+                resume_id=resume_id, user_id=user_id).one()
 
             if candidate_info:
                 technical_skills = candidate_info.tech_skill
@@ -199,7 +199,7 @@ def generate_and_save_assessment(app, job_id, no_tech_questions, no_behav_questi
                 print("behaviour_questions_json",behaviour_questions_json)
                 print("coding_question_json",coding_question_json)
                 save_assessment_to_db(job_id, role, candidate_id, tech_questions_json,
-                                      behaviour_questions_json, coding_question_json)
+                                      behaviour_questions_json, coding_question_json, user_id)
                 resume_score.status = 'assessment_generated'
                 db.session.commit()
                 print("save to db can check now")
@@ -216,7 +216,7 @@ def generate_and_save_assessment(app, job_id, no_tech_questions, no_behav_questi
 
 @assessment_bp.route('/CHECK_Auto_assessment', methods=['POST'])
 @token_required
-def CHECK_Auto_assessment():
+def CHECK_Auto_assessment(current_user):
     try:
         data = request.get_json()
         job_id = data.get('job_id')
@@ -229,12 +229,9 @@ def CHECK_Auto_assessment():
         print('no_behav_questions',no_behav_questions)
         print('no_code_question',no_code_questions)
         if not job_id or not resume_id:
-            return jsonify({'error': 'Job ID and Resume ID  are required parameters.'}), 400
+            return jsonify({'error': 'Job ID and Resume ID are required parameters.'}), 400
 
-        # candidate_name_formatted = candidate_name.lower().replace(" ", "")
-        # resume_score = ResumeScore.query.filter_by(job_id=job_id).filter(func.lower(
-            # func.replace(ResumeScore.name, " ", "")) == candidate_name_formatted).first()
-        resume_score = ResumeScore.query.filter_by(resume_id=resume_id).first()
+        resume_score = ResumeScore.query.filter_by(resume_id=resume_id, user_id=current_user.id).first()
 
         if resume_score:
             resume_score.status = 'generating_assessment'
@@ -242,7 +239,7 @@ def CHECK_Auto_assessment():
             print("thread fucntionis called")
             app = current_app._get_current_object()
             thread = Thread(target=generate_and_save_assessment, args=(
-                app, job_id, no_tech_questions, no_behav_questions, no_code_questions, resume_score.id, resume_score.resume_id))
+                app, job_id, no_tech_questions, no_behav_questions, no_code_questions, resume_score.id, resume_score.resume_id, current_user.id))
 
             thread.start()
 
@@ -254,10 +251,9 @@ def CHECK_Auto_assessment():
         return jsonify({'error': str(e)}), 500
 
 
-
 @assessment_bp.route('/fetch_candidate_questions_after_selected', methods=['POST'])
 @token_required
-def fetch_candidate_questions():
+def fetch_candidate_questions(current_user):
     data = request.get_json()
     resume_id = data.get('resume_id')
     job_id = data.get('job_id')
@@ -266,7 +262,7 @@ def fetch_candidate_questions():
         return jsonify({'error': 'Resume ID and job_id are required parameters.'}), 400
 
     candidate = Candidate.query.filter_by(
-        resume_id=resume_id, job_id=job_id).first()
+        resume_id=resume_id, job_id=job_id, user_id=current_user.id).first()
 
     if not candidate:
         return jsonify({'error': 'Candidate not found for the given job_id.'}), 404
@@ -297,10 +293,8 @@ def fetch_candidate_questions():
         })
 
     return jsonify({
-        "candidate_id":candidate.id,
+        "candidate_id": candidate.id,
         'tech_questions': technical_questions,
         'Behaviour_q': behavioural_questions,
         'coding_question': coding_questions
     }), 200
-
-
