@@ -1,16 +1,21 @@
 import os
 import json
 import uuid
-from flask import Blueprint, request, jsonify
+from io import BytesIO
+from flask import Blueprint, request, jsonify, current_app, send_file
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 from .models import db, ResumeScore, Candidate, BehaviouralQuestion, TechnicalQuestion, CodingQuestion
 from .prompts.response_evaluate_prompts import (
-    factors, evaluate_tech_prompt, evaluate_code_prompt)
+    factors, evaluate_tech_prompt, evaluate_code_prompt,evaluate_behavioural_prompt)
 from openai import OpenAI
 from .config import AUDIO_FOLDER, MODEL_NAME
 from .auth import token_required
 from sqlalchemy.orm.exc import NoResultFound
+import threading
+from werkzeug.exceptions import NotFound
+from urllib.parse import unquote
+import boto3
 
 response_evaluate_bp = Blueprint('response_evaluate', __name__)
 
@@ -19,7 +24,28 @@ response_evaluate_bp = Blueprint('response_evaluate', __name__)
 # API endpoint for processing audio
 # Audio (blob to webm to wav)
 
+# Initialize S3 client
+s3_client = boto3.client(
+    's3',
+    aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+    aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY')
+)
+def generate_presigned_url(bucket_name, object_name, expiration=3600):
+    return s3_client.generate_presigned_url('get_object',
+                                            Params={'Bucket': bucket_name, 'Key': object_name},
+                                            ExpiresIn=expiration)
 
+def check_s3_upload(bucket_name, file_key):
+    try:
+        s3_client.head_object(Bucket=bucket_name, Key=file_key)
+        return True
+    except boto3.exceptions.botocore.client.ClientError as e:
+        if e.response['Error']['Code'] == '404':
+            return False
+        else:
+            raise e
+
+### new code to save the evalaute of the audio and save , it will be running in thread after every audio complete
 @response_evaluate_bp.route('/blob_process_audio', methods=['POST'])
 @token_required
 def blob_process_audio(current_user):
@@ -36,38 +62,102 @@ def blob_process_audio(current_user):
         candidate = Candidate.query.filter_by(id=candidate_id, job_id=job_id, user_id=current_user.id).one()
     except NoResultFound:
         return jsonify({'error': 'Candidate not found.'}), 404
+
+    candidate_name = candidate.name.replace(' ', '_')
+    unique_filename = f"{candidate_name}_{uuid.uuid4().hex}.wav"
+
+    # Read the audio file into memory
+    audio_data = BytesIO(audio_blob.read())
+    audio_data.seek(0)
     
-    unique_filename = f"{candidate.name}_{uuid.uuid4().hex}.wav"
-    audio_folder = os.path.join(AUDIO_FOLDER, candidate.name)
+    # Upload the file to S3
+    s3_bucket = os.getenv('AWS_STORAGE_BUCKET_NAME')
+    s3_client.upload_fileobj(audio_blob, s3_bucket, unique_filename)
 
-    if not os.path.exists(audio_folder):
-        os.makedirs(audio_folder)
+    # Check if the file was uploaded successfully
+    if not check_s3_upload(s3_bucket, unique_filename):
+        return jsonify({'error': 'File upload to S3 failed.'}), 500
 
-    webm_file_path = os.path.join(audio_folder, unique_filename)
-    audio_blob.save(webm_file_path)
-
+    # Generate the S3 file URL
+    s3_url = f"https://{s3_bucket}.s3.amazonaws.com/{unique_filename}"
+    print(s3_url)
     client = OpenAI()
     client.api_key = os.getenv("OPENAI_API_KEY")
 
-    with open(webm_file_path, "rb") as wav_file:
+    # Reset the file pointer and read the data again for transcription
+    audio_data.seek(0)
+
+    with open(unique_filename, 'wb') as f:
+        f.write(audio_data.read())
+
+    
+    with open(unique_filename, "rb") as wav_file:
         transcript = client.audio.transcriptions.create(
             model="whisper-1",
             file=wav_file,
             response_format="text"
         )
-
+    
     behav = BehaviouralQuestion.query.filter_by(id=question_id, candidate_id=candidate_id, user_id=current_user.id).first()
-
+    cwd=os.getcwd()
+    file_path=os.path.join(cwd,unique_filename)
+    if os.path.isfile(file_path):
+        os.remove(file_path)
     if not behav:
         return jsonify({'error': 'Behavioural question not found.'}), 404
 
     try:
         behav.audio_transcript = transcript
+        behav.audio_file_path = s3_url  # Store the S3 URL
         db.session.commit()
-        return jsonify({'status': 'transcript saved successfully'}), 200
+
+        # Start a thread to evaluate the audio
+        evaluation_thread = threading.Thread(target=evaluate_audio, args=(current_app._get_current_object(), behav.id, transcript, behav.question_text))
+        evaluation_thread.start()
+
+        return jsonify({'status': 'transcript saved successfully, evaluation started'}), 200
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+
+# function to evaluate the audio part
+def evaluate_audio(app,behav_id,transcript, question_text):
+    with app.app_context():
+        print("threat started")
+        client = OpenAI()
+        client.api_key = os.getenv("OPENAI_API_KEY")
+    
+        message = [
+            {"role": "system", "content": evaluate_behavioural_prompt},
+            {"role": "user", "content": f"For the given behaviour question {question_text} and transcript {transcript} , evalaute it as expained in system prompt, give score based on prompt and the response should be only in JSON format as explained earlier."}
+            ] 
+        try:       
+            response = client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=message,
+                max_tokens=1000
+            )
+            response = dict(response)
+            behav_assessment_response = dict(dict(response['choices'][0])['message'])[
+                'content'].replace("\n", " ")
+            behav_assessment_response = ' '.join(behav_assessment_response.split())
+            print("respone from ai is done ")
+            print("this is the response form ai",behav_assessment_response)
+
+            # Query for the specific BehaviouralQuestion entry again within the thread
+            behav = BehaviouralQuestion.query.get(behav_id)
+            if behav:
+                # Save the evaluation result
+                behav.behav_eval = behav_assessment_response
+                db.session.commit()
+                print("commit of score is done")
+            else:
+                print(f"Error: BehaviouralQuestion with id {behav_id} not found")
+        except Exception as e:
+            print(f"Error in evaluation thread: {str(e)}")
+            db.session.rollback()
+
+
 
 # To evaluate the technical MCQ questions and score them
 
@@ -261,12 +351,12 @@ def fetch_user_responses(current_user):
         resume_score_entry = ResumeScore.query.filter_by(resume_id=resume_id, user_id=current_user.id).first()
         if not resume_score_entry or resume_score_entry.assessment_status != 1:
             return jsonify({'error': 'Assessment not completed or not found.'}), 400
-
-        code_responses = CodingQuestion.query.filter_by(candidate_id=candidate.id, user_id=current_user.id).all()
+        ## Fetch the latest code responses
+        code_responses = CodingQuestion.query.filter_by(candidate_id=candidate.id, user_id=current_user.id).order_by(CodingQuestion.updated_at.desc()).all()
         if not code_responses:
             return jsonify({'error': 'No code responses found for the given candidate ID.'}), 404
-
-        tech_responses = TechnicalQuestion.query.filter_by(candidate_id=candidate.id, user_id=current_user.id).all()
+        ### Fetch the latest tech responses
+        tech_responses = TechnicalQuestion.query.filter_by(candidate_id=candidate.id, user_id=current_user.id).order_by(TechnicalQuestion.updated_at.desc()).all()
         if not tech_responses:
             return jsonify({'error': 'No technical responses found for the given candidate ID.'}), 404
 
@@ -278,14 +368,18 @@ def fetch_user_responses(current_user):
         for audio_transcription in audio_transcriptions:
             formatted_audio_transcriptions.append({
                 'question': audio_transcription.question_text,
-                'User_response': audio_transcription.audio_transcript
+                'score': audio_transcription.behav_eval,
+                "audio_file_path" :audio_transcription.audio_file_path
             })
+        # Get the latest unique evaluation responses
+        latest_code_response = code_responses[0].code_eval if code_responses else None
+        latest_tech_response = tech_responses[0].tech_eval if tech_responses else None
 
         formatted_data = {
             'candidate_name': candidate.name,
             'job_id': job_id,
-            'code_response': [code_response.code_eval for code_response in code_responses],
-            'tech_response': [tech_response.tech_eval for tech_response in tech_responses],
+            'code_response': latest_code_response,
+            'tech_response': latest_tech_response,
             'audio_transcript': formatted_audio_transcriptions
         }
 
@@ -293,3 +387,5 @@ def fetch_user_responses(current_user):
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+

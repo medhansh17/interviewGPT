@@ -128,7 +128,7 @@ def export_jobs_as_json(current_user):
 
 @job_bp.route('/edit_job/<string:job_id>', methods=['PUT'])
 @token_required
-def edit_job(job_id,current_user):
+def edit_job(current_user, job_id):
     """
     Edit an existing job's details based on the provided job ID.
     """

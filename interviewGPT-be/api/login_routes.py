@@ -93,15 +93,18 @@ def login():
 
     user.last_login = datetime.now()
     db.session.commit()
-
+    role = user.role.name  # Fetch the role name
     token_payload = {
         'email': email,
         'user_id': user.id,
+        'role': role,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
         'exp': datetime.utcnow() + timedelta(weeks=1)
     }
     token = jwt.encode(token_payload, SECRET_KEY, algorithm='HS256')
 
-    return jsonify({'token': token, 'user_id': user.id, "first_name": user.first_name, "last_name": user.last_name}), 200
+    return jsonify({'email': email,'token': token, 'user_id': user.id, "first_name": user.first_name, "last_name": user.last_name,'role': role}), 200
 
 @login_bp.route('/register', methods=['POST'])
 def register():
