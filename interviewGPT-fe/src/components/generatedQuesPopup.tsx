@@ -11,6 +11,7 @@ import UpdateQuestionPopup from "./updateQuestionPopup";
 import { deleteQuestion } from "@/api/deleteCandidateQuestion";
 import { useToast } from "./toast";
 import EditQuestionPopup from "./editQuestionPopup";
+// import { approveCandidate } from "@/api/approveCandidate";
 
 export interface UpdateQuestionData {
   resume_id: string;
@@ -60,8 +61,11 @@ export default function GeneratedQuesPopup({
   const [editData, setEditData] = useState<EditQuestionData | undefined>();
   const navigate = useNavigate();
 
-  const handleApproval = () => {
-    // Handle approval logic here
+  const handleApproval = async () => {
+    // const item = sessionStorage.getItem("question");
+    // const candidate_id = item ? JSON.parse(item).candidate_id : "";
+    // const resp = await approveCandidate(candidate_id);
+    // console.log(resp);
     navigate(`/online-assess/`);
   };
 

@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "./components/customAxios/Axios";
-import { useToast } from "./components/toast";
+import api from "./customAxios/Axios";
+import { useToast } from "./toast";
 
-const Register: React.FC = () => {
+const RegisterAdmin: React.FC = () => {
   const toast = useToast();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -14,7 +14,6 @@ const Register: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // Add your form submission logic here
     if (password !== confirmPassword) {
       toast.error({
         title: "Error",
@@ -25,9 +24,18 @@ const Register: React.FC = () => {
       });
       return;
     }
-
+    if (!email.endsWith("bluetickconsultants.com")) {
+      toast.error({
+        title: "Error",
+        description: "Invalid email domain.",
+        duration: 5000,
+        open: true,
+        status: "error",
+      });
+      return;
+    }
     try {
-      const res = await api.post("/register_guest", {
+      const res = await api.post("/register_admin", {
         first_name: firstName,
         last_name: lastName,
         email,
@@ -192,4 +200,4 @@ const Register: React.FC = () => {
   );
 };
 
-export default Register;
+export default RegisterAdmin;

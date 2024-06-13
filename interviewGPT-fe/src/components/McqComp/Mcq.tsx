@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import McqMain from "./McqMain";
 import New_Sidebar from "../navbar.component";
+import { useNavigate } from "react-router-dom";
 
 const Mcq = () => {
+  const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [technicalQuestions, setTechnicalQuestions] = useState<any[]>([]);
   const beha = sessionStorage.getItem("question");
@@ -12,6 +14,7 @@ const Mcq = () => {
     };
     behaveQues();
   }, []);
+  if (technicalQuestions.length === 0) navigate("/code");
   return (
     <div className="flex h-screen">
       {technicalQuestions.length > 0 && (

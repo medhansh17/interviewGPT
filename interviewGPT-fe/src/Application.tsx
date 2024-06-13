@@ -1,6 +1,6 @@
 import TextArea from "./components/TextArea";
 import Table from "./components/Table";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Header from "./components/Header";
 import { useToast } from "./components/toast";
 
@@ -29,16 +29,6 @@ function Application() {
   const [manual, setManual] = useState(true);
   const navigate = useNavigate();
   const toast = useToast();
-
-  useEffect(() => {
-    const clearLocalStorage = () => {
-      localStorage.clear();
-    };
-    window.addEventListener("beforeunload", clearLocalStorage);
-    return () => {
-      window.removeEventListener("beforeunload", clearLocalStorage);
-    };
-  }, []);
 
   const uploadJD = async () => {
     const wordCountRegex = /\S+/g;
@@ -97,6 +87,25 @@ function Application() {
         setMainData(null);
         setRole("");
         setRole2("");
+      } else if (
+        response.data.message ==
+        "Guest users can only upload one job description."
+      ) {
+        toast.error({
+          type: "background",
+          duration: 3000,
+          status: "Error",
+          title: "Error",
+          description: "Guest users can only upload one job description.",
+          open: true,
+        });
+        setIsLoading(false);
+        setEmpty(true);
+        setMainTextArea(null);
+        setMainTextArea2(null);
+        setMainData(null);
+        setRole("");
+        setRole2("");
       }
     } catch (error: any) {
       setIsLoading(false);
@@ -105,7 +114,8 @@ function Application() {
         duration: 3000,
         status: "Error",
         title: "Error",
-        description: "Could not upload JD. Please try again.",
+        description:
+          error.response?.data?.message || "An unknown error occurred.",
         open: true,
       });
     }
@@ -176,10 +186,9 @@ function Application() {
   return (
     <main id="main-content">
       <Header />
-      <div className="flex justify-end"></div>
       <div
         onClick={() => navigate("/dashboard")}
-        className="absolute right-[5rem] w-[10rem] text-center bg-gray-200 px-4 py-2 rounded-md shadow-md hover:bg-gray-300 cursor-pointer  mb-[2rem]  font-bold"
+        className="absolute right-[5rem] w-[10rem] text-center bg-gray-200 px-4 py-2 rounded-md shadow-md hover:bg-gray-300 cursor-pointer  mb-[2rem]  font-bold "
       >
         JD Dashboard
       </div>
@@ -187,7 +196,7 @@ function Application() {
         <div className="">
           <div className="mx-[3rem]">
             <div>
-              <p className="flex justify-left items-center mb-2 font-bold md:text-[2rem] text-[1rem]">
+              <p className="flex justify-left items-center mb-2 font-bold md:text-[2rem] text-[1rem] mt-[2rem]">
                 Add Job Description
               </p>
               <p>

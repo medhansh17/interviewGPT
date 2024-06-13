@@ -188,7 +188,7 @@ const Dashboard = () => {
         <Header />
       </p>
       <div
-        className="max-w-[1400px] min-w-fit mx-auto mt-[-2rem] sm:p-6 p-2"
+        className="max-w-[1400px] min-w-fit mx-auto mt-[-2rem] sm:p-6 p-2 mt-[2rem]"
         style={{ paddingTop: 0 }}
       >
         <div className="mb-4">
