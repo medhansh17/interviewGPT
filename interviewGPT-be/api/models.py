@@ -121,6 +121,7 @@ class Candidate(db.Model):
         'CodeResponse', backref='candidate', cascade='all, delete')
     tech_responses = db.relationship(
         'TechResponse', backref='candidate', cascade='all, delete')
+    image_file_path = db.Column(db.String(512), nullable=True)  # Column for image URL
     created_at = db.Column(
         db.DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(

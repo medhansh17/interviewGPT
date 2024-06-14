@@ -1,6 +1,7 @@
 import os
 import json
 import uuid
+import base64
 from io import BytesIO
 from flask import Blueprint, request, jsonify, current_app, send_file
 from sqlalchemy import func
@@ -30,10 +31,7 @@ s3_client = boto3.client(
     aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
     aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY')
 )
-def generate_presigned_url(bucket_name, object_name, expiration=3600):
-    return s3_client.generate_presigned_url('get_object',
-                                            Params={'Bucket': bucket_name, 'Key': object_name},
-                                            ExpiresIn=expiration)
+s3_bucket = os.getenv('AWS_STORAGE_BUCKET_NAME')
 
 def check_s3_upload(bucket_name, file_key):
     try:
@@ -53,9 +51,9 @@ def blob_process_audio(current_user):
     question_id = data.get('question_id')
     candidate_id = data.get('candidate_id')
     job_id = data.get('job_id')
-    audio_blob = request.files['audio']
+    audio = request.files['audio']
 
-    if not question_id or not candidate_id or not job_id or not audio_blob:
+    if not question_id or not candidate_id or not job_id or not audio:
         return jsonify({'error': 'Missing required parameters.'}), 400
 
     try:
@@ -65,14 +63,21 @@ def blob_process_audio(current_user):
 
     candidate_name = candidate.name.replace(' ', '_')
     unique_filename = f"{candidate_name}_{uuid.uuid4().hex}.wav"
+    audio_folder = os.path.join(AUDIO_FOLDER, candidate.name)
+    if not os.path.exists(audio_folder):
+        os.makedirs(audio_folder)
+    local_file_path = os.path.join(audio_folder, unique_filename)
+    audio.save(local_file_path)
 
-    # Read the audio file into memory
-    audio_data = BytesIO(audio_blob.read())
-    audio_data.seek(0)
-    
     # Upload the file to S3
     s3_bucket = os.getenv('AWS_STORAGE_BUCKET_NAME')
-    s3_client.upload_fileobj(audio_blob, s3_bucket, unique_filename)
+    s3_client = boto3.client('s3')  # Make sure boto3 is imported and configured
+
+    try:
+        with open(local_file_path, "rb") as f:
+            s3_client.upload_fileobj(f, s3_bucket, unique_filename)
+    except Exception as e:
+        return jsonify({'error': f"Failed to upload file to S3: {str(e)}"}), 500
 
     # Check if the file was uploaded successfully
     if not check_s3_upload(s3_bucket, unique_filename):
@@ -80,32 +85,29 @@ def blob_process_audio(current_user):
 
     # Generate the S3 file URL
     s3_url = f"https://{s3_bucket}.s3.amazonaws.com/{unique_filename}"
-    print(s3_url)
+
     client = OpenAI()
     client.api_key = os.getenv("OPENAI_API_KEY")
 
-    # Reset the file pointer and read the data again for transcription
-    audio_data.seek(0)
+    try:
+        with open(local_file_path, "rb") as wav_file:
+            transcript = client.audio.transcriptions.create(
+                model="whisper-1",
+                file=wav_file,
+                response_format="text"
+            )
+    except Exception as e:
+        return jsonify({'error': f"Transcription failed: {str(e)}"}), 500
 
-    with open(unique_filename, 'wb') as f:
-        f.write(audio_data.read())
+    # Remove local file after processing
+    if os.path.isfile(local_file_path):
+        os.remove(local_file_path)
 
-    
-    with open(unique_filename, "rb") as wav_file:
-        transcript = client.audio.transcriptions.create(
-            model="whisper-1",
-            file=wav_file,
-            response_format="text"
-        )
-    
     behav = BehaviouralQuestion.query.filter_by(id=question_id, candidate_id=candidate_id, user_id=current_user.id).first()
-    cwd=os.getcwd()
-    file_path=os.path.join(cwd,unique_filename)
-    if os.path.isfile(file_path):
-        os.remove(file_path)
     if not behav:
         return jsonify({'error': 'Behavioural question not found.'}), 404
-
+    print("transcripts",transcript)
+    print(s3_url)
     try:
         behav.audio_transcript = transcript
         behav.audio_file_path = s3_url  # Store the S3 URL
@@ -115,10 +117,11 @@ def blob_process_audio(current_user):
         evaluation_thread = threading.Thread(target=evaluate_audio, args=(current_app._get_current_object(), behav.id, transcript, behav.question_text))
         evaluation_thread.start()
 
-        return jsonify({'status': 'transcript saved successfully, evaluation started'}), 200
+        return jsonify({'status': 'Transcript saved successfully, evaluation started'}), 200
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+
 
 # function to evaluate the audio part
 def evaluate_audio(app,behav_id,transcript, question_text):
@@ -369,7 +372,8 @@ def fetch_user_responses(current_user):
             formatted_audio_transcriptions.append({
                 'question': audio_transcription.question_text,
                 'score': audio_transcription.behav_eval,
-                "audio_file_path" :audio_transcription.audio_file_path
+                "audio_file_path" :audio_transcription.audio_file_path,
+                "audio_transcript":audio_transcription.audio_transcription
             })
         # Get the latest unique evaluation responses
         latest_code_response = code_responses[0].code_eval if code_responses else None
@@ -377,6 +381,7 @@ def fetch_user_responses(current_user):
 
         formatted_data = {
             'candidate_name': candidate.name,
+            'candidate_image':candidate.image_file_path,
             'job_id': job_id,
             'code_response': latest_code_response,
             'tech_response': latest_tech_response,
@@ -387,5 +392,71 @@ def fetch_user_responses(current_user):
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+@response_evaluate_bp.route('/upload_screenshot', methods=['POST'])
+@token_required
+def upload_screenshot(current_user):
+    data = request.form
+    candidate_id = data.get('candidate_id')
+    image = request.files['image']
+    
+
+    if not candidate_id or not image:
+        return jsonify({'error': 'Missing required parameters.'}), 400
+
+    try:
+        candidate = Candidate.query.filter_by(id=candidate_id, user_id=current_user.id).first()
+        if not candidate:
+            return jsonify({'error': 'Candidate not found.'}), 404
+
+        candidate_name = candidate.name.replace(' ', '_')
+        unique_image_filename = f"{candidate_name}_{uuid.uuid4().hex}.png"
+        
+        
+        # Upload the image file to S3
+        s3_bucket = os.getenv('AWS_STORAGE_BUCKET_NAME')
+        s3_client.upload_fileobj(image, s3_bucket, unique_image_filename)
+
+        # Check if the file was uploaded successfully
+        if not check_s3_upload(s3_bucket, unique_image_filename):
+            return jsonify({'error': 'Image upload to S3 failed.'}), 500
+
+        # Generate the S3 file URL
+        s3_image_url = f"https://{s3_bucket}.s3.amazonaws.com/{unique_image_filename}"
+        print(s3_image_url)
+
+        try:
+            candidate.image_file_path = s3_image_url  # Store the image S3 URL in Candidate table
+            db.session.commit()
+            return jsonify({'status': 'Candidate photo uploaded and URL saved successfully', 'image_url': s3_image_url}), 200
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+
+    except NoResultFound:
+        return jsonify({'error': 'Candidate not found.'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+
+########################################################
+@response_evaluate_bp.route('/check_upload_file', methods=['POST'])
+def check_upload_file():
+    if 'file' not in request.files:
+        return jsonify({"error":"no file part"})
+    
+    file=request.files['file']
+    if file.filename == '':
+        return jsonify({"error":"no Selected file"})
+    try:
+        #upload image to s3 bucket
+        s3_client.upload_fileobj(file,s3_bucket,file.filename)
+
+        #get public URL of uploaded image
+        object_url=f"https://{s3_bucket}.s3.amazonaws.com/{file.filename}"
+        print(object_url)
+        return jsonify({"status":"successfull"})
+    except Exception as e:
+        return jsonify({"error":str(e)})
     
 
