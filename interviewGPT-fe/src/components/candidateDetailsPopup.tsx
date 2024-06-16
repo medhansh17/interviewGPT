@@ -43,13 +43,13 @@ export default function CandidateDetailsPopup({
       );
       setCandidateDetails(res.data.extracted_info_details);
       setShowDetails(true);
-    } catch (error) {
+    } catch (err: any) {
       toast.error({
         type: "background",
         duration: 3000,
         status: "Error",
         title: "Error fetching candidate details",
-        description: { error },
+        description: err.response?.data?.error || "An error occurred.",
         open: true,
       });
       setShowDetails(false);

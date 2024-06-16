@@ -8,9 +8,8 @@ interface DataItem {
 interface TableProps {
   setMainData: React.Dispatch<React.SetStateAction<any>>;
   setLoad: React.Dispatch<React.SetStateAction<any>>;
-  manual:boolean;
+  manual: boolean;
   doc: boolean;
-
 }
 
 const truncateText = (text: string, wordCount: number) => {
@@ -21,7 +20,12 @@ const truncateText = (text: string, wordCount: number) => {
   return words.slice(0, wordCount).join(" ") + "...";
 };
 
-const Table: React.FC<TableProps> = ({ setMainData,setLoad,doc,manual }: any) => {
+const Table: React.FC<TableProps> = ({
+  setMainData,
+  setLoad,
+  doc,
+  manual,
+}: any) => {
   const [selectedJd, setSelectedJd] = useState<DataItem | null>(null);
 
   const data: DataItem[] = [
@@ -49,12 +53,12 @@ const Table: React.FC<TableProps> = ({ setMainData,setLoad,doc,manual }: any) =>
   const handleLoadClick = () => {
     if (selectedJd) {
       setMainData(selectedJd);
-      setLoad(true)
+      setLoad(true);
     }
   };
-  useEffect(()=>{
-setSelectedJd(null)
-  },[doc,manual])
+  useEffect(() => {
+    setSelectedJd(null);
+  }, [doc, manual]);
 
   return (
     <section className="mx-[1rem] md:mx-[0rem] mt-[2rem]">
@@ -73,7 +77,7 @@ setSelectedJd(null)
                   <tr>
                     <th
                       scope="col"
-                      className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                      className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400 bg-[#0d6efd] "
                     >
                       <div className="flex items-center gap-x-3">
                         <span className="md:text-[1.2rem] text-[#fff]">
@@ -83,7 +87,7 @@ setSelectedJd(null)
                     </th>
                     <th
                       scope="col"
-                      className="px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                      className="px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400 bg-[#0d6efd] "
                     >
                       <button className="flex items-center gap-x-2">
                         <span className="md:text-[1.2rem] text-[#fff]">
@@ -99,7 +103,7 @@ setSelectedJd(null)
                     </th>
                     <th
                       scope="col"
-                      className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                      className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400 bg-[#0d6efd] "
                     >
                       <button className="flex items-center gap-x-2">
                         <span className="md:text-[1.2rem] text-[#fff]">
@@ -119,7 +123,7 @@ setSelectedJd(null)
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900 lg:h-[20rem]">
                   {data?.map((item) => (
-                    <tr key={item.id} className="odd:bg-white even:bg-slate-50" >
+                    <tr key={item.id} className="odd:bg-white even:bg-slate-50">
                       <td className="px-4  text-sm font-medium text-gray-700 ">
                         <div className="inline-flex items-center gap-x-3">
                           <input

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./online.css";
+import api from "@/components/customAxios/Axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCamera, faMicrophone } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
@@ -19,6 +20,7 @@ const IntroScreen: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const navigate = useNavigate();
+
   useEffect(() => {
     setIsPhone(isMobile()); // Set the state to indicate if user is on phone
     const checkMediaAccess = async () => {
@@ -64,6 +66,50 @@ const IntroScreen: React.FC = () => {
       localStorage.setItem("userSelfie", photoData);
       setUserPhoto(photoData);
       setHasTakenSelfie(true);
+
+      // Convert dataURL to File object
+      const blob = dataURLToBlob(photoData);
+      const file = new File([blob], "selfie.png", { type: "image/png" });
+
+      // Upload the selfie
+      const candidateId = "12345"; // Replace with the actual candidate ID
+      uploadSelfie(candidateId, file);
+    }
+  };
+
+  const dataURLToBlob = (dataURL: any) => {
+    const byteString = atob(dataURL.split(",")[1]);
+    const mimeString = dataURL.split(",")[0].split(":")[1].split(";")[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([ab], { type: mimeString });
+  };
+
+  const uploadSelfie = async (imageFile: any) => {
+    const formData = new FormData();
+    formData.append(
+      "candidate_id",
+      JSON.parse(sessionStorage.getItem("question") ?? "").candidate_id
+    );
+    formData.append("image", imageFile);
+
+    try {
+      const response = await api.post("/upload_screenshot", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === 200) {
+        console.log("Image uploaded successfully:", response.data.image_url);
+      } else {
+        console.error("Image upload failed:", response.data.error);
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
     }
   };
 
@@ -349,7 +395,6 @@ const IntroScreen: React.FC = () => {
                 ? "bg-gray-300"
                 : "bg-green-500 hover:bg-green-600"
             } text-white py-2 px-4 rounded mt-4 w-full`}
-            // className={`w-[18%] ml-auto block ${"bg-green-500 hover:bg-green-600"} text-white py-2 px-4 rounded mt-4 mx-auto`}
           >
             Proceed to test
           </button>
