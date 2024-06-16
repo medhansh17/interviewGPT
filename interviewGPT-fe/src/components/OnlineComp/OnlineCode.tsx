@@ -70,10 +70,7 @@ const IntroScreen: React.FC = () => {
       // Convert dataURL to File object
       const blob = dataURLToBlob(photoData);
       const file = new File([blob], "selfie.png", { type: "image/png" });
-
-      // Upload the selfie
-      const candidateId = "12345"; // Replace with the actual candidate ID
-      uploadSelfie(candidateId, file);
+      uploadSelfie(file);
     }
   };
 
