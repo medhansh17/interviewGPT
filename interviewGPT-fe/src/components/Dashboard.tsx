@@ -62,13 +62,13 @@ const Dashboard = () => {
         dispatch(deleteJob(item.id));
         setData(data.filter((job) => job.id !== item.id));
       }
-    } catch (error) {
+    } catch (err: any) {
       toast.error({
         type: "background",
         duration: 3000,
         status: "Error",
         title: "Error deleting job",
-        description: { error },
+        description: err.response?.data?.error || "An error occurred.",
         open: true,
       });
     }
@@ -188,7 +188,7 @@ const Dashboard = () => {
         <Header />
       </p>
       <div
-        className="max-w-[1400px] min-w-fit mx-auto mt-[-2rem] sm:p-6 p-2 mt-[2rem]"
+        className="max-w-[1400px] min-w-fit mx-auto sm:p-6 p-2 mt-[2rem]"
         style={{ paddingTop: 0 }}
       >
         <div className="mb-4">
@@ -396,34 +396,34 @@ const Dashboard = () => {
           )}
         </div>
         {/* <div className="flex justify-center mt-4">
-      <button
-        onClick={() => handlePageClick(currentPage - 1)}
-        disabled={currentPage === 1}
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-l focus:outline-none disabled:opacity-50"
-      >
-        Previous
-      </button>
-      {Array.from({ length: totalPages }, (_, index) => (
-        <button
-          key={index}
-          onClick={() => handlePageClick(index + 1)}
-          className={`mx-1 px-3 py-2 rounded focus:outline-none ${
-            currentPage === index + 1
-              ? "bg-blue-700 text-white"
-              : "bg-gray-300 text-gray-700 hover:bg-gray-400"
-          }`}
-        >
-          {index + 1}
-        </button>
-      ))}
-      <button
-        onClick={() => handlePageClick(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-r focus:outline-none disabled:opacity-50"
-      >
-        Next
-      </button>
-    </div> */}
+          <button
+            onClick={() => handlePageClick(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-l focus:outline-none disabled:opacity-50"
+          >
+            Previous
+          </button>
+          {Array.from({ length: totalPages }, (_, index) => (
+            <button
+              key={index}
+              onClick={() => handlePageClick(index + 1)}
+              className={`mx-1 px-3 py-2 rounded focus:outline-none ${
+                currentPage === index + 1
+                  ? "bg-blue-700 text-white"
+                  : "bg-gray-300 text-gray-700 hover:bg-gray-400"
+              }`}
+            >
+              {index + 1}
+            </button>
+          ))}
+          <button
+            onClick={() => handlePageClick(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-r focus:outline-none disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div> */}
       </div>
     </div>
   );

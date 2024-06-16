@@ -21,6 +21,10 @@ const Login: React.FC = () => {
         localStorage.clear();
         localStorage.setItem("authToken", res.data.token);
         localStorage.setItem("user", JSON.stringify(res.data.user_id));
+        localStorage.setItem(
+          "name",
+          res.data.first_name + " " + res.data.last_name
+        );
         if (res.data.role === "bluetick-admin") {
           localStorage.setItem("role", "bluetick-admin");
         }

@@ -58,7 +58,7 @@ const ConfirmButton: React.FC<ConfirmButtonProps> = ({
       onClick={showConfirmDialog}
       icon={icon}
       label={label}
-      className="cursor-pointer resp-btn text-red-600"
+      className="cursor-pointer resp-btn bg-red-200 text-red-600"
     />
   );
 };

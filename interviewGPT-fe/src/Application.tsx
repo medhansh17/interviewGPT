@@ -185,7 +185,9 @@ function Application() {
 
   return (
     <main id="main-content">
-      <Header />
+      <div className="sm:w-[93%] w-full mx-auto">
+        <Header />
+      </div>
       <div
         onClick={() => navigate("/dashboard")}
         className="absolute right-[5rem] w-[10rem] text-center bg-gray-200 px-4 py-2 rounded-md shadow-md hover:bg-gray-300 cursor-pointer  mb-[2rem]  font-bold "
@@ -212,7 +214,7 @@ function Application() {
                 </button>
                 <button
                   onClick={manualHandler}
-                  className=" ml-[2rem] mt-[1rem]  py-2 w-[8rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80"
+                  className="  mt-[1rem]  py-2 w-[8rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80"
                 >
                   Type Manually
                 </button>

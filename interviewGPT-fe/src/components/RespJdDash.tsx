@@ -104,13 +104,13 @@ const RespJdDash = () => {
           job_id: response.data.job_details.job_id,
         });
         localStorage.setItem("job_id", response.data.job_details.job_id);
-      } catch (error: any) {
+      } catch (err: any) {
         toast.error({
           type: "background",
           duration: 3000,
           status: "Error",
           title: "Error fetching job details",
-          description: { error },
+          description: err?.response?.data?.error || "An error occurred.",
           open: true,
         });
       }
@@ -127,7 +127,7 @@ const RespJdDash = () => {
           duration: 3000,
           status: "Error",
           title: "Error fetching candidate details",
-          description: { err },
+          description: err.response?.data?.error || "An error occurred.",
           open: true,
         });
       }
@@ -159,7 +159,7 @@ const RespJdDash = () => {
           duration: 3000,
           status: "Error",
           title: "Error fetching candidate details",
-          description: { err },
+          description: err.response?.data?.error || "An error occurred.",
           open: true,
         });
       }
@@ -200,7 +200,7 @@ const RespJdDash = () => {
         handleRefresh();
         setTimeout(() => {
           handleRefresh();
-        }, 5000);
+        }, 7000);
         toast.success({
           type: "background",
           duration: 3000,
@@ -240,12 +240,12 @@ const RespJdDash = () => {
         });
       }
       dispatch(deleteCandidateByName(item.candidate_name));
-    } catch (error) {
+    } catch (error: any) {
       toast.error({
         type: "background",
         duration: 3000,
         status: "Error Deleting Candidate",
-        title: { error },
+        title: error?.resp?.error || "",
         description: "",
         open: true,
       });
@@ -542,8 +542,18 @@ const RespJdDash = () => {
                           ))}
                       </td>
 
-                      <td className="p-2 text-center">
-                        {item.experience_match == 1 ? "Match" : "Mismatch"}
+                      <td className="text-center">
+                        <span
+                          className={`text-green-700 py-1 px-3 rounded-full text-md ${
+                            item.experience_match === 1
+                              ? "bg-green-200"
+                              : item.MATCH_STATUS === 0
+                              ? "bg-yellow-200"
+                              : "bg-red-200"
+                          }`}
+                        >
+                          {item.experience_match == 1 ? "Match" : "Mismatch"}
+                        </span>
                       </td>
                       <td className=" text-center">
                         <p>{item.JD_MATCH}</p>
@@ -581,7 +591,7 @@ const RespJdDash = () => {
 
                           {gen == "" && pop == false && item.status == null && (
                             <button
-                              className="resp-btn"
+                              className="resp-btn bg-green-200 text-green-900"
                               onClick={() => handleRightArrowClick(item)}
                             >
                               Generate
@@ -597,7 +607,7 @@ const RespJdDash = () => {
                             // item.assessment_status == 1 &&
                             item.status == "assessment_generated" && (
                               <button
-                                className="resp-btn"
+                                className="resp-btn bg-green-200 text-green-900"
                                 onClick={() => popHandle(item)}
                               >
                                 Generated
@@ -606,7 +616,7 @@ const RespJdDash = () => {
                           }
                           {item.assessment_status == 1 && (
                             <button
-                              className="resp-btn"
+                              className="resp-btn bg-green-200 text-green-900"
                               onClick={() => showResult(item.resume_id)}
                             >
                               Result

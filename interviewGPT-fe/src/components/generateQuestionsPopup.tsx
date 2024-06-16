@@ -43,13 +43,13 @@ export default function GenerateQuestionsPopup({
         no_code_question: numCoding,
       });
       if (resp.statusText === "OK") window.location.reload();
-    } catch (err) {
+    } catch (err: any) {
       toast.error({
         type: "background",
         duration: 3000,
         status: "Error",
         title: "Error fetching candidate details",
-        description: { err },
+        description: err?.message,
         open: true,
       });
     }
