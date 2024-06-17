@@ -373,7 +373,7 @@ def fetch_user_responses(current_user):
                 'question': audio_transcription.question_text,
                 'score': audio_transcription.behav_eval,
                 "audio_file_path" :audio_transcription.audio_file_path,
-                "audio_transcript":audio_transcription.audio_transcription
+                "audio_transcript":audio_transcription.audio_transcript
             })
         # Get the latest unique evaluation responses
         latest_code_response = code_responses[0].code_eval if code_responses else None
