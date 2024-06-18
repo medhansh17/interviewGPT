@@ -1,6 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 const Header = () => {
+  const { pathname } = useLocation();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -23,11 +25,12 @@ const Header = () => {
         </div>
       </Link>
 
-      <li className="group max-lg:border-b mt-[-1rem] w-[200px] relative list-none">
-        <a
-          href="#"
-          className="hover:text-[#007bff] hover:fill-[#007bff] text-gray-600 font-semibold text-[16px] block"
-        >
+      <li
+        className={`group max-lg:border-b mt-[-1rem] w-[200px] relative list-none ${
+          pathname === "/login" ? "hidden" : "block"
+        }`}
+      >
+        <div className="hover:text-[#007bff] hover:fill-[#007bff] text-gray-600 font-semibold text-[16px] block">
           {localStorage.getItem("name") || "User"}
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -42,7 +45,7 @@ const Header = () => {
               data-original="#000000"
             />
           </svg>
-        </a>
+        </div>
         <ul className="absolute top-6 max-lg:top-8 left-[-50px] z-50 block space-y-2 shadow-lg bg-white max-h-0 overflow-hidden min-w-[250px] group-hover:opacity-100 group-hover:max-h-[700px] px-6 group-hover:pb-4 transition-all duration-500">
           <li className="border-b py-3">
             <Link

@@ -29,6 +29,7 @@ const Login: React.FC = () => {
           localStorage.setItem("role", "bluetick-admin");
         }
         navigate("/app");
+        window.location.reload();
       } else
         toast.error({
           title: "Error",
@@ -37,10 +38,10 @@ const Login: React.FC = () => {
           open: true,
           status: "error",
         });
-    } catch (err) {
+    } catch (err: any) {
       toast.error({
         title: "Error",
-        description: "Invalid Credentials!",
+        description: err.response.data.error,
         duration: 5000,
         open: true,
         status: "error",
