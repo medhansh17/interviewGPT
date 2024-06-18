@@ -352,8 +352,8 @@ def fetch_user_responses(current_user):
             return jsonify({'error': 'Candidate not found.'}), 404
 
         resume_score_entry = ResumeScore.query.filter_by(resume_id=resume_id, user_id=current_user.id).first()
-        if not resume_score_entry or resume_score_entry.assessment_status != 1:
-            return jsonify({'error': 'Assessment not completed or not found.'}), 400
+        if not resume_score_entry :
+            return jsonify({'error': 'Resumescore/Assessment not completed or not found.'}), 400
         ## Fetch the latest code responses
         code_responses = CodingQuestion.query.filter_by(candidate_id=candidate.id, user_id=current_user.id).order_by(CodingQuestion.updated_at.desc()).all()
         if not code_responses:
