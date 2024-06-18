@@ -1,4 +1,5 @@
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
+import PrivateRoutes from "./components/protectedRoutes";
 import Home from "./Home";
 import Application from "./Application";
 import MainPage from "./MainPage";
@@ -25,12 +26,18 @@ function App() {
       <Router>
         <Toasts>
           <Routes>
+            <Route element={<PrivateRoutes />}>
+              <Route path="/app" element={<Application />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route
+                path="/respective-dashboard/:id"
+                element={<RespJdDash />}
+              />
+            </Route>
             <Route path="/" element={<Home />} />
-            <Route path="/app" element={<Application />} />
             <Route path="/app-submit" element={<MainPage />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/forget-password" element={<ForgetPass />} />
             <Route path="/test" element={<Sample />} />
             <Route path="/mcq" element={<McqComp />} />
@@ -39,7 +46,6 @@ function App() {
             <Route path="/success" element={<Success />} />
             <Route path="/mcq-main" element={<Mcq />} />
             <Route path="/code" element={<Code />} />
-            <Route path="/respective-dashboard/:id" element={<RespJdDash />} />
             <Route path="/register-admin" element={<RegisterAdmin />} />
             <Route path="/assess-main" element={<MainAssessment />}>
               <Route path="audio-ques" element={<Sample />} />
