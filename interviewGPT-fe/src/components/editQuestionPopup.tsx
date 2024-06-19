@@ -4,20 +4,23 @@ import { useState } from "react";
 import api from "@/components/customAxios/Axios";
 import { useToast } from "./toast";
 import { EditQuestionData } from "./generatedQuesPopup";
+import Loader from "./Loader";
 
-export default function EditQuestionPopup({
+const EditQuestionPopup = ({
   onClose,
   data,
 }: {
   onClose: () => void;
   data: EditQuestionData | undefined;
-}) {
+}) => {
   const toast = useToast();
   const [question, setQuestion] = useState(data?.question || "");
   const [sampleInput, setSampleInput] = useState(data?.sample_input || "");
   const [sampleOutput, setSampleOutput] = useState(data?.sample_output || "");
   const [options, setOptions] = useState(data?.options || {});
+  const [answer, setAnswer] = useState(data?.answer || ""); // State for answer
   const [updating, setUpdating] = useState(false);
+  console.log(data);
 
   const handleUpdate = () => {
     if (!data) return;
@@ -29,12 +32,18 @@ export default function EditQuestionPopup({
       question_id: data.question_id,
       question_type: data.question_type,
       question_data: {
-        question: question,
+        ...(data.question_type !== "behavioural" && { question: question }),
         ...(data.question_type === "coding" && {
           sample_input: sampleInput,
           sample_output: sampleOutput,
         }),
-        ...(data.question_type === "technical" && { options: options }),
+        ...(data.question_type === "technical" && {
+          options: options,
+          answer: answer,
+        }),
+        ...(data.question_type === "behavioural" && {
+          b_question_text: question,
+        }),
       },
     };
 
@@ -76,8 +85,8 @@ export default function EditQuestionPopup({
 
   const renderOptions = () => {
     return Object.keys(options).map((key) => (
-      <div key={key} className="mb-2">
-        <label className="block mb-1">{`Option ${key}`}</label>
+      <div key={key} className="mb-2 flex items-center gap-2">
+        <label className="block font-semibold mb-1">{`${key}`}</label>
         <input
           type="text"
           value={options[key]}
@@ -102,7 +111,9 @@ export default function EditQuestionPopup({
         </h2>
         <div className="mb-4">
           <label htmlFor="question" className="block mb-2">
-            Enter Question:
+            {data?.question_type === "behavioural"
+              ? "Enter Behavioral Question:"
+              : "Enter Question:"}
           </label>
           <textarea
             id="question"
@@ -113,10 +124,24 @@ export default function EditQuestionPopup({
           ></textarea>
         </div>
         {data?.question_type === "technical" && (
-          <div className="mb-4">
-            <label className="block mb-2">Options:</label>
-            {renderOptions()}
-          </div>
+          <>
+            <div className="mb-4">
+              <label className="block mb-2">Options:</label>
+              {renderOptions()}
+            </div>
+            <div className="mb-4">
+              <label htmlFor="answer" className="block mb-2">
+                Answer:
+              </label>
+              <input
+                id="answer"
+                type="text"
+                value={answer}
+                onChange={(e) => setAnswer(e.target.value)}
+                className="border border-gray-300 rounded px-2 py-1 w-full"
+              />
+            </div>
+          </>
         )}
         {data?.question_type === "coding" && (
           <>
@@ -155,7 +180,10 @@ export default function EditQuestionPopup({
             {updating ? "Updating..." : "Update"}
           </button>
         </div>
+        {updating && <Loader />}
       </div>
     </div>
   );
-}
+};
+
+export default EditQuestionPopup;

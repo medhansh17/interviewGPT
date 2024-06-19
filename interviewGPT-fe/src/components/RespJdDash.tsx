@@ -591,7 +591,7 @@ const RespJdDash = () => {
 
                           {gen == "" && pop == false && item.status == null && (
                             <button
-                              className="resp-btn bg-green-200 text-green-900"
+                              className="resp-btn text-black"
                               onClick={() => handleRightArrowClick(item)}
                             >
                               Generate
