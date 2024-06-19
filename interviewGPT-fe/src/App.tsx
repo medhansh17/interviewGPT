@@ -41,7 +41,7 @@ function App() {
             <Route path="/forget-password" element={<ForgetPass />} />
             <Route path="/test" element={<Sample />} />
             <Route path="/mcq" element={<McqComp />} />
-            <Route path="/online-assess" element={<IntroScreen />} />
+            <Route path="/online-assess/:token" element={<IntroScreen />} />
             <Route path="/instruction" element={<InstructionPage />} />
             <Route path="/success" element={<Success />} />
             <Route path="/mcq-main" element={<Mcq />} />

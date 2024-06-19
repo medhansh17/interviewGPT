@@ -6,12 +6,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import UpdateQuestionPopup from "./updateQuestionPopup";
 import { deleteQuestion } from "@/api/deleteCandidateQuestion";
 import { useToast } from "./toast";
 import EditQuestionPopup from "./editQuestionPopup";
-// import { approveCandidate } from "@/api/approveCandidate";
+import { approveCandidate } from "@/api/approveCandidate";
 
 export interface UpdateQuestionData {
   resume_id: string;
@@ -59,14 +59,34 @@ export default function GeneratedQuesPopup({
   const [editStatus, setEditStatus] = useState(false);
   const [data, setData] = useState<UpdateQuestionData | undefined>();
   const [editData, setEditData] = useState<EditQuestionData | undefined>();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const handleApproval = async () => {
-    // const item = sessionStorage.getItem("question");
-    // const candidate_id = item ? JSON.parse(item).candidate_id : "";
-    // const resp = await approveCandidate(candidate_id);
-    // console.log(resp);
-    navigate(`/online-assess/`);
+    const item = sessionStorage.getItem("question");
+    const candidate_id = item ? JSON.parse(item).candidate_id : "";
+    const resp = await approveCandidate(candidate_id);
+    console.log(resp);
+
+    if (resp.message === "Assessment link has been sent to the candidate.") {
+      toast.success({
+        type: "background",
+        duration: 3000,
+        status: "Error",
+        title: "Success",
+        description: "Email sent successfully",
+        open: true,
+      });
+      onClose();
+    } else {
+      toast.error({
+        type: "background",
+        duration: 3000,
+        status: "Error",
+        title: "Error",
+        description: resp.error,
+        open: true,
+      });
+    }
   };
 
   return (

@@ -3,13 +3,16 @@ import "./online.css";
 import api from "@/components/customAxios/Axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCamera, faMicrophone } from "@fortawesome/free-solid-svg-icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import getAssessmentSheet from "@/api/assessmentSheet";
+import { useToast } from "../toast";
 
 export function isMobile() {
   return /Mobi|Android/i.test(navigator.userAgent);
 }
 
 const IntroScreen: React.FC = () => {
+  const toast = useToast();
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
   const [isMicrophoneAccessible, setIsMicrophoneAccessible] =
     useState<boolean>(false);
@@ -20,9 +23,11 @@ const IntroScreen: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const navigate = useNavigate();
+  const { token } = useParams<{ token: string }>();
 
   useEffect(() => {
-    setIsPhone(isMobile()); // Set the state to indicate if user is on phone
+    setIsPhone(isMobile());
+
     const checkMediaAccess = async () => {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         setIsBrowserAccessible(false);
@@ -54,6 +59,28 @@ const IntroScreen: React.FC = () => {
     checkMediaAccess();
   }, []);
 
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      if (token) {
+        try {
+          const resp = await getAssessmentSheet(token);
+          console.log(resp);
+        } catch (error: any) {
+          toast.error({
+            type: "background",
+            duration: 3000,
+            status: "Error",
+            title: "Error",
+            description: error.data.error,
+            open: true,
+          });
+        }
+      }
+    };
+
+    fetchQuestions();
+  }, [token]);
+
   const takeSelfie = () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
@@ -66,8 +93,6 @@ const IntroScreen: React.FC = () => {
       localStorage.setItem("userSelfie", photoData);
       setUserPhoto(photoData);
       setHasTakenSelfie(true);
-
-      // Convert dataURL to File object
       const blob = dataURLToBlob(photoData);
       const file = new File([blob], "selfie.png", { type: "image/png" });
       uploadSelfie(file);
@@ -122,14 +147,14 @@ const IntroScreen: React.FC = () => {
       </h1>
       <div className="w-[90%] mx-auto bg-white p-6 rounded-lg shadow">
         <h2
-          className="text-lg ml-[5rem]  font-semibold mb-4"
+          className="text-lg ml-[5rem] font-semibold mb-4"
           style={{ fontSize: "1.3rem" }}
         >
           System Check & Verification Photo
         </h2>
-        <div className="flex items-center justify-center ">
-          <div className=" flex-1">
-            <div className="flex items-center mx-auto mb-8  int-page">
+        <div className="flex items-center justify-center">
+          <div className="flex-1">
+            <div className="flex items-center mx-auto mb-8 int-page">
               <div className="flex">
                 <div>
                   <FontAwesomeIcon
@@ -225,7 +250,7 @@ const IntroScreen: React.FC = () => {
                 )}
               </div>
             </div>
-            <div className="flex items-center mx-auto mb-8  int-page">
+            <div className="flex items-center mx-auto mb-8 int-page">
               <div className="flex">
                 <div>
                   <FontAwesomeIcon
@@ -273,7 +298,7 @@ const IntroScreen: React.FC = () => {
                 )}
               </div>
             </div>
-            <div className="flex items-center mx-auto mb-8  int-page">
+            <div className="flex items-center mx-auto mb-8 int-page">
               <div className="flex">
                 <div>
                   <FontAwesomeIcon
@@ -282,31 +307,17 @@ const IntroScreen: React.FC = () => {
                   />
                 </div>
                 <div className="ml-3 text-sm text-zinc-700">
-                  {isPhone == false ? "Desktop" : "Switch to Desktop"}
+                  {isPhone ? "Switch to Desktop" : "Desktop"}
                 </div>
               </div>
               <div
                 className={`flex-shrink-0 w-6 h-6 rounded-full p-1 ${
-                  isPhone == false
-                    ? "bg-green-100 text-green-500"
-                    : "bg-red-100 text-red-500"
+                  isPhone
+                    ? "bg-red-100 text-red-500"
+                    : "bg-green-100 text-green-500"
                 }`}
               >
-                {isPhone == false ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                ) : (
+                {isPhone ? (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -320,13 +331,26 @@ const IntroScreen: React.FC = () => {
                       d="M6 18L18 6M6 6l12 12"
                     />
                   </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
                 )}
               </div>
             </div>
             <div className="text-xs text-red-500 ml-2">
-              {isMicrophoneAccessible
-                ? ""
-                : "Please speak louder or adjust microphone level"}
+              {!isMicrophoneAccessible &&
+                "Please speak louder or adjust microphone level"}
             </div>
           </div>
           <div className="mt-4 mb-2 flex-1">
@@ -357,7 +381,7 @@ const IntroScreen: React.FC = () => {
               <button
                 style={{ width: "30%" }}
                 onClick={retakeSelfie}
-                className="block  mx-auto bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded mt-4 w-full"
+                className="block mx-auto bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded mt-4 w-full"
               >
                 Retake Selfie
               </button>
@@ -365,7 +389,7 @@ const IntroScreen: React.FC = () => {
               <button
                 style={{ width: "30%" }}
                 onClick={takeSelfie}
-                className="block  mx-auto bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded mt-4 w-full"
+                className="block mx-auto bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded mt-4 w-full"
               >
                 Click a Selfie
               </button>
