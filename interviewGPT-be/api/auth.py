@@ -13,7 +13,7 @@ EMAIL_PASS = os.getenv("EMAIL_PASS")
 EMAIL_USER = os.getenv("EMAIL_USER")
 EMAIL_VERIFY_URI = os.getenv("EMAIL_VERIFY_URI")
 FRONTEND_URL = os.getenv("FRONTEND_URL")
-TA_USER=os.getenv("TA_USER")
+TA_USER = os.getenv("TA_USER")
 
 s = URLSafeTimedSerializer(SECRET_KEY)
 
@@ -26,6 +26,7 @@ def login_is_required(function):
         else:
             return function(*args, **kwargs)
     return wrapper
+
 
 def token_required(f):
     @wraps(f)
@@ -47,11 +48,12 @@ def token_required(f):
             return jsonify({'message': 'Token is invalid !!'}), 401
         except Exception as e:
             return jsonify({'message': 'Token is invalid !!', 'error': str(e)}), 401
-        
+
         # Pass the current_user to the wrapped function
         return f(current_user, *args, **kwargs)
-    
+
     return decorated
+
 
 def generate_email_template(title, message, link, button_text):
     html_head = f"""
@@ -132,6 +134,7 @@ def generate_email_template(title, message, link, button_text):
     """
     return html_head + html_body
 
+
 def create_reset_password_body(link):
     return generate_email_template(
         "Reset Password",
@@ -140,6 +143,7 @@ def create_reset_password_body(link):
         "Reset Password"
     )
 
+
 def create_verification_email_body(link):
     return generate_email_template(
         "Email Verification",
@@ -147,6 +151,7 @@ def create_verification_email_body(link):
         link,
         "Verify Email"
     )
+
 
 def password_reset_form_html(token):
     html_head = """
@@ -272,6 +277,7 @@ def password_reset_form_html(token):
 
     return html_head + html_body
 
+
 def generate_success_html_page(title, heading, message, link, button_text):
     html_head = f"""
     <!DOCTYPE html>
@@ -346,6 +352,7 @@ def generate_success_html_page(title, heading, message, link, button_text):
     """
     return html_head + html_body
 
+
 def password_reset_success_html(link):
     return generate_success_html_page(
         "Password Reset Successful", "Password Reset Successful",
@@ -353,12 +360,14 @@ def password_reset_success_html(link):
         link, "Log In"
     )
 
+
 def email_verified_success_html(link):
     return generate_success_html_page(
         "Email Confirmed", "Email Successfully Verified",
         "Thank you for verifying your email. You're now ready to start using InterviewGPT.",
         link, "Log In and Get Started"
     )
+
 
 def create_assessment_email_body(candidate_name, link):
     return f"""
@@ -369,8 +378,8 @@ def create_assessment_email_body(candidate_name, link):
 
         <h4>Assessment Details:</h4>
         <ul>
-            <li><strong>Assessment Type:</strong> [Specify the type of assessment, e.g., technical, behavioral, coding]</li>
-            <li><strong>Duration:</strong> [Specify the duration of the assessment, e.g., 1 hour, 2 hours]</li>
+            <li><strong>Assessment Type:</strong> Behavioural & Technical Assessment</li>
+            <li><strong>Duration:</strong> 30 mins</li>
             <li><strong>Link:</strong> <a href="{link}">Take Your Test</a></li>
         </ul>
 
@@ -380,7 +389,7 @@ def create_assessment_email_body(candidate_name, link):
         <ul>
             <li><strong>Link Expiry:</strong> The assessment link will expire in 2 hours from the time of this email. Please ensure to complete the assessment within this timeframe.</li>
             <li><strong>Preparation:</strong> Ensure you have a stable internet connection and a quiet environment to complete the assessment without interruptions.</li>
-            <li><strong>Support:</strong> If you encounter any issues or have any questions, please do not hesitate to reach out to us at [support email/phone number].</li>
+            <li><strong>Support:</strong> If you encounter any issues or have any questions, please do not hesitate to reach out to us at recruitment@bluetickconsultants.com.</li>
         </ul>
 
         <h4>What to Expect:</h4>
@@ -394,7 +403,7 @@ def create_assessment_email_body(candidate_name, link):
 
         <p>Thank you for your interest in joining Bluetick Consultants. We look forward to your participation and wish you the best of luck.</p>
 
-        <p>Best regards,<br>BLUETICK CONSULTANTS</p>
+        <p>Best regards,<br>Talent Team,<br>Bluetick Consultants</p>
     </body>
     </html>
     """
