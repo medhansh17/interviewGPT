@@ -9,43 +9,52 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setLoading(true);
+
     try {
       const res = await api.post("/login", {
-        email: email,
-        password: password,
+        email,
+        password,
       });
-      if (res.statusText == "OK") {
+
+      if (res.status === 200) {
+        const { token, user_id, first_name, last_name, role } = res.data;
+
         localStorage.clear();
-        localStorage.setItem("authToken", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user_id));
-        localStorage.setItem(
-          "name",
-          res.data.first_name + " " + res.data.last_name
-        );
-        if (res.data.role === "bluetick-admin") {
+        localStorage.setItem("authToken", token);
+        localStorage.setItem("user", JSON.stringify(user_id));
+        localStorage.setItem("name", `${first_name} ${last_name}`);
+        if (role === "bluetick-admin") {
           localStorage.setItem("role", "bluetick-admin");
         }
+
         navigate("/app");
         window.location.reload();
-      } else
+      } else {
         toast.error({
           title: "Error",
-          description: res.data.message,
+          description: res.data.message || "Login failed",
           duration: 5000,
           open: true,
           status: "error",
         });
+      }
     } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.error || "An unexpected error occurred";
       toast.error({
         title: "Error",
-        description: err.response.data.error,
+        description: errorMessage,
         duration: 5000,
         open: true,
         status: "error",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,11 +66,10 @@ const Login: React.FC = () => {
       <p className="sm:w-[93%] w-full mx-auto">
         <Header />
       </p>
-
       <div className="flex items-center justify-center h-screen w-[500px] bg-zinc-100 dark:bg-zinc-800">
         <form
           onSubmit={handleSubmit}
-          className="bg-white dark:bg-zinc-700 rounded-lg shadow p-8 m-4  w-full"
+          className="bg-white dark:bg-zinc-700 rounded-lg shadow p-8 m-4 w-full"
         >
           <h2 className="text-2xl font-bold mb-8 text-center text-zinc-800 dark:text-white">
             Login
@@ -76,9 +84,11 @@ const Login: React.FC = () => {
             <input
               type="email"
               id="email"
+              value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-zinc-700 dark:text-zinc-300 leading-tight focus:outline-none focus:shadow-outline"
               placeholder="Email"
+              required
             />
           </div>
           <div className="mb-6">
@@ -91,15 +101,17 @@ const Login: React.FC = () => {
             <input
               type="password"
               id="password"
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-zinc-700 dark:text-zinc-300 leading-tight focus:outline-none focus:shadow-outline"
               placeholder="Password"
+              required
             />
           </div>
           <div className="mb-6 flex items-center justify-center">
             <Link
               to="/forget-password"
-              className="  font-bold text-sm text-blue-500 hover:text-blue-800 dark:hover:text-blue-300 float-right mt-2"
+              className="font-bold text-sm text-blue-500 hover:text-blue-800 dark:hover:text-blue-300 float-right mt-2"
             >
               Forgot password?
             </Link>
@@ -108,8 +120,9 @@ const Login: React.FC = () => {
             <button
               className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               type="submit"
+              disabled={loading}
             >
-              Login
+              {loading ? "Logging in..." : "Login"}
             </button>
           </div>
           <div className="text-center">
