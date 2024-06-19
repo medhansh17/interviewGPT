@@ -131,7 +131,7 @@ function Application() {
 
     try {
       const response = await api.post("/file_upload_jd", newResume);
-      if (response.statusText === "OK") {
+      if (response.status === 200) {
         setMainTextArea(null);
         setMainTextArea2(null);
         setMainData(null);

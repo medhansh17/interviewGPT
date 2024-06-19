@@ -196,7 +196,7 @@ const RespJdDash = () => {
 
     try {
       const response = await api.post("/upload_resume_to_job", newResume);
-      if (response.statusText === "OK") {
+      if (response.status === 200) {
         handleRefresh();
         setTimeout(() => {
           handleRefresh();
