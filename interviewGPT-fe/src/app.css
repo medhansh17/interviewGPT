@@ -216,3 +216,15 @@
   .hover-style{
     margin-bottom:1rem !important ;
   }
+
+
+iframe {
+    width: 700px;
+    height: 393px;
+    border: 0;
+    box-shadow: 0px 0px 20px #ccc;
+}
+
+@media(max-width: 744px){
+  iframe { max-width: 100%; height: auto; }
+}
