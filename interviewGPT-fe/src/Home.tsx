@@ -3,7 +3,7 @@ import "./app.css";
 import { Link } from "react-router-dom";
 import { Features } from "./components/Home/Features";
 import { Benefits } from "./components/Home/Benefits";
-import Image from "./assets/landing.gif";
+// import Image from "./assets/landing.gif";
 import Pricing from "./components/Pricing";
 
 const Home = () => {
