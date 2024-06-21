@@ -47,7 +47,7 @@ def token_required(f):
         except jwt.InvalidTokenError:
             return jsonify({'message': 'Token is invalid !!'}), 401
         except Exception as e:
-            return jsonify({'message': 'Token is invalid !!', 'error': str(e)}), 401
+            return jsonify({'message': f'Token is invalid !! {str(e)}', 'error': str(e)}), 401
 
         # Pass the current_user to the wrapped function
         return f(current_user, *args, **kwargs)
