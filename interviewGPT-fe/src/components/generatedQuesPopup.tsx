@@ -12,6 +12,7 @@ import { deleteQuestion } from "@/api/deleteCandidateQuestion";
 import { useToast } from "./toast";
 import EditQuestionPopup from "./editQuestionPopup";
 import { approveCandidate } from "@/api/approveCandidate";
+import { useLoader } from "@/context/loaderContext";
 
 export interface UpdateQuestionData {
   resume_id: string;
@@ -55,6 +56,7 @@ export default function GeneratedQuesPopup({
   resume_id: string;
   onClose: () => void;
 }) {
+  const { setLoading } = useLoader();
   const toast = useToast();
   const [updateStatus, setUpdateStatus] = useState(false);
   const [editStatus, setEditStatus] = useState(false);
@@ -63,12 +65,12 @@ export default function GeneratedQuesPopup({
   // const navigate = useNavigate();
 
   const handleApproval = async () => {
+    setLoading(true);
     const item = sessionStorage.getItem("question");
     const candidate_id = item ? JSON.parse(item).candidate_id : "";
     const resp = await approveCandidate(candidate_id);
-    console.log(resp);
-
     if (resp.message === "Assessment link has been sent to the candidate.") {
+      setLoading(false);
       toast.success({
         type: "background",
         duration: 3000,
@@ -79,6 +81,7 @@ export default function GeneratedQuesPopup({
       });
       onClose();
     } else {
+      setLoading(false);
       toast.error({
         type: "background",
         duration: 3000,

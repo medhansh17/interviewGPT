@@ -15,6 +15,7 @@ import ConfirmButton from "./confirmationPopup";
 import { ConfirmDialog } from "primereact/confirmdialog";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import { useLoader } from "@/context/loaderContext";
 
 interface MyObjectType {
   jd: string | null;
@@ -50,6 +51,7 @@ interface TechnicalQuestion {
   answer: string;
 }
 const RespJdDash = () => {
+  const { setLoading } = useLoader();
   const toast = useToast();
   const { state, dispatch } = useContext(UserContext)!;
   const [jobDetails, setJobDetails] = useState<MyObjectType | null>(null);
@@ -95,6 +97,7 @@ const RespJdDash = () => {
   };
 
   useEffect(() => {
+    setLoading(true);
     const getJobDetails = async () => {
       try {
         const response = await api.get(`/jobs/${id}`);
@@ -105,6 +108,7 @@ const RespJdDash = () => {
         });
         localStorage.setItem("job_id", response.data.job_details.job_id);
       } catch (err: any) {
+        setLoading(false);
         toast.error({
           type: "background",
           duration: 3000,
@@ -113,15 +117,19 @@ const RespJdDash = () => {
           description: err?.response?.data?.error || "An error occurred.",
           open: true,
         });
+      } finally {
+        setLoading(false);
       }
     };
     getJobDetails();
     const getCandList = async () => {
+      setLoading(true);
       try {
         const res = await api.get(`/get_resume_scores?job_id=${id}`);
         const candidateData = res.data.resume_scores;
         dispatch(setCandList(candidateData));
       } catch (err: any) {
+        setLoading(false);
         toast.error({
           type: "background",
           duration: 3000,
@@ -130,6 +138,8 @@ const RespJdDash = () => {
           description: err.response?.data?.error || "An error occurred.",
           open: true,
         });
+      } finally {
+        setLoading(false);
       }
     };
     getCandList();
@@ -148,12 +158,14 @@ const RespJdDash = () => {
     }
   };
   const handleRefresh = () => {
+    setLoading(true);
     const getCandList = async () => {
       try {
         const res = await api.get(`/get_resume_scores?job_id=${id}`);
         const candidateData = res.data.resume_scores;
         dispatch(setCandList(candidateData));
       } catch (err: any) {
+        setLoading(false);
         toast.error({
           type: "background",
           duration: 3000,
@@ -162,6 +174,8 @@ const RespJdDash = () => {
           description: err.response?.data?.error || "An error occurred.",
           open: true,
         });
+      } finally {
+        setLoading(false);
       }
     };
     getCandList();
@@ -193,11 +207,12 @@ const RespJdDash = () => {
       jobDetails.job_id ? jobDetails.job_id.toString() : ""
     );
     newResume.append("role", jobDetails.role!);
-
+    setLoading(true);
     try {
       const response = await api.post("/upload_resume_to_job", newResume);
       if (response.status === 200) {
         handleRefresh();
+        setLoading(false);
         setTimeout(() => {
           handleRefresh();
         }, 7000);
@@ -212,6 +227,7 @@ const RespJdDash = () => {
         setFile(null);
       }
     } catch (error) {
+      setLoading(false);
       toast.error({
         type: "background",
         duration: 3000,
@@ -221,15 +237,20 @@ const RespJdDash = () => {
         open: true,
       });
       setFile(null);
+    } finally {
+      setLoading(false);
     }
   };
 
   const deleteCandHandler = async (item: any) => {
+    setLoading(true);
     try {
       const resp = await api.get(
         `/delete_resume?resume_id=${item.resume_id}&job_id=${jobDetails?.job_id}`
       );
       if (resp.statusText === "OK") {
+        dispatch(deleteCandidateByName(item.candidate_name));
+        setLoading(false);
         toast.success({
           type: "background",
           duration: 3000,
@@ -239,8 +260,8 @@ const RespJdDash = () => {
           open: true,
         });
       }
-      dispatch(deleteCandidateByName(item.candidate_name));
     } catch (error: any) {
+      setLoading(false);
       toast.error({
         type: "background",
         duration: 3000,

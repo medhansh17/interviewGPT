@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../customAxios/Axios";
+import { useLoader } from "@/context/loaderContext";
 // import Timer from "./Timer";
 
 interface QuestionProps {
@@ -16,6 +17,7 @@ const McqMain: React.FC<QuestionProps> = ({
   currentIndex,
   setCurrentIndex,
 }: QuestionProps) => {
+  const { setLoading } = useLoader();
   const [selectedOptions, setSelectedOptions] = useState<{
     [key: number]: string;
   }>({});
@@ -46,6 +48,7 @@ const McqMain: React.FC<QuestionProps> = ({
   };
 
   const submitMcq = async () => {
+    setLoading(true);
     setIsSubmitting(true);
     const payload = {
       candidate_id: candidate_id,
@@ -58,14 +61,18 @@ const McqMain: React.FC<QuestionProps> = ({
     try {
       const resp = await api.post("/store_tech_response", payload);
       if (resp.status === 200) {
+        setLoading(false);
         navigate("/code");
       } else {
-        console.log("Error submitting answers");
+        setLoading(false);
+        alert("Error submitting answers");
       }
     } catch (error) {
-      console.error("Submission error:", error);
+      setLoading(false);
+      alert("Error submitting answers");
     } finally {
       setIsSubmitting(false);
+      setLoading(false);
     }
   };
 

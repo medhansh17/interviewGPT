@@ -2,6 +2,7 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { useToast } from "./toast";
+import { useLoader } from "@/context/loaderContext";
 import api from "@/components/customAxios/Axios";
 
 interface GenerateQuestionsPopupProps {
@@ -15,6 +16,7 @@ export default function GenerateQuestionsPopup({
   job_id,
   setPop,
 }: GenerateQuestionsPopupProps) {
+  const { setLoading } = useLoader();
   const toast = useToast();
   const [numBehavioral, setNumBehavioral] = useState(1);
   const [numMCQ, setNumMCQ] = useState(1);
@@ -34,6 +36,7 @@ export default function GenerateQuestionsPopup({
 
   const handleProceed = async () => {
     setPop(false);
+    setLoading(true);
     try {
       const resp = await api.post("/CHECK_Auto_assessment", {
         job_id,
@@ -43,7 +46,9 @@ export default function GenerateQuestionsPopup({
         no_code_question: numCoding,
       });
       if (resp.statusText === "OK") window.location.reload();
+      setLoading(false);
     } catch (err: any) {
+      setLoading(false);
       toast.error({
         type: "background",
         duration: 3000,

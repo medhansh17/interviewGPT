@@ -25,7 +25,7 @@ export async function submitAudio({
     });
     return response.data;
   } catch (error) {
-    console.error("Error submitting audio:", error);
+    alert("Error submitting audio");
     return null;
   }
 }
