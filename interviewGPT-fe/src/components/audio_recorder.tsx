@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { submitAudio } from "@/api/audioSubmission";
 import { useToast } from "./toast";
+import { useLoader } from "@/context/loaderContext";
 
 const AudioRecorder = ({
   question_id,
@@ -11,6 +12,7 @@ const AudioRecorder = ({
   candidate_id: string;
   jobId: string | null;
 }) => {
+  const { setLoading } = useLoader();
   const toast = useToast();
   const mediaStream = useRef<MediaStream | null>(null);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
@@ -19,9 +21,12 @@ const AudioRecorder = ({
   const [minutes, setMinutes] = useState<number>(2);
   const [seconds, setSeconds] = useState<number>(0);
   const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
+  const [isRecorded, setIsRecorded] = useState<boolean>(false);
   const timerRef = useRef<any>(null);
 
   const submitAudioBlob = async (blob: Blob) => {
+    setLoading(true);
     try {
       await submitAudio({
         audioBlob: blob,
@@ -30,6 +35,7 @@ const AudioRecorder = ({
         jobId: jobId,
       });
     } catch (error) {
+      setLoading(false);
       toast.error({
         type: "background",
         duration: 3000,
@@ -38,6 +44,8 @@ const AudioRecorder = ({
         description: "",
         open: true,
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -56,10 +64,10 @@ const AudioRecorder = ({
       };
       mediaRecorder.current.onstop = () => {
         const recordedBlob = new Blob(chunks.current, { type: "audio/wav" });
-        // const url = URL.createObjectURL(recordedBlob);
-        // setRecordedUrl(url);
+        const url = URL.createObjectURL(recordedBlob);
+        setRecordedUrl(url);
+        setIsRecorded(true);
         chunks.current = [];
-        submitAudioBlob(recordedBlob);
       };
       mediaRecorder.current.start();
       isRecording.current = true;
@@ -116,6 +124,18 @@ const AudioRecorder = ({
     }, 1000);
   };
 
+  const handleRerecord = () => {
+    setRecordedUrl(null);
+    setIsRecorded(false);
+  };
+
+  const handleSubmit = () => {
+    if (recordedUrl) {
+      const recordedBlob = new Blob(chunks.current, { type: "audio/wav" });
+      submitAudioBlob(recordedBlob);
+    }
+  };
+
   return (
     <div>
       <div style={{ textAlign: "center" }}>
@@ -125,22 +145,45 @@ const AudioRecorder = ({
         </div>
         <p>{isRunning ? "Recording" : "Not recording"}</p>
       </div>
-      {/* <audio controls src={recordedUrl} /> */}
+      {recordedUrl && (
+        <div>
+          <audio controls src={recordedUrl} />
+        </div>
+      )}
       <div className="w-[150px] flex justify-between mt-2">
-        <button
-          className="bg-blue-500 text-white p-2 rounded-lg shadow "
-          onClick={startRecording}
-          disabled={isRecording.current}
-        >
-          Start
-        </button>
-        <button
-          className="bg-blue-500 text-white p-2 rounded-lg shadow"
-          onClick={stopRecording}
-          disabled={!isRecording.current}
-        >
-          Stop
-        </button>
+        {!isRecorded ? (
+          <>
+            <button
+              className="bg-blue-500 text-white p-2 rounded-lg shadow"
+              onClick={startRecording}
+              disabled={isRecording.current}
+            >
+              Start
+            </button>
+            <button
+              className="bg-blue-500 text-white p-2 rounded-lg shadow"
+              onClick={stopRecording}
+              disabled={!isRecording.current}
+            >
+              Stop
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              className="bg-blue-500 text-white p-2 rounded-lg shadow"
+              onClick={handleRerecord}
+            >
+              Rerecord
+            </button>
+            <button
+              className="bg-blue-500 text-white p-2 rounded-lg shadow"
+              onClick={handleSubmit}
+            >
+              Submit
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

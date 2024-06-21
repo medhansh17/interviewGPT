@@ -12,6 +12,7 @@ import { deleteQuestion } from "@/api/deleteCandidateQuestion";
 import { useToast } from "./toast";
 import EditQuestionPopup from "./editQuestionPopup";
 import { approveCandidate } from "@/api/approveCandidate";
+import { useLoader } from "@/context/loaderContext";
 
 export interface UpdateQuestionData {
   resume_id: string;
@@ -24,11 +25,12 @@ export interface EditQuestionData {
   resume_id: string;
   job_id: string;
   question_id: string;
-  question_type: "behavioral" | "technical" | "coding";
+  question_type: "behavioural" | "technical" | "coding";
   question: string;
   sample_input?: string;
   sample_output?: string;
   options?: { [key: string]: string };
+  answer?: string;
 }
 
 export default function GeneratedQuesPopup({
@@ -54,6 +56,7 @@ export default function GeneratedQuesPopup({
   resume_id: string;
   onClose: () => void;
 }) {
+  const { setLoading } = useLoader();
   const toast = useToast();
   const [updateStatus, setUpdateStatus] = useState(false);
   const [editStatus, setEditStatus] = useState(false);
@@ -62,12 +65,12 @@ export default function GeneratedQuesPopup({
   // const navigate = useNavigate();
 
   const handleApproval = async () => {
+    setLoading(true);
     const item = sessionStorage.getItem("question");
     const candidate_id = item ? JSON.parse(item).candidate_id : "";
     const resp = await approveCandidate(candidate_id);
-    console.log(resp);
-
     if (resp.message === "Assessment link has been sent to the candidate.") {
+      setLoading(false);
       toast.success({
         type: "background",
         duration: 3000,
@@ -78,6 +81,7 @@ export default function GeneratedQuesPopup({
       });
       onClose();
     } else {
+      setLoading(false);
       toast.error({
         type: "background",
         duration: 3000,
@@ -150,7 +154,7 @@ export default function GeneratedQuesPopup({
                         resume_id: resume_id,
                         job_id: localStorage.getItem("job_id") || "",
                         question_id: question.b_question_id,
-                        question_type: "behavioral",
+                        question_type: "behavioural",
                         question: question.b_question_text,
                       });
                       setEditStatus(true);
@@ -209,6 +213,7 @@ export default function GeneratedQuesPopup({
                         question_type: "technical",
                         question: question.question,
                         options: question.options,
+                        answer: question.answer,
                       });
                       setEditStatus(true);
                     }}

@@ -3,6 +3,7 @@ import MonacoEditor from "react-monaco-editor";
 import api from "../customAxios/Axios";
 import { useNavigate } from "react-router-dom";
 // import Timer from "../McqComp/Timer";
+import { useLoader } from "@/context/loaderContext";
 import New_Sidebar from "../navbar.component";
 
 interface CodingQuestion {
@@ -13,6 +14,7 @@ interface CodingQuestion {
 }
 
 const Code = () => {
+  const { setLoading } = useLoader();
   const [code, setCode] = useState<string>("");
   const navigate = useNavigate();
   const [canName, setCanname] = useState("");
@@ -76,14 +78,25 @@ const Code = () => {
   };
 
   const codeSubmit = async () => {
-    saveCurrentCode();
+    setLoading(true);
+    // Save current code and wait for state to update
+    await new Promise((resolve) => {
+      saveCurrentCode();
+      setTimeout(resolve, 0); // Ensure state is updated
+    });
+
     const resp = await api.post("/store_code_response", {
       candidate_id: beha ? JSON.parse(beha).candidate_id : "",
       job_id: localStorage.getItem("job_id"),
       code: codeResponses,
     });
+
     if (resp.statusText === "OK") {
+      setLoading(false);
       navigate("/success");
+    } else {
+      setLoading(false);
+      alert("Error submitting answers");
     }
   };
 

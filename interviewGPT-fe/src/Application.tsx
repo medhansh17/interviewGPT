@@ -3,15 +3,14 @@ import Table from "./components/Table";
 import { useState } from "react";
 import Header from "./components/Header";
 import { useToast } from "./components/toast";
-
-// import TechSkillTable from "./components/TechSkillTable";
-// import { FetchSkillsData } from "./types";
+import { useLoader } from "./context/loaderContext";
 import api from "./components/customAxios/Axios";
 import { useNavigate } from "react-router-dom";
 import AddJd from "./components/AddJd";
 import TextArea2 from "./components/TextArea2";
 
 function Application() {
+  const { setLoading } = useLoader();
   const [file, setFile] = useState<any | null>(null);
   const [mainData, setMainData] = useState<any | null>(null);
   const [mainTextArea, setMainTextArea] = useState<any | null>("");
@@ -22,7 +21,6 @@ function Application() {
   const [empty, setEmpty] = useState<boolean>(false);
   // const [fetchSkill] = useState<FetchSkillsData & { timestamp: number }>();
   // const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [role, setRole] = useState<string>("");
   const [role2, setRole2] = useState<string>("");
   const [doc, setDoc] = useState(false);
@@ -47,14 +45,14 @@ function Application() {
       });
       return;
     }
-    setIsLoading(true);
+    setLoading(true);
     try {
       const response = await api.post("/manual_upload_job", {
         role: mainData?.role || mainData2?.role || role || "",
         jd: mainData?.jd || mainData2?.jd || mainTextArea || mainTextArea2,
       });
       if (response.data.message === "Job uploaded successfully.") {
-        setIsLoading(false);
+        setLoading(false);
         setMainTextArea(null);
         setMainTextArea2(null);
         setMainData("");
@@ -80,7 +78,7 @@ function Application() {
           description: "Job JD already exists.",
           open: true,
         });
-        setIsLoading(false);
+        setLoading(false);
         setEmpty(true);
         setMainTextArea(null);
         setMainTextArea2(null);
@@ -99,7 +97,7 @@ function Application() {
           description: "Guest users can only upload one job description.",
           open: true,
         });
-        setIsLoading(false);
+        setLoading(false);
         setEmpty(true);
         setMainTextArea(null);
         setMainTextArea2(null);
@@ -108,7 +106,7 @@ function Application() {
         setRole2("");
       }
     } catch (error: any) {
-      setIsLoading(false);
+      setLoading(false);
       toast.error({
         type: "background",
         duration: 3000,
@@ -130,8 +128,10 @@ function Application() {
     newResume.append("jd_file", file);
 
     try {
+      setLoading(true);
       const response = await api.post("/file_upload_jd", newResume);
-      if (response.statusText === "OK") {
+      if (response.status === 200) {
+        setLoading(false);
         setMainTextArea(null);
         setMainTextArea2(null);
         setMainData(null);
@@ -139,6 +139,7 @@ function Application() {
         setRole2("");
         navigate("/dashboard");
       } else {
+        setLoading(false);
         toast.error({
           type: "background",
           duration: 3000,
@@ -149,6 +150,7 @@ function Application() {
         });
       }
     } catch (error) {
+      setLoading(false);
       toast.error({
         type: "background",
         duration: 3000,
@@ -289,7 +291,7 @@ function Application() {
                     // onClick={doc?uploadDoc:uploadJD}
                     // disabled={!mainData || !mainTextArea || !mainData2 || !mainTextArea2}
                   >
-                    {isLoading ? <span className="loader"></span> : "Submit"}
+                    "Submit"
                   </button>
 
                   <button
@@ -314,7 +316,7 @@ function Application() {
           </div>
         </div>
 
-        <div className="">
+        <div >
           <Table
             setMainData={setMainData}
             setLoad={setLoad}
@@ -323,23 +325,6 @@ function Application() {
           />
         </div>
       </div>
-      {/* <div style={{ display: isHidden ? "block" : "none" }}>
-        <div className="flex  w-full flex-wrap">
-          <div className="w-[100%]">
-            <p className=" text-center md:text-[2rem] text-[1rem] my-[1rem]">
-              TechinalSkill
-            </p>
-            {fetchSkill?.skills && (
-              <TechSkillTable
-                key={fetchSkill?.timestamp}
-                fetchSkill={fetchSkill}
-                role={mainData?.role}
-              />
-            )}
-          </div>
-        </div>
-      </div> */}
-
       <div className="bg-deep-purple-accent-400 ">
         <svg
           className="absolute top-0 w-full h-6 -mt-5 sm:-mt-10 sm:h-16 text-deep-purple-accent-400"

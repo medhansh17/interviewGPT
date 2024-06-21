@@ -52,7 +52,7 @@ const New_Sidebar = () => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
         // User switched tabs or minimized the window
-        alert("Please stay on this page to complete the quiz.");
+        alert("Please stay on this page to complete the assessment.");
         setTabSwitchCount((prevCount) => prevCount + 1);
       }
     };

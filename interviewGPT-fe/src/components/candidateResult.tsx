@@ -3,6 +3,7 @@ import api from "@/components/customAxios/Axios";
 import { useToast } from "./toast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
+import { useLoader } from "@/context/loaderContext";
 
 interface InterviewDataProps {
   onClick: () => void;
@@ -49,11 +50,12 @@ const InterviewDataDisplay: React.FC<InterviewDataProps> = ({
   resume_id,
   jobId,
 }) => {
+  const { setLoading } = useLoader();
   const [resultData, setResultData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const toast = useToast();
 
   const showResultHandler = async () => {
+    setLoading(true);
     try {
       const resp = await api.post("/fetch_user_responses", {
         resume_id,
@@ -61,6 +63,7 @@ const InterviewDataDisplay: React.FC<InterviewDataProps> = ({
       });
       setResultData(resp.data);
     } catch (err: any) {
+      setLoading(false);
       toast.error({
         type: "background",
         duration: 3000,
@@ -70,17 +73,13 @@ const InterviewDataDisplay: React.FC<InterviewDataProps> = ({
         open: true,
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     showResultHandler();
   }, []);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   if (!resultData) {
     onClick();

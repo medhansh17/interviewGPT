@@ -20,12 +20,14 @@ const IntroScreen: React.FC = () => {
   const [isCameraAccessible, setIsCameraAccessible] = useState<boolean>(false);
   const [isBrowserAccessible, setIsBrowserAccessible] = useState<boolean>(true);
   const [hasTakenSelfie, setHasTakenSelfie] = useState<boolean>(false);
+  const [isAssessmentLoaded, setIsAssessmentLoaded] = useState<boolean>(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const navigate = useNavigate();
   const { token } = useParams<{ token: string }>();
 
   useEffect(() => {
+    localStorage.clear();
     setIsPhone(isMobile());
 
     const checkMediaAccess = async () => {
@@ -65,15 +67,18 @@ const IntroScreen: React.FC = () => {
         try {
           const resp = await getAssessmentSheet(token);
           console.log(resp);
+          setIsAssessmentLoaded(true);
         } catch (error: any) {
           toast.error({
             type: "background",
             duration: 3000,
             status: "Error",
             title: "Error",
-            description: error.data.error,
+            description:
+              error.response?.data?.error || "Failed to load assessment.",
             open: true,
           });
+          setIsAssessmentLoaded(false);
         }
       }
     };
@@ -398,21 +403,29 @@ const IntroScreen: React.FC = () => {
         </div>
         <div className="border-t border-solid border-lightgray mt-8">
           <button
-            onClick={() => navigate("/instruction")}
+            onClick={() => {
+              if (isAssessmentLoaded) {
+                navigate("/instruction");
+              } else {
+                alert("Assessment data is not loaded. Please try again later.");
+              }
+            }}
             style={{ width: "30%" }}
             disabled={
               !isBrowserAccessible ||
               !isCameraAccessible ||
               !isMicrophoneAccessible ||
               isPhone ||
-              !hasTakenSelfie
+              !hasTakenSelfie ||
+              !isAssessmentLoaded
             }
             className={`w-[18%] mx-auto block ${
               !isBrowserAccessible ||
               !isCameraAccessible ||
               !isMicrophoneAccessible ||
               isPhone ||
-              !hasTakenSelfie
+              !hasTakenSelfie ||
+              !isAssessmentLoaded
                 ? "bg-gray-300"
                 : "bg-green-500 hover:bg-green-600"
             } text-white py-2 px-4 rounded mt-4 w-full`}

@@ -11,6 +11,7 @@ import {
 import { UserContext } from "../context/JobContext";
 import { deleteJob } from "../context/JobContext";
 import ConfirmButton from "./confirmationPopup";
+import { useLoader } from "@/context/loaderContext";
 import { useToast } from "./toast";
 import { ConfirmDialog } from "primereact/confirmdialog";
 
@@ -22,6 +23,7 @@ interface DataItem {
 }
 
 const Dashboard = () => {
+  const { setLoading } = useLoader();
   const toast = useToast();
   const [data, setData] = useState<DataItem[]>([]);
   const { dispatch } = useContext(UserContext)!;
@@ -35,22 +37,37 @@ const Dashboard = () => {
   const currentPage = 1;
 
   useEffect(() => {
+    setLoading(true);
     const getJobList = async () => {
       try {
         const response = await api.get("/export_jobs_json");
         setData(response.data);
-      } catch (error) {}
+      } catch (error: any) {
+        setLoading(false);
+        toast.error({
+          type: "background",
+          duration: 3000,
+          status: "Error",
+          title: "Error fetching job list",
+          description: error.response?.data?.error || "An error occurred.",
+          open: true,
+        });
+      } finally {
+        setLoading(false);
+      }
     };
     getJobList();
   }, []);
 
   const deleteJobHandler = async (item: DataItem) => {
+    setLoading(true);
     try {
       const resp = await api.post("/delete_job", {
         role: item.role,
         id: item.id,
       });
       if (resp.status === 200) {
+        setLoading(false);
         toast.success({
           type: "background",
           duration: 3000,
@@ -63,6 +80,7 @@ const Dashboard = () => {
         setData(data.filter((job) => job.id !== item.id));
       }
     } catch (err: any) {
+      setLoading(false);
       toast.error({
         type: "background",
         duration: 3000,
@@ -71,6 +89,8 @@ const Dashboard = () => {
         description: err.response?.data?.error || "An error occurred.",
         open: true,
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -91,6 +111,7 @@ const Dashboard = () => {
     if (item.active === true) {
       active = true;
     } else active = false;
+    setLoading(true);
     try {
       const response = await api.put(`/edit_job/${item.id}`, {
         role: item.role,
@@ -98,6 +119,7 @@ const Dashboard = () => {
         active: active,
       });
       if (response.status === 200) {
+        setLoading(false);
         toast.success({
           type: "background",
           duration: 3000,
@@ -108,6 +130,7 @@ const Dashboard = () => {
         });
       }
     } catch (error: any) {
+      setLoading(false);
       toast.error({
         type: "background",
         duration: 3000,
@@ -116,6 +139,8 @@ const Dashboard = () => {
         description: error.response.error,
         open: true,
       });
+    } finally {
+      setLoading(false);
     }
     setEditableRow(null);
   };

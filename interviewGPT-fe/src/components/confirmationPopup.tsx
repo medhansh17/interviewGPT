@@ -30,14 +30,16 @@ const ConfirmButton: React.FC<ConfirmButtonProps> = ({
   };
 
   const handleReject = () => {
-    console.log("Action rejected");
+    return null;
   };
 
   const showConfirmDialog = () => {
     confirmDialog({
       message: <div className="text-gray-700">{message}</div>,
       header: (
-        <div className="font-bold text-lg text-gray-800 mb-3">{header}</div>
+        <div className="absolute w-full top-3 left-3 font-bold text-lg text-gray-800 mb-3 ml-3 flex ">
+          {header}
+        </div>
       ),
       icon: <i className={`${icon || "pi pi-info-circle"} text-blue-500`} />,
       acceptClassName: `${
