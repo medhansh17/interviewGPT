@@ -418,6 +418,13 @@ def assessment_sheet():
     
     if not candidate:
         return jsonify({'error': 'Candidate not found.'}), 404
+    # check the assessment link is accessed multiple times
+    if candidate.link_used:
+        return jsonify({'error': 'This link has already been used.'}), 403
+    
+    # Mark the link as used
+    candidate.link_used = True
+    db.session.commit()
     
     technical_questions = []
     for question in candidate.technical_questions:

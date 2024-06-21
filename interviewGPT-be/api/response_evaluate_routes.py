@@ -50,14 +50,15 @@ def blob_process_audio(current_user):
     data = request.form
     question_id = data.get('question_id')
     candidate_id = data.get('candidate_id')
-    job_id = data.get('job_id')
+    #job_id = data.get('job_id')
     audio = request.files['audio']
 
-    if not question_id or not candidate_id or not job_id or not audio:
+    if not question_id or not candidate_id or not audio:
         return jsonify({'error': 'Missing required parameters.'}), 400
 
     try:
-        candidate = Candidate.query.filter_by(id=candidate_id, job_id=job_id, user_id=current_user.id).one()
+        candidate = Candidate.query.filter_by(id=candidate_id, user_id=current_user.id).one()
+        job_id=candidate.job_id
     except NoResultFound:
         return jsonify({'error': 'Candidate not found.'}), 404
 
@@ -116,6 +117,23 @@ def blob_process_audio(current_user):
         # Start a thread to evaluate the audio
         evaluation_thread = threading.Thread(target=evaluate_audio, args=(current_app._get_current_object(), behav.id, transcript, behav.question_text))
         evaluation_thread.start()
+        # TO UPDATE THE STATUS COLUMN OF RESUME TO ASSESSMENT COMPLETED
+        # Query the Candidate table to get the resume_id for the given candidate_id
+        candidate = Candidate.query.filter_by(id=candidate_id, user_id=current_user.id).first()
+
+        if not candidate:
+            return jsonify({"error": "Candidate not found"}), 404
+
+        # Query the ResumeScore table to update the status for the given resume_id
+        resume_score = ResumeScore.query.filter_by(resume_id=candidate.resume_id, user_id=current_user.id).first()
+
+        if not resume_score:
+            return jsonify({"error": "ResumeScore not found for the given candidate's resume_id"}), 404
+
+        # Update the status
+        resume_score.status = " Behavioural Assessment completed by candidate"
+        resume_score.assessment_status = 1
+        db.session.commit()
 
         return jsonify({'status': 'Transcript saved successfully, evaluation started'}), 200
     except Exception as e:
@@ -188,11 +206,11 @@ def perform_techmcq_assessment(mcq_question):
 @token_required
 def store_tech_response(current_user):
     data = request.get_json()
-    job_id = data.get('job_id')
+    #job_id = data.get('job_id')
     candidate_id = data.get('candidate_id')
     answers = data.get('answers')  # [{"question_id":"1","user_answer":"the tool is ai"},{"question_id":"2","user_answer":"start with *"},{"question_id":"3","user_answer":"the ai is artifial intelligence"}]
 
-    if not job_id or not candidate_id or not answers:
+    if  not candidate_id or not answers:
         return jsonify({'error': 'Missing required parameters.'}), 400
 
     # Iterate over each answer in the provided list
@@ -235,6 +253,23 @@ def store_tech_response(current_user):
         for question in tech_questions:
             question.tech_eval = tech_response
         db.session.commit()
+        # TO UPDATE THE STATUS COLUMN OF RESUME TO ASSESSMENT COMPLETED
+        # Query the Candidate table to get the resume_id for the given candidate_id
+        candidate = Candidate.query.filter_by(id=candidate_id, user_id=current_user.id).first()
+
+        if not candidate:
+            return jsonify({"error": "Candidate not found"}), 404
+
+        # Query the ResumeScore table to update the status for the given resume_id
+        resume_score = ResumeScore.query.filter_by(resume_id=candidate.resume_id, user_id=current_user.id).first()
+
+        if not resume_score:
+            return jsonify({"error": "ResumeScore not found for the given candidate's resume_id"}), 404
+
+        # Update the status
+        resume_score.status = "Assessment completed by candidate"
+        resume_score.assessment_status = 1
+        db.session.commit()
         return jsonify({'status': 'tech response evaluated and stored successfully.'}), 200
 
     except Exception as e:
@@ -267,11 +302,11 @@ def perform_code_assessment(question_code):
 @token_required
 def store_code_response(current_user):
     data = request.get_json()
-    job_id = data.get('job_id')
+    #job_id = data.get('job_id')
     candidate_id = data.get('candidate_id')
     code = data.get('code')  # [{"question_id":"1","user_code":"print("helo world")"},{"question_id":"2","user_code":"for i in 10:"},{"question_id":"3","user_code":"def fun()"}]
 
-    if not job_id or not candidate_id or not code:
+    if  not candidate_id or not code:
         return jsonify({'error': 'Missing required parameters.'}), 400
 
     # Iterate over each answer in the provided list
@@ -357,15 +392,18 @@ def fetch_user_responses(current_user):
         ## Fetch the latest code responses
         code_responses = CodingQuestion.query.filter_by(candidate_id=candidate.id, user_id=current_user.id).order_by(CodingQuestion.updated_at.desc()).all()
         if not code_responses:
-            return jsonify({'error': 'No code responses found for the given candidate ID.'}), 404
+            pass
+            #return jsonify({'error': 'No code responses found for the given candidate ID.'}), 404
         ### Fetch the latest tech responses
         tech_responses = TechnicalQuestion.query.filter_by(candidate_id=candidate.id, user_id=current_user.id).order_by(TechnicalQuestion.updated_at.desc()).all()
         if not tech_responses:
-            return jsonify({'error': 'No technical responses found for the given candidate ID.'}), 404
+            pass
+            #return jsonify({'error': 'No technical responses found for the given candidate ID.'}), 404
 
         audio_transcriptions = BehaviouralQuestion.query.filter_by(candidate_id=candidate.id, user_id=current_user.id).all()
         if not audio_transcriptions:
-            return jsonify({'error': 'No audio transcriptions found for the given candidate ID.'}), 404
+            pass
+            #return jsonify({'error': 'No audio transcriptions found for the given candidate ID.'}), 404
 
         formatted_audio_transcriptions = []
         for audio_transcription in audio_transcriptions:
