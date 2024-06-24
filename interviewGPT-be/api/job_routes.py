@@ -56,7 +56,7 @@ def file_upload_job_description(current_user):
     
     if current_user.role.name == 'guest':
         job_count = Job.query.filter_by(user_id=current_user_id).count()
-        if job_count >= 1:
+        if job_count >= 5:
             return jsonify({'message': 'Guest users can only upload one job description.'}), 403
 
     if 'role' not in request.form or 'jd_file' not in request.files:
