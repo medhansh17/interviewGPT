@@ -22,7 +22,7 @@ def manual_upload_job(current_user):
     if current_user.role.name == 'guest':
         job_count = Job.query.filter_by(user_id=current_user_id).count()
         if job_count >= 5:
-            return jsonify({'message': 'Guest users can only upload one job description.'}), 403
+            return jsonify({'message': 'Guest users can only upload 5 job description.'}), 403
 
     data = request.get_json()
     role = data.get('role')
@@ -57,7 +57,7 @@ def file_upload_job_description(current_user):
     if current_user.role.name == 'guest':
         job_count = Job.query.filter_by(user_id=current_user_id).count()
         if job_count >= 5:
-            return jsonify({'message': 'Guest users can only upload one job description.'}), 403
+            return jsonify({'message': 'Guest users can only upload 5 job description.'}), 403
 
     if 'role' not in request.form or 'jd_file' not in request.files:
         return jsonify({'error': 'Role and JD file are required.'}), 400

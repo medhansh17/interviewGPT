@@ -45,8 +45,7 @@ def check_s3_upload(bucket_name, file_key):
 
 ### new code to save the evalaute of the audio and save , it will be running in thread after every audio complete
 @response_evaluate_bp.route('/blob_process_audio', methods=['POST'])
-@token_required
-def blob_process_audio(current_user):
+def blob_process_audio():
     data = request.form
     question_id = data.get('question_id')
     candidate_id = data.get('candidate_id')
@@ -57,7 +56,7 @@ def blob_process_audio(current_user):
         return jsonify({'error': 'Missing required parameters.'}), 400
 
     try:
-        candidate = Candidate.query.filter_by(id=candidate_id, user_id=current_user.id).one()
+        candidate = Candidate.query.filter_by(id=candidate_id).one()
         job_id=candidate.job_id
     except NoResultFound:
         return jsonify({'error': 'Candidate not found.'}), 404
@@ -104,7 +103,7 @@ def blob_process_audio(current_user):
     if os.path.isfile(local_file_path):
         os.remove(local_file_path)
 
-    behav = BehaviouralQuestion.query.filter_by(id=question_id, candidate_id=candidate_id, user_id=current_user.id).first()
+    behav = BehaviouralQuestion.query.filter_by(id=question_id, candidate_id=candidate_id).first()
     if not behav:
         return jsonify({'error': 'Behavioural question not found.'}), 404
     print("transcripts",transcript)
@@ -119,13 +118,13 @@ def blob_process_audio(current_user):
         evaluation_thread.start()
         # TO UPDATE THE STATUS COLUMN OF RESUME TO ASSESSMENT COMPLETED
         # Query the Candidate table to get the resume_id for the given candidate_id
-        candidate = Candidate.query.filter_by(id=candidate_id, user_id=current_user.id).first()
+        candidate = Candidate.query.filter_by(id=candidate_id).first()
 
         if not candidate:
             return jsonify({"error": "Candidate not found"}), 404
 
         # Query the ResumeScore table to update the status for the given resume_id
-        resume_score = ResumeScore.query.filter_by(resume_id=candidate.resume_id, user_id=current_user.id).first()
+        resume_score = ResumeScore.query.filter_by(resume_id=candidate.resume_id).first()
 
         if not resume_score:
             return jsonify({"error": "ResumeScore not found for the given candidate's resume_id"}), 404
@@ -203,8 +202,7 @@ def perform_techmcq_assessment(mcq_question):
 
 #############newly tried one 
 @response_evaluate_bp.route('/store_tech_response', methods=['POST'])
-@token_required
-def store_tech_response(current_user):
+def store_tech_response():
     data = request.get_json()
     #job_id = data.get('job_id')
     candidate_id = data.get('candidate_id')
@@ -219,7 +217,7 @@ def store_tech_response(current_user):
         user_answer = answer.get('user_answer')
 
         # Find the TechnicalQuestion entry with the corresponding candidate_id and question_id
-        tech_question = TechnicalQuestion.query.filter_by(candidate_id=candidate_id, id=question_id, user_id=current_user.id).first()
+        tech_question = TechnicalQuestion.query.filter_by(candidate_id=candidate_id, id=question_id).first()
 
         if tech_question:
             # Update the user_answer field
@@ -232,7 +230,7 @@ def store_tech_response(current_user):
             return jsonify({"error": f"Question with id {question_id} for candidate {candidate_id} not found"}), 404
 
     # Query the TechnicalQuestion table for all rows matching the candidate_id
-    tech_questions = TechnicalQuestion.query.filter_by(candidate_id=candidate_id, user_id=current_user.id).all()
+    tech_questions = TechnicalQuestion.query.filter_by(candidate_id=candidate_id).all()
 
     if not tech_questions:
         return jsonify({"error": "No technical questions found for the given candidate ID"}), 404
@@ -255,13 +253,13 @@ def store_tech_response(current_user):
         db.session.commit()
         # TO UPDATE THE STATUS COLUMN OF RESUME TO ASSESSMENT COMPLETED
         # Query the Candidate table to get the resume_id for the given candidate_id
-        candidate = Candidate.query.filter_by(id=candidate_id, user_id=current_user.id).first()
+        candidate = Candidate.query.filter_by(id=candidate_id).first()
 
         if not candidate:
             return jsonify({"error": "Candidate not found"}), 404
 
         # Query the ResumeScore table to update the status for the given resume_id
-        resume_score = ResumeScore.query.filter_by(resume_id=candidate.resume_id, user_id=current_user.id).first()
+        resume_score = ResumeScore.query.filter_by(resume_id=candidate.resume_id).first()
 
         if not resume_score:
             return jsonify({"error": "ResumeScore not found for the given candidate's resume_id"}), 404
@@ -299,8 +297,7 @@ def perform_code_assessment(question_code):
 
 # Api to do code scoring
 @response_evaluate_bp.route('/store_code_response', methods=['POST'])
-@token_required
-def store_code_response(current_user):
+def store_code_response():
     data = request.get_json()
     #job_id = data.get('job_id')
     candidate_id = data.get('candidate_id')
@@ -315,7 +312,7 @@ def store_code_response(current_user):
         user_code = answer.get('user_code')
 
         # Find the CodingQuestion entry with the corresponding candidate_id and question_id
-        code_question = CodingQuestion.query.filter_by(candidate_id=candidate_id, id=question_id, user_id=current_user.id).first()
+        code_question = CodingQuestion.query.filter_by(candidate_id=candidate_id, id=question_id).first()
 
         if code_question:
             # Update the user_answer field
@@ -328,7 +325,7 @@ def store_code_response(current_user):
             return jsonify({"error": f"Question with id {question_id} for candidate {candidate_id} not found"}), 404
 
     # Query the CodingQuestion table for all rows matching the candidate_id
-    code_questions = CodingQuestion.query.filter_by(candidate_id=candidate_id, user_id=current_user.id).all()
+    code_questions = CodingQuestion.query.filter_by(candidate_id=candidate_id).all()
 
     if not code_questions:
         return jsonify({"error": "No technical questions found for the given candidate ID"}), 404
@@ -351,13 +348,13 @@ def store_code_response(current_user):
 
         # TO UPDATE THE STATUS COLUMN OF RESUME TO ASSESSMENT COMPLETED
         # Query the Candidate table to get the resume_id for the given candidate_id
-        candidate = Candidate.query.filter_by(id=candidate_id, user_id=current_user.id).first()
+        candidate = Candidate.query.filter_by(id=candidate_id).first()
 
         if not candidate:
             return jsonify({"error": "Candidate not found"}), 404
 
         # Query the ResumeScore table to update the status for the given resume_id
-        resume_score = ResumeScore.query.filter_by(resume_id=candidate.resume_id, user_id=current_user.id).first()
+        resume_score = ResumeScore.query.filter_by(resume_id=candidate.resume_id).first()
 
         if not resume_score:
             return jsonify({"error": "ResumeScore not found for the given candidate's resume_id"}), 404
@@ -374,33 +371,32 @@ def store_code_response(current_user):
 # To fetch the user responses after the assessment (all types of questions)
 
 @response_evaluate_bp.route('/fetch_user_responses', methods=['POST'])
-@token_required
-def fetch_user_responses(current_user):
+def fetch_user_responses():
     data = request.get_json()
     resume_id = data.get('resume_id')
     job_id = data.get('job_id')
 
     try:
         # Query the Candidate table to get the candidate using the given resume_id and user_id
-        candidate = Candidate.query.filter_by(resume_id=resume_id, user_id=current_user.id).first()
+        candidate = Candidate.query.filter_by(resume_id=resume_id).first()
         if not candidate:
             return jsonify({'error': 'Candidate not found.'}), 404
 
-        resume_score_entry = ResumeScore.query.filter_by(resume_id=resume_id, user_id=current_user.id).first()
+        resume_score_entry = ResumeScore.query.filter_by(resume_id=resume_id).first()
         if not resume_score_entry :
             return jsonify({'error': 'Resumescore/Assessment not completed or not found.'}), 400
         ## Fetch the latest code responses
-        code_responses = CodingQuestion.query.filter_by(candidate_id=candidate.id, user_id=current_user.id).order_by(CodingQuestion.updated_at.desc()).all()
+        code_responses = CodingQuestion.query.filter_by(candidate_id=candidate.id).order_by(CodingQuestion.updated_at.desc()).all()
         if not code_responses:
             pass
             #return jsonify({'error': 'No code responses found for the given candidate ID.'}), 404
         ### Fetch the latest tech responses
-        tech_responses = TechnicalQuestion.query.filter_by(candidate_id=candidate.id, user_id=current_user.id).order_by(TechnicalQuestion.updated_at.desc()).all()
+        tech_responses = TechnicalQuestion.query.filter_by(candidate_id=candidate.id).order_by(TechnicalQuestion.updated_at.desc()).all()
         if not tech_responses:
             pass
             #return jsonify({'error': 'No technical responses found for the given candidate ID.'}), 404
 
-        audio_transcriptions = BehaviouralQuestion.query.filter_by(candidate_id=candidate.id, user_id=current_user.id).all()
+        audio_transcriptions = BehaviouralQuestion.query.filter_by(candidate_id=candidate.id).all()
         if not audio_transcriptions:
             pass
             #return jsonify({'error': 'No audio transcriptions found for the given candidate ID.'}), 404
@@ -432,8 +428,7 @@ def fetch_user_responses(current_user):
         return jsonify({'error': str(e)}), 500
     
 @response_evaluate_bp.route('/upload_screenshot', methods=['POST'])
-@token_required
-def upload_screenshot(current_user):
+def upload_screenshot():
     data = request.form
     candidate_id = data.get('candidate_id')
     image = request.files['image']
@@ -443,7 +438,7 @@ def upload_screenshot(current_user):
         return jsonify({'error': 'Missing required parameters.'}), 400
 
     try:
-        candidate = Candidate.query.filter_by(id=candidate_id, user_id=current_user.id).first()
+        candidate = Candidate.query.filter_by(id=candidate_id).first()
         if not candidate:
             return jsonify({'error': 'Candidate not found.'}), 404
 
