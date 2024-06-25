@@ -4,3 +4,4 @@ instance/
 database/
 __pycache__/
 media/
+migrations/

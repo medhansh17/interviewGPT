@@ -76,17 +76,17 @@ const ExampleComponent = ({ refresh }: { refresh: () => void }) => {
   }, [id, toast]);
 
   const handleSubmit = useCallback(async () => {
-    if (!checkAdmin()) {
-      toast.error({
-        type: "background",
-        duration: 3000,
-        status: "Error",
-        title: "You are not authorized to perform this action",
-        description: "",
-        open: true,
-      });
-      return;
-    }
+    // if (!checkAdmin()) {
+    //   toast.error({
+    //     type: "background",
+    //     duration: 3000,
+    //     status: "Error",
+    //     title: "You are not authorized to perform this action",
+    //     description: "",
+    //     open: true,
+    //   });
+    //   return;
+    // }
 
     setSubmitting(true);
     try {
@@ -126,10 +126,10 @@ const ExampleComponent = ({ refresh }: { refresh: () => void }) => {
     }
   }, [uploadedFiles, jobDetails, refresh, toast]);
 
-  const checkAdmin = useCallback(() => {
-    const role = localStorage.getItem("role");
-    return role === "bluetick-admin";
-  }, []);
+  // const checkAdmin = useCallback(() => {
+  //   const role = localStorage.getItem("role");
+  //   return role === "bluetick-admin";
+  // }, []);
 
   return (
     <div className="m-2 inline-block">

@@ -3,7 +3,6 @@ import "./app.css";
 import { Link } from "react-router-dom";
 import { Features } from "./components/Home/Features";
 import { Benefits } from "./components/Home/Benefits";
-import Image from "./assets/landing.gif";
 import Pricing from "./components/Pricing";
 
 const Home = () => {
@@ -77,7 +76,16 @@ const Home = () => {
               </Link>
             </div>
             <div className="ravelent" data-aos="fade-left">
-              <img src={Image} className="w-[60rem] shadow-2xl" alt="logo" />
+            <iframe
+                  width="100%"
+                  height=""
+                  src="https://bluetick-website-images.bluetickconsultants.com/interviewgpt.mp4"
+                  title="InterviewGPT"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+              ></iframe>
+              {/* <img src={Image} className="w-[60rem] shadow-2xl" alt="logo" /> */}
             </div>
           </div>
         </div>

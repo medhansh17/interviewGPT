@@ -12,9 +12,10 @@ interface InterviewDataProps {
 }
 
 interface AudioTranscript {
-  audio_file_path: string;
+  audio_file_path: string | null;
+  audio_transcript: string;
   question: string;
-  score: string; // Assuming it's a JSON string
+  score: string | null; // Assuming it's a JSON string or null
 }
 
 interface TechResponse {
@@ -82,12 +83,11 @@ const InterviewDataDisplay: React.FC<InterviewDataProps> = ({
   }, []);
 
   if (!resultData) {
-    onClick();
-    return null;
+    return <div>Loading...</div>;
   }
 
   const { audio_transcript, candidate_name, code_response, tech_response } =
-    resultData;
+    resultData || {};
 
   const parseJSON = (response: string) => {
     try {
@@ -98,9 +98,13 @@ const InterviewDataDisplay: React.FC<InterviewDataProps> = ({
     }
   };
 
-  const renderCodeResponses = (codeResponses: string) => {
+  const renderCodeResponses = (codeResponses?: string) => {
+    if (!codeResponses) {
+      return <div>No code responses available</div>;
+    }
+
     const parsedCodeResponses: CodeResponse | null = parseJSON(codeResponses);
-    if (!parsedCodeResponses) {
+    if (!parsedCodeResponses || !parsedCodeResponses.coding_evaluation) {
       return <div>Error parsing code responses</div>;
     }
 
@@ -149,10 +153,14 @@ const InterviewDataDisplay: React.FC<InterviewDataProps> = ({
     ));
   };
 
-  const renderTechResponses = (techResponses: string) => {
+  const renderTechResponses = (techResponses?: string) => {
+    if (!techResponses) {
+      return <div>No technical responses available</div>;
+    }
+
     const parsedTechResponses: TechResponse | null = parseJSON(techResponses);
     if (!parsedTechResponses) {
-      return <div>Error parsing tech responses</div>;
+      return <div>Error parsing technical responses</div>;
     }
 
     return (
@@ -198,29 +206,35 @@ const InterviewDataDisplay: React.FC<InterviewDataProps> = ({
     );
   };
 
-  const renderAudioTranscripts = (transcripts: AudioTranscript[]) => {
+  const renderAudioTranscripts = (transcripts?: AudioTranscript[]) => {
+    if (!transcripts || transcripts.length === 0) {
+      return <div>No audio transcripts available</div>;
+    }
+
     return transcripts.map((item, index) => {
-      const parsedScore = parseJSON(item.score);
+      const parsedScore = item.score ? parseJSON(item.score) : null;
       return (
         <div key={index} className="mb-4">
           <p className="mb-1">
             <strong>Question:</strong> {item.question}
           </p>
-          <audio controls className="mb-1">
-            <source src={item.audio_file_path} type="audio/wav" />
-            Your browser does not support the audio element.
-          </audio>
+          {item.audio_file_path && (
+            <audio controls className="mb-1">
+              <source src={item.audio_file_path} type="audio/wav" />
+              Your browser does not support the audio element.
+            </audio>
+          )}
           <h4 className="text-sm font-bold mb-1">Scores:</h4>
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                <th className="border-2 border-gray-400 p-2">Aspect</th>
-                <th className="border-2 border-gray-400 p-2">Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              {parsedScore ? (
-                Object.entries(parsedScore.scores).map(([key, value]) => (
+          {parsedScore ? (
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className="border-2 border-gray-400 p-2">Aspect</th>
+                  <th className="border-2 border-gray-400 p-2">Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(parsedScore.scores).map(([key, value]) => (
                   <tr key={key}>
                     <td className="border-2 border-gray-400 p-2">
                       {key.replace(/_/g, " ")}
@@ -229,16 +243,12 @@ const InterviewDataDisplay: React.FC<InterviewDataProps> = ({
                       {value as React.ReactNode}
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={2} className="border-2 border-gray-400 p-2">
-                    Error parsing scores
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div>No scores available</div>
+          )}
         </div>
       );
     });

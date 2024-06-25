@@ -291,7 +291,7 @@ function Application() {
                     // onClick={doc?uploadDoc:uploadJD}
                     // disabled={!mainData || !mainTextArea || !mainData2 || !mainTextArea2}
                   >
-                    "Submit"
+                    Submit
                   </button>
 
                   <button

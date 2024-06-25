@@ -11,4 +11,4 @@ Flask-Migrate==4.0.7
 flask-sqlalchemy==3.0.5
 Werkzeug==2.3.6
 boto3
-
+PyJWT
