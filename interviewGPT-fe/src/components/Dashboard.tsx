@@ -216,10 +216,8 @@ const Dashboard = () => {
         className="max-w-[1400px] min-w-fit mx-auto sm:p-6 p-2 mt-[2rem]"
         style={{ paddingTop: 0 }}
       >
-        <div className="mb-4">
+        <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold mb-1">Dashboard</h1>
-        </div>
-        <div className="flex justify-end items-center mb-4">
           <div className="flex gap-[2rem]">
             <div
               className="flex w-[19rem] items-center bg-zinc-200 dark:bg-zinc-800 rounded-lg "

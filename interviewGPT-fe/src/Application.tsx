@@ -171,6 +171,7 @@ function Application() {
     setRole("");
     setRole2("");
     setFile(null);
+    setLoad(false);
   };
 
   const docHanler = () => {
@@ -216,10 +217,11 @@ function Application() {
                 </button>
                 <button
                   onClick={manualHandler}
-                  className="  mt-[1rem]  py-2 w-[8rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80"
+                  className="  mt-[1rem]  py-2 w-[8rem] font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80 ml-2"
                 >
                   Type Manually
                 </button>
+                ``
               </div>
 
               <form onSubmit={doc ? uploadDoc : uploadJD}>
@@ -316,7 +318,7 @@ function Application() {
           </div>
         </div>
 
-        <div >
+        <div>
           <Table
             setMainData={setMainData}
             setLoad={setLoad}

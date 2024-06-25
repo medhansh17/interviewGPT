@@ -98,33 +98,39 @@ const ExampleComponent = ({ refresh }: { refresh: () => void }) => {
       }
 
       const response = await api.post("/upload_resume_to_job", formData);
+      console.log(response.data);
 
-      if (response.status === 200) {
+      if (
+        response.data.message ===
+        "Resumes uploaded successfully and processing started."
+      ) {
         refresh();
-        setTimeout(refresh, 2000);
         toast.success({
           type: "background",
           duration: 3000,
-          status: "Success",
+          status: "success",
           title: "Resume uploaded successfully",
           description: "",
           open: true,
         });
+      } else {
+        throw new Error("Unexpected response format");
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Error uploading resume:", error);
       toast.error({
         type: "background",
         duration: 3000,
         status: "Error",
         title: "Error uploading resume",
-        description: "",
+        description: error.message || "",
         open: true,
       });
     } finally {
       setSubmitting(false);
       setUploadedFiles([]);
     }
-  }, [uploadedFiles, jobDetails, refresh, toast]);
+  }, [uploadedFiles, jobDetails, refresh]);
 
   // const checkAdmin = useCallback(() => {
   //   const role = localStorage.getItem("role");
@@ -139,15 +145,18 @@ const ExampleComponent = ({ refresh }: { refresh: () => void }) => {
         multiple
         accept="application/pdf, image/png"
         onChange={handleFileEvent}
-        className="hidden"
+        className={` hidden`}
         disabled={fileLimit || submitting}
       />
 
       {!uploadedFiles.length && (
-        <label htmlFor="fileUpload">
-          <a className={`btn btn-primary ${fileLimit ? "disabled" : ""}`}>
-            Bulk Upload
-          </a>
+        <label
+          htmlFor="fileUpload"
+          className={`btn btn-primary ${
+            fileLimit ? "disabled" : ""
+          } refreshbtn`}
+        >
+          <a>Bulk Upload</a>
         </label>
       )}
 
