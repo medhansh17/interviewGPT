@@ -1,6 +1,4 @@
 export const Features = () => {
-
-
   return (
     <div className="" data-aos="fade-up">
       <div className="relative px-4 py-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8 lg:py-20">
@@ -18,18 +16,20 @@ export const Features = () => {
             <div className="p-5">
               <div className="flex items-center justify-center w-10 h-10 mb-4 rounded-full bg-indigo-50">
                 <img
-                  width="30"
-                  height="30"
-                  src="https://img.icons8.com/ios-glyphs/30/decision--v1.png"
+                  width="40"
+                  height="40"
+                  src=".\assets\ai-analysis.svg"
                   alt="decision--v1"
                 />
               </div>
               <p className="text-xl mb-2 font-bold">
-                Custom Question Generation:
+                AI-Powered Resume Analysis
               </p>
               <p className="text-lg leading-5 text-gray-600">
-                Enter Job Descriptions, Get AI-Crafted Interview Questions -
-                Tailored to Assess Key Skills and Experience Levels.
+                Utilize AI to match job descriptions with resumes, identifying
+                both matching and missing skills, and evaluating years of
+                experience to generate a comprehensive cumulative score for each
+                candidate.
               </p>
             </div>
             <div className="w-full h-1 ml-auto duration-300 origin-left transform scale-x-0 bg-deep-purple-accent-400 group-hover:scale-x-100" />
@@ -46,11 +46,12 @@ export const Features = () => {
                 />
               </div>
               <p className=" text-xl mb-2 font-bold">
-                Comprehensive Answer Guide
+                AI-Driven Skill Gap Analysis
               </p>
               <p className="text-lg leading-5 text-gray-600">
-                Access Well-Structured Answers and Key Keywords for Each
-                Question, Enabling In-Depth Candidate Evaluation.
+                Use AI to identify and highlight skill gaps in candidates,
+                providing actionable insights for targeted training and
+                development programs.
               </p>
             </div>
             <div className="w-full h-1 ml-auto duration-300 origin-left transform scale-x-0 bg-deep-purple-accent-400 group-hover:scale-x-100" />
@@ -68,11 +69,12 @@ export const Features = () => {
                 />
               </div>
               <p className="text-xl mb-2 font-bold">
-                Candidate Evaluation Tool
+                AI-Generated Online Assessments
               </p>
               <p className="text-lg leading-5 text-gray-600">
-                Effortlessly Mark Responses as Correct, Partially Correct, or
-                Wrong - Streamline the Scoring Process for Each Skill
+                Create customized online assessment tests specifically curated
+                for each candidate based on the role, ensuring relevant and
+                accurate evaluations.
               </p>
             </div>
             <div className="w-full h-1 ml-auto duration-300 origin-left transform scale-x-0 bg-deep-purple-accent-400 group-hover:scale-x-100" />
@@ -93,11 +95,12 @@ export const Features = () => {
                   />
                 </div>
                 <p className="text-xl mb-2 font-bold">
-                  Skill-Based Scoring System
+                  AI-Proctored Online Exams
                 </p>
                 <p className="text-lg leading-5 text-gray-600 w-full md:w-[20rem]">
-                  Quantify Candidate Competency with an Automated Scoring System
-                  Based on Interview Responses.
+                  Conduct anti-cheating, online proctored exams to maintain
+                  integrity, while comprehensively assessing both behavioral and
+                  technical aspects of the candidate.
                 </p>
               </div>
               <div className="w-full h-1 ml-auto duration-300 origin-left transform scale-x-0 bg-deep-purple-accent-400 group-hover:scale-x-100" />
@@ -115,10 +118,13 @@ export const Features = () => {
                     alt="share-rounded"
                   />
                 </div>
-                <p className="text-xl mb-2 font-bold">Downloadable Reports</p>
+                <p className="text-xl mb-2 font-bold">
+                  AI-Driven Exam Analysis
+                </p>
                 <p className="text-lg leading-5 text-gray-600 w-full md:w-[20rem]">
-                  Easily Download Candidate Evaluations and Comprehensive
-                  Reports for Record-Keeping and Analysis
+                  Provide detailed AI-driven analysis of the exam, covering both
+                  behavioral and technical aspects, to deliver insightful
+                  reports for informed decision-making.
                 </p>
               </div>
               <div className="w-full h-1 ml-auto duration-300 origin-left transform scale-x-0 bg-deep-purple-accent-400 group-hover:scale-x-100" />
