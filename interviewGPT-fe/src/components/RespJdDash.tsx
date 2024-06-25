@@ -2,7 +2,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import Header from "./Header";
 import api from "./customAxios/Axios";
 import { useToast } from "./toast";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { UserContext } from "../context/JobContext";
 import { setCandList, deleteCandidateByName } from "../context/JobContext";
 import InterviewDataDisplay from "./candidateResult";
@@ -53,6 +53,7 @@ interface TechnicalQuestion {
 const RespJdDash = () => {
   const { setLoading } = useLoader();
   const toast = useToast();
+  const navigate = useNavigate();
   const { state, dispatch } = useContext(UserContext)!;
   const [jobDetails, setJobDetails] = useState<MyObjectType | null>(null);
   const [file, setFile] = useState<any | null>(null);
@@ -135,7 +136,7 @@ const RespJdDash = () => {
           duration: 3000,
           status: "Error",
           title: "Error fetching candidate details",
-          description: err.response?.data?.error || "An error occurred.",
+          description: err.message || "An error occurred.",
           open: true,
         });
       } finally {
@@ -180,6 +181,31 @@ const RespJdDash = () => {
     };
     getCandList();
   };
+  // const autoRefresh = () => {
+  //   console.log("Autowed");
+  //   handleRefresh();
+  //   let i = 5;
+  //   const countdownElement = document.getElementsByClassName("refreshbtn");
+  //   console.log(countdownElement);
+  //   const updateCountdown = () => {
+  //     if (i > 0 && countdownElement) {
+  //       countdownElement[0].textContent = `Auto Refresh in ${i}`;
+  //       countdownElement[1].textContent = `Auto Refresh in ${i}`;
+
+  //       i--;
+  //       setTimeout(updateCountdown, 1000);
+  //     } else {
+  //       countdownElement
+  //         ? (countdownElement[0].textContent = "Bulk Upload")
+  //         : null;
+  //       countdownElement
+  //         ? (countdownElement[1].textContent = "Add new candidate")
+  //         : null;
+  //       handleRefresh();
+  //     }
+  //   };
+  //   updateCountdown();
+  // };
   // Calculate total number of pages
   const totalPages = Math.ceil(Data.length / itemsPerPage);
   // Pagination logic
@@ -210,12 +236,11 @@ const RespJdDash = () => {
     setLoading(true);
     try {
       const response = await api.post("/upload_resume_to_job", newResume);
+      console.log(response.status);
       if (response.status === 200) {
+        console.log("Medhansh");
         handleRefresh();
         setLoading(false);
-        setTimeout(() => {
-          handleRefresh();
-        }, 7000);
         toast.success({
           type: "background",
           duration: 3000,
@@ -228,14 +253,14 @@ const RespJdDash = () => {
       }
     } catch (error) {
       setLoading(false);
-      toast.error({
-        type: "background",
-        duration: 3000,
-        status: "Error",
-        title: "Error uploading resume",
-        description: "",
-        open: true,
-      });
+      // toast.error({
+      //   type: "background",
+      //   duration: 3000,
+      //   status: "Error",
+      //   title: "Error uploading resume",
+      //   description: "",
+      //   open: true,
+      // });
       setFile(null);
     } finally {
       setLoading(false);
@@ -333,6 +358,18 @@ const RespJdDash = () => {
           }}
         />
       )}
+      <span
+        className=" absolute top-[4%] left-[1%] cursor-pointer"
+        onClick={() => navigate("/dashboard")}
+      >
+        <img
+          src="./assets/back-button.svg"
+          alt="BACK"
+          width={30}
+          height={30}
+          className="cursor-pointer"
+        />
+      </span>
       <p className="w-[93%] mx-auto">
         <Header />
       </p>
@@ -404,14 +441,14 @@ const RespJdDash = () => {
             />
             {file ? (
               <button
-                className="bg-green-500 text-white p-2 rounded-lg shadow"
+                className="bg-green-500 text-white p-2 rounded-lg shadow refreshbtn"
                 onClick={addResume}
               >
                 Upload
               </button>
             ) : (
               <button
-                className="bg-blue-500 text-white p-2 rounded-lg shadow"
+                className="bg-blue-500 text-white p-2 rounded-lg shadow refreshbtn"
                 onClick={handleBrowseClick}
               >
                 Add new Candidate
