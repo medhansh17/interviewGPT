@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { submitAudio } from "@/api/audioSubmission";
 import { useToast } from "./toast";
 import { useLoader } from "@/context/loaderContext";
@@ -21,9 +21,25 @@ const AudioRecorder = ({
   const [minutes, setMinutes] = useState<number>(2);
   const [seconds, setSeconds] = useState<number>(0);
   const [isRunning, setIsRunning] = useState<boolean>(false);
-  const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
-  const [isRecorded, setIsRecorded] = useState<boolean>(false);
   const timerRef = useRef<any>(null);
+  const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Reset the state when the question changes
+    setRecordedUrl(null);
+    setMinutes(2);
+    setSeconds(0);
+    setIsRunning(false);
+    if (mediaRecorder.current && mediaRecorder.current.state === "recording") {
+      mediaRecorder.current.stop();
+    }
+    clearInterval(timerRef.current);
+    if (mediaStream.current) {
+      mediaStream.current.getTracks().forEach((track: MediaStreamTrack) => {
+        track.stop();
+      });
+    }
+  }, [question_id]);
 
   const submitAudioBlob = async (blob: Blob) => {
     setLoading(true);
@@ -66,8 +82,8 @@ const AudioRecorder = ({
         const recordedBlob = new Blob(chunks.current, { type: "audio/wav" });
         const url = URL.createObjectURL(recordedBlob);
         setRecordedUrl(url);
-        setIsRecorded(true);
         chunks.current = [];
+        submitAudioBlob(recordedBlob);
       };
       mediaRecorder.current.start();
       isRecording.current = true;
@@ -124,16 +140,9 @@ const AudioRecorder = ({
     }, 1000);
   };
 
-  const handleRerecord = () => {
+  const handleReRecord = () => {
     setRecordedUrl(null);
-    setIsRecorded(false);
-  };
-
-  const handleSubmit = () => {
-    if (recordedUrl) {
-      const recordedBlob = new Blob(chunks.current, { type: "audio/wav" });
-      submitAudioBlob(recordedBlob);
-    }
+    startRecording();
   };
 
   return (
@@ -146,12 +155,12 @@ const AudioRecorder = ({
         <p>{isRunning ? "Recording" : "Not recording"}</p>
       </div>
       {recordedUrl && (
-        <div>
+        <div className="mt-4">
           <audio controls src={recordedUrl} />
         </div>
       )}
       <div className="w-[150px] flex justify-between mt-2">
-        {!isRecorded ? (
+        {!recordedUrl && (
           <>
             <button
               className="bg-blue-500 text-white p-2 rounded-lg shadow"
@@ -168,21 +177,14 @@ const AudioRecorder = ({
               Stop
             </button>
           </>
-        ) : (
-          <>
-            <button
-              className="bg-blue-500 text-white p-2 rounded-lg shadow"
-              onClick={handleRerecord}
-            >
-              Rerecord
-            </button>
-            <button
-              className="bg-blue-500 text-white p-2 rounded-lg shadow"
-              onClick={handleSubmit}
-            >
-              Submit
-            </button>
-          </>
+        )}
+        {recordedUrl && (
+          <button
+            className="bg-blue-500 text-white p-2 rounded-lg shadow"
+            onClick={handleReRecord}
+          >
+            Re-record
+          </button>
         )}
       </div>
     </div>

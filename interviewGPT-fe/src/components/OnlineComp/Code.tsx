@@ -55,7 +55,7 @@ const Code = () => {
     }
   };
 
-  const saveCurrentCode = () => {
+  const saveCurrentCode = async () => {
     setCodeResponses((prevResponses) => {
       const updatedResponses = [...prevResponses];
       const currentResponseIndex = updatedResponses.findIndex(
@@ -72,19 +72,18 @@ const Code = () => {
           user_code: code,
         });
       }
-
+      setCodeResponses(updatedResponses);
       return updatedResponses;
     });
   };
 
   const codeSubmit = async () => {
     setLoading(true);
-    // Save current code and wait for state to update
-    await new Promise((resolve) => {
-      saveCurrentCode();
-      setTimeout(resolve, 0); // Ensure state is updated
+    console.log(code);
+    codeResponses.push({
+      question_id: codingQuestions[currentQuestionIndex].coding_ques_id,
+      user_code: code,
     });
-
     const resp = await api.post("/store_code_response", {
       candidate_id: beha ? JSON.parse(beha).candidate_id : "",
       job_id: localStorage.getItem("job_id"),
