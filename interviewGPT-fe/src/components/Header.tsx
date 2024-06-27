@@ -11,23 +11,24 @@ const Header = () => {
   };
 
   return (
-    <div className="flex justify-between items-center md:mx-[2rem] mx-[1rem] py-2">
+    <div className="flex justify-between items-center py-2 max-w-[1400px] mx-auto pt-4 mb-2">
       <Link to="/">
         <div className="flex justify-center items-center">
           <img
-            src="./assets/cropped_logo.webp"
+            src="./assets/InterviewGPT-logo.png"
             alt="logo"
-            className="md:w-[3rem] h-[3rem] w-[2rem]"
+            className="w-[300px]"
           />
-          <h1 className="text-[2.5rem] text-[#3388CC] font-semibold font-roboto flex justify-center mb-4 mt-[1rem]">
-            InterviewGPT
-          </h1>
         </div>
       </Link>
 
       <li
         className={`group max-lg:border-b mt-[-1rem] w-[200px] relative list-none ${
-          pathname === "/login" ? "hidden" : "block"
+          pathname === "/login" ||
+          pathname === "/register" ||
+          pathname == "/register-admin"
+            ? "hidden"
+            : "block"
         }`}
       >
         <div className="hover:text-[#007bff] hover:fill-[#007bff] text-gray-600 font-semibold text-[16px] block">

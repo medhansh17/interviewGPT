@@ -181,31 +181,25 @@ const RespJdDash = () => {
     };
     getCandList();
   };
-  // const autoRefresh = () => {
-  //   console.log("Autowed");
-  //   handleRefresh();
-  //   let i = 5;
-  //   const countdownElement = document.getElementsByClassName("refreshbtn");
-  //   console.log(countdownElement);
-  //   const updateCountdown = () => {
-  //     if (i > 0 && countdownElement) {
-  //       countdownElement[0].textContent = `Auto Refresh in ${i}`;
-  //       countdownElement[1].textContent = `Auto Refresh in ${i}`;
+  const autoRefresh = () => {
+    handleRefresh();
+    let i = 7;
+    const countdownElement = document.getElementById("refreshbtn");
+    const updateCountdown = () => {
+      if (i > 0 && countdownElement) {
+        countdownElement.textContent = `Auto Refresh in ${i}`;
+        i--;
+        setTimeout(updateCountdown, 1000);
+      } else {
+        countdownElement
+          ? (countdownElement.textContent = "Bulk Upload")
+          : null;
+        handleRefresh();
+      }
+    };
+    updateCountdown();
+  };
 
-  //       i--;
-  //       setTimeout(updateCountdown, 1000);
-  //     } else {
-  //       countdownElement
-  //         ? (countdownElement[0].textContent = "Bulk Upload")
-  //         : null;
-  //       countdownElement
-  //         ? (countdownElement[1].textContent = "Add new candidate")
-  //         : null;
-  //       handleRefresh();
-  //     }
-  //   };
-  //   updateCountdown();
-  // };
   // Calculate total number of pages
   const totalPages = Math.ceil(Data.length / itemsPerPage);
   // Pagination logic
@@ -238,8 +232,7 @@ const RespJdDash = () => {
       const response = await api.post("/upload_resume_to_job", newResume);
       console.log(response.status);
       if (response.status === 200) {
-        console.log("Medhansh");
-        handleRefresh();
+        autoRefresh();
         setLoading(false);
         toast.success({
           type: "background",
@@ -359,7 +352,7 @@ const RespJdDash = () => {
         />
       )}
       <span
-        className=" absolute top-[4%] left-[1%] cursor-pointer"
+        className=" absolute top-[6%] left-[1%] cursor-pointer"
         onClick={() => navigate("/dashboard")}
       >
         <img
@@ -395,12 +388,13 @@ const RespJdDash = () => {
         <div className="flex justify-between items-center mb-4">
           <div>
             <button
-              className="bg-blue-500 text-white p-2 rounded-lg shadow"
+              id="refreshbtn"
+              className="bg-blue-500 text-white p-2 rounded-lg shadow "
               onClick={handleRefresh}
             >
               Refresh
             </button>
-            <ExampleComponent refresh={() => handleRefresh()} />
+            <ExampleComponent refresh={() => autoRefresh()} />
           </div>
 
           <div className="flex gap-[2rem]">
@@ -441,14 +435,14 @@ const RespJdDash = () => {
             />
             {file ? (
               <button
-                className="bg-green-500 text-white p-2 rounded-lg shadow refreshbtn"
+                className="bg-green-500 text-white p-2 rounded-lg shadow"
                 onClick={addResume}
               >
                 Upload
               </button>
             ) : (
               <button
-                className="bg-blue-500 text-white p-2 rounded-lg shadow refreshbtn"
+                className="bg-blue-500 text-white p-2 rounded-lg shadow"
                 onClick={handleBrowseClick}
               >
                 Add new Candidate
@@ -617,16 +611,16 @@ const RespJdDash = () => {
                         <p>{item.JD_MATCH}</p>
                         <span
                           className={`text-green-700 py-1 px-3 rounded-full text-xs ${
-                            item.MATCH_STATUS === "SELECTED FOR REVIEW"
+                            item.MATCH_STATUS === "Selected"
                               ? "bg-green-200"
-                              : item.MATCH_STATUS === "ON HOLD"
+                              : item.MATCH_STATUS === "On hold"
                               ? "bg-yellow-200"
                               : "bg-red-200"
                           }`}
                         >
-                          {item.MATCH_STATUS == "SELECTED FOR REVIEW"
+                          {item.MATCH_STATUS == "Selected"
                             ? "Selected"
-                            : item.MATCH_STATUS === "ON HOLD"
+                            : item.MATCH_STATUS === "On hold"
                             ? "On Hold"
                             : "Rejected"}
                         </span>

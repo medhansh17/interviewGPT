@@ -244,6 +244,14 @@ const InterviewDataDisplay: React.FC<InterviewDataProps> = ({
                     </td>
                   </tr>
                 ))}
+                <tr>
+                  <td className="border-2 border-gray-400 p-2 font-bold">
+                    Total Score
+                  </td>
+                  <td className="border-2 border-gray-400 p-2 font-bold">
+                    {parsedScore.final_score}
+                  </td>
+                </tr>
               </tbody>
             </table>
           ) : (
@@ -258,15 +266,21 @@ const InterviewDataDisplay: React.FC<InterviewDataProps> = ({
     <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-10">
       <div className="relative bg-white dark:bg-zinc-700 rounded-lg shadow p-6 w-full max-w-5xl overflow-auto max-h-[calc(100vh-1rem)]">
         <button
-          className="absolute top-2 right-2 text-black p-2"
+          className="absolute top-4 right-4 bg-blue-500 text-white rounded-full p-2 w-10 h-10 flex items-center justify-center"
           onClick={onClick}
         >
           <FontAwesomeIcon icon={faTimes} />
         </button>
+
         <h1 className="text-2xl font-bold mb-6 text-center">
           Interview Data for {candidate_name}
         </h1>
-
+        <img
+          src={resultData.candidate_image}
+          alt="candidate_image"
+          width={200}
+          className="absolute right-[10%] top-0"
+        />
         <section>
           <h2 className="text-lg font-bold mb-4">Audio Transcript</h2>
           {renderAudioTranscripts(audio_transcript)}

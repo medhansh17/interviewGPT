@@ -63,7 +63,7 @@ const Login: React.FC = () => {
       className="bg-gray-100 flex w-screen h-screen items-center justify-center p-4 flex-col"
       id="main-content"
     >
-      <p className="sm:w-[93%] w-full mx-auto">
+      <p className="sm:w-[93%] w-full mx-auto max-w-[1400px]">
         <Header />
       </p>
       <div className="flex items-center justify-center h-screen w-[500px] bg-zinc-100 dark:bg-zinc-800">
@@ -118,7 +118,7 @@ const Login: React.FC = () => {
           </div>
           <div className="mb-8">
             <button
-              className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none "
               type="submit"
               disabled={loading}
             >

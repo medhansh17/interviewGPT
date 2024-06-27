@@ -152,9 +152,7 @@ const ExampleComponent = ({ refresh }: { refresh: () => void }) => {
       {!uploadedFiles.length && (
         <label
           htmlFor="fileUpload"
-          className={`btn btn-primary ${
-            fileLimit ? "disabled" : ""
-          } refreshbtn`}
+          className={`btn btn-primary ${fileLimit ? "disabled" : ""} `}
         >
           <a>Bulk Upload</a>
         </label>
