@@ -387,7 +387,7 @@ def create_assessment_email_body(candidate_name, link):
 
         <h4>Important Information:</h4>
         <ul>
-            <li><strong>Link Expiry:</strong> The assessment link will expire in 2 hours from the time of this email. Please ensure to complete the assessment within this timeframe.</li>
+            <li><strong>Link Expiry:</strong> The assessment link will expire in 24 hours from the time of this email. Please ensure to complete the assessment within this timeframe.</li>
             <li><strong>Preparation:</strong> Ensure you have a stable internet connection and a quiet environment to complete the assessment without interruptions.</li>
             <li><strong>Support:</strong> If you encounter any issues or have any questions, please do not hesitate to reach out to us at recruitment@bluetickconsultants.com.</li>
         </ul>

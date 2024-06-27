@@ -359,7 +359,7 @@ def fetch_coding_question(current_user):
 # token link generation for assessment
 
 
-def generate_assessment_token(candidate_id, candidate_name, job_id, user_id, validity_hours=2):
+def generate_assessment_token(candidate_id, candidate_name, job_id, user_id, validity_hours=24):
     payload = {
         'candidate_id': candidate_id,
         'candidate_name': candidate_name,
