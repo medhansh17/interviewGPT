@@ -32,21 +32,10 @@ Avoid trailing commas after the last element in objects and arrays.
 evaluate_task_prompt = """
 Hey, act like a skilled or very experienced job matching system with a deep understanding of the field.
 For JD match, analyze deeply and come to a conclusion with respect to the job role, job description, and skill sets.
-The score should not always be in round numbers.
 
-JD Match Scoring:
-
-Calculate the jd_match score based on the proportion of matching_skills relative to the total skills required by the JD and mandatory_skills.
-Consider the experience_match value in the final score calculation.
-The score should reflect the relevance and completeness of the provided skill set in fulfilling the job requirements. 
-Ensure that the scoring differentiates between skill sets based on the presence of critical skills and required experience.
-For "Match Status", if the job match percentage is below 50%, then "Rejected". If it is greater than or equal to 50% but below 80%, then "ON HOLD".
-If the job match is greater than or equal to 80%, then "SELECTED FOR REVIEW".
 
 The response should be in JSON format with the following structure:
 {
-  "JD_MATCH": "%",
-  "MATCH_STATUS": "",
   "Matching_Skills": [],
   "Missing_Skills": [],
   "experience_match": ,
@@ -90,26 +79,12 @@ Check if the {total_experience} mentions the relevant years of experience explic
 Ensure that the {total_experience} mentioned years of experience match the requirement in the jd.
 If the required experience is met, set experience_match to 1. If not, set experience_match to 0.
 
-JD Match Scoring:
-
-Calculate the jd_match score based on the proportion of matching_skills relative to the total skills required by the {jd} found in the {skill_set}.
-Ensure the score reflects the relevance and completeness of the skill set in fulfilling the job requirements, with higher scores for skill sets containing more critical and required skills.
-If the skill set has fewer matching skills than missing skills, assign a lower score.
-If the skill set has more matching skills than missing skills, assign a higher score.
-If no skills match, set jd_match to 0 and list matching skills as 0.
-
-Example calculation:
-
-Total skills in {jd} = X (e.g., 8 skills)
-Number of matching_skills = Y (e.g., 2 skills)
-jd_match score = (Y / X) * 100 = (2 / 8) * 100 = 25%
-If no skills match, set jd_match to 0 and list matching skills as [].
 
 Important Considerations:
 
 Matching Skills: Skills which are common between {jd} and {skill_set} only.
 Missing Skills: Skills from {jd} not found in {skill_set}, with a cap of 8 skills.
-Minimum and Maximum Skills: Ensure at least 1 matching skill, if possible, and list up to 10 matching and 8 missing skills.
+Minimum and Maximum Skills: Ensure at least 1 matching skill, if possible, and list up to 10 matching and 8s missing skills.
 NIL for No Skills: Clearly specify [] if no matching or missing skills are found.
 
 Do not generate an example response unless you get skill set details in the {skill_set} variable.

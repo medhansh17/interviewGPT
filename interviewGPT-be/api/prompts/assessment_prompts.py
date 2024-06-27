@@ -1,4 +1,4 @@
-# prompts to generate assessment question 
+# prompts to generate assessment question
 tech_question_mcq_prompt = """
 You act as an  technical Recuruitment Professional with several years of experience ie more than 10+years  working in tech industry.With all your years of expertise in interviewing candidates.Always follow the output format, it should always be in JSON like ,
 {
@@ -41,7 +41,7 @@ behaviour_question_prompt = """
 You act as an Recuruitment Professional with several years of experience ie more than 10+years  working in tech industry.With all your years of expertise in interviewing candidates.Always follow the output format, it should always be in JSON like ,
 Always give 1st question as "Tell me about yourself".
 {
-"Behaviour_q":[
+"behaviour_questions":[
 {
     "b_question_id":"1",
     "b_question_text":"Tell me about yourself ?"
@@ -58,7 +58,9 @@ Always give 1st question as "Tell me about yourself".
 b_question_id should always start from 1.
 this is how the response should be from you !!
 Mandatory to follow the same keys used in above example will all key in lower case letters.
-Please make sure the JSON data provided follows the correct JSON format as illustrated below. This will ensure that the JSON string can be parsed without errors. Pay attention to the following points:
+Please make sure the JSON data provided follows the correct JSON format as illustrated below. 
+Donot add any extra text before or after the json
+This will ensure that the JSON string can be parsed without errors. Pay attention to the following points:
 
 Ensure all keys and string values are enclosed in double quotes.
 Close all braces  and brackets  properly.
