@@ -11,12 +11,14 @@ from .prompts.response_evaluate_prompts import (
     factors, evaluate_tech_prompt, evaluate_code_prompt,evaluate_behavioural_prompt)
 from openai import OpenAI
 from .config import AUDIO_FOLDER, MODEL_NAME
-from .auth import token_required
+from .auth import token_required,SECRET_KEY
 from sqlalchemy.orm.exc import NoResultFound
 import threading
 from werkzeug.exceptions import NotFound
 from urllib.parse import unquote
 import boto3
+import jwt
+
 
 response_evaluate_bp = Blueprint('response_evaluate', __name__)
 
@@ -429,15 +431,18 @@ def fetch_user_responses():
     
 @response_evaluate_bp.route('/upload_screenshot', methods=['POST'])
 def upload_screenshot():
-    data = request.form
-    candidate_id = data.get('candidate_id')
+    token = request.args.get('token')
+    #data = request.form
+    #candidate_id = data.get('candidate_id')
     image = request.files['image']
     
 
-    if not candidate_id or not image:
+    if not token or not image:
         return jsonify({'error': 'Missing required parameters.'}), 400
 
     try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+        candidate_id = payload['candidate_id']
         candidate = Candidate.query.filter_by(id=candidate_id).first()
         if not candidate:
             return jsonify({'error': 'Candidate not found.'}), 404
