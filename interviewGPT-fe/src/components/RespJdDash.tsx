@@ -273,7 +273,7 @@ const RespJdDash = () => {
       const resp = await api.get(
         `/delete_resume?resume_id=${item.resume_id}&job_id=${jobDetails?.job_id}`
       );
-      if (resp.statusText === "OK") {
+      if (resp.status === 200) {
         dispatch(deleteCandidateByName(item.candidate_name));
         setLoading(false);
         toast.success({

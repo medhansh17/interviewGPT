@@ -6,12 +6,14 @@ import { faCamera, faMicrophone } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate, useParams } from "react-router-dom";
 import getAssessmentSheet from "@/api/assessmentSheet";
 import { useToast } from "../toast";
+import { useLoader } from "@/context/loaderContext";
 
 export function isMobile() {
   return /Mobi|Android/i.test(navigator.userAgent);
 }
 
 const IntroScreen: React.FC = () => {
+  const { setLoading } = useLoader();
   const toast = useToast();
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
   const [isMicrophoneAccessible, setIsMicrophoneAccessible] =
@@ -20,7 +22,7 @@ const IntroScreen: React.FC = () => {
   const [isCameraAccessible, setIsCameraAccessible] = useState<boolean>(false);
   const [isBrowserAccessible, setIsBrowserAccessible] = useState<boolean>(true);
   const [hasTakenSelfie, setHasTakenSelfie] = useState<boolean>(false);
-  const [isAssessmentLoaded, setIsAssessmentLoaded] = useState<boolean>(false);
+  // const [isAssessmentLoaded, setIsAssessmentLoaded] = useState<boolean>(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const navigate = useNavigate();
@@ -61,30 +63,31 @@ const IntroScreen: React.FC = () => {
     checkMediaAccess();
   }, []);
 
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      if (token) {
-        try {
-          const resp = await getAssessmentSheet(token);
-          console.log(resp);
-          setIsAssessmentLoaded(true);
-        } catch (error: any) {
-          toast.error({
-            type: "background",
-            duration: 3000,
-            status: "Error",
-            title: "Error",
-            description:
-              error.response?.data?.error || "Failed to load assessment.",
-            open: true,
-          });
-          setIsAssessmentLoaded(false);
+  const fetchQuestions = async () => {
+    setLoading(true);
+    if (token) {
+      try {
+        const resp = await getAssessmentSheet(token);
+        console.log(resp.status);
+        if (resp.status === 200) {
+          setLoading(false);
+          sessionStorage.setItem("question", JSON.stringify(resp.data));
+          navigate("/instruction");
         }
+      } catch (error: any) {
+        setLoading(false);
+        toast.error({
+          type: "background",
+          duration: 3000,
+          status: "Error",
+          title: "Error",
+          description:
+            error.response?.data?.error || "Failed to load assessment.",
+          open: true,
+        });
       }
-    };
-
-    fetchQuestions();
-  }, [token]);
+    }
+  };
 
   const takeSelfie = () => {
     if (videoRef.current && canvasRef.current) {
@@ -404,11 +407,7 @@ const IntroScreen: React.FC = () => {
         <div className="border-t border-solid border-lightgray mt-8">
           <button
             onClick={() => {
-              if (isAssessmentLoaded) {
-                navigate("/instruction");
-              } else {
-                alert("Assessment data is not loaded. Please try again later.");
-              }
+              fetchQuestions();
             }}
             style={{ width: "30%" }}
             disabled={
@@ -416,16 +415,14 @@ const IntroScreen: React.FC = () => {
               !isCameraAccessible ||
               !isMicrophoneAccessible ||
               isPhone ||
-              !hasTakenSelfie ||
-              !isAssessmentLoaded
+              !hasTakenSelfie
             }
             className={`w-[18%] mx-auto block ${
               !isBrowserAccessible ||
               !isCameraAccessible ||
               !isMicrophoneAccessible ||
               isPhone ||
-              !hasTakenSelfie ||
-              !isAssessmentLoaded
+              !hasTakenSelfie
                 ? "bg-gray-300"
                 : "bg-green-500 hover:bg-green-600"
             } text-white py-2 px-4 rounded mt-4 w-full`}

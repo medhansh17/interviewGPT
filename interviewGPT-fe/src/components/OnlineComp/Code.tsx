@@ -90,7 +90,7 @@ const Code = () => {
       code: codeResponses,
     });
 
-    if (resp.statusText === "OK") {
+    if (resp.status === 200) {
       setLoading(false);
       navigate("/success");
     } else {
