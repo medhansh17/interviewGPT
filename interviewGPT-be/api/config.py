@@ -22,7 +22,7 @@ for folder in folders:
     if not os.path.exists(folder):
         os.makedirs(folder)
 
-MODEL_NAME = "gpt-4-turbo"
+MODEL_NAME = "gpt-4o"
 
 # Set up OpenAI API client
 client = None

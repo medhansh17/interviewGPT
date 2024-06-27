@@ -154,9 +154,10 @@ def generate_new_question(old_question, difficulty_level, system_prompt, user_pr
 
     response = dict(response)
     response_data = dict(dict(response['choices'][0])['message'])[
-        'content'].replace("\n", " ")
+        'content'].replace("\n", " ").replace("```json", "").replace("```", "")
 
     response_content = ' '.join(response_data.split())
+    print(response_content)
     new_question = json.loads(response_content)
     return new_question
 
@@ -170,8 +171,8 @@ def update_candidate_question(current_user):
     question_id = data.get('question_id')
     # 'technical', 'behavioral', 'coding'
     question_type = data.get('question_type').lower()
-    topic_prompt = data.get('topic_prompt'," ")
-    difficulty_level=data.get("difficulty_level"," ") ## easy, medium, hard
+    topic_prompt = data.get('topic_prompt', " ")
+    difficulty_level = data.get("difficulty_level", " ")  # easy, medium, hard
     print(data)
     if not resume_id or not job_id or not question_type or not topic_prompt:
         return jsonify({'error': 'Candidate name, job_id, question_type, and topic_prompt are required parameters.'}), 400
@@ -191,14 +192,16 @@ def update_candidate_question(current_user):
     candidate = Candidate.query.filter_by(
         resume_id=resume_id, job_id=job_id, user_id=current_user.id).one()
 
-    old_question = str(fetch_question_details(question_id, question_type, current_user.id))
+    old_question = str(fetch_question_details(
+        question_id, question_type, current_user.id))
     if not old_question:
         return jsonify({'error': 'Question not found.'}), 404
 
     new_question = generate_new_question(old_question, difficulty_level,
                                          prompt_generator[question_type], topic_prompt)
 
-    update_functions[question_type](question_id, new_question, candidate.id, current_user.id)
+    update_functions[question_type](
+        question_id, new_question, candidate.id, current_user.id)
 
     return jsonify({'message': 'Question updated successfully.'}), 200
 
@@ -207,20 +210,23 @@ def update_candidate_question(current_user):
 
 def fetch_question_details(question_id, question_type, user_id):
     if question_type == 'technical':
-        question = TechnicalQuestion.query.filter_by(id=question_id, user_id=user_id).first()
+        question = TechnicalQuestion.query.filter_by(
+            id=question_id, user_id=user_id).first()
         if question:
             return {
                 'question_text': question.question_text,
                 'options': question.options
             }
     elif question_type == 'behavioral':
-        question = BehaviouralQuestion.query.filter_by(id=question_id, user_id=user_id).first()
+        question = BehaviouralQuestion.query.filter_by(
+            id=question_id, user_id=user_id).first()
         if question:
             return {
                 'question_text': question.question_text,
             }
     elif question_type == 'coding':
-        question = CodingQuestion.query.filter_by(id=question_id, user_id=user_id).first()
+        question = CodingQuestion.query.filter_by(
+            id=question_id, user_id=user_id).first()
         if question:
             return {
                 'question_text': question.question_text,
@@ -228,6 +234,7 @@ def fetch_question_details(question_id, question_type, user_id):
                 'sample_output': question.sample_output
             }
     return None
+
 
 def update_technical_question(question_id, new_question, candidate_id, user_id):
     tech_question = TechnicalQuestion.query.filter_by(
@@ -348,8 +355,8 @@ def fetch_coding_question(current_user):
     return jsonify({'coding_question': coding_questions}), 200
 
 
-### APPROVAL SCREEN
-## token link generation for assessment
+# APPROVAL SCREEN
+# token link generation for assessment
 
 
 def generate_assessment_token(candidate_id, candidate_name, job_id, user_id, validity_hours=2):
@@ -358,7 +365,7 @@ def generate_assessment_token(candidate_id, candidate_name, job_id, user_id, val
         'candidate_name': candidate_name,
         'job_id': job_id,
         'user_id': user_id,
-        'exp': datetime.utcnow() + timedelta(hours=validity_hours), # Expiry time
+        'exp': datetime.utcnow() + timedelta(hours=validity_hours),  # Expiry time
         'iat': datetime.utcnow()  # Issued at time
     }
     token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
@@ -370,38 +377,44 @@ def generate_assessment_token(candidate_id, candidate_name, job_id, user_id, val
 def approve_candidate(current_user):
     data = request.get_json()
     candidate_id = data.get('candidate_id')
-    candidate = Candidate.query.filter_by(id=candidate_id, user_id=current_user.id).one()
-    
+    candidate = Candidate.query.filter_by(
+        id=candidate_id, user_id=current_user.id).one()
+
     if not candidate:
         return jsonify({'error': 'Candidate not found.'}), 404
-    
-    extracted_info = ExtractedInfo.query.filter_by(resume_id=candidate.resume_id, user_id=current_user.id).first()
 
-    token = generate_assessment_token(candidate.id, candidate.name, candidate.job_id, current_user.id)
+    extracted_info = ExtractedInfo.query.filter_by(
+        resume_id=candidate.resume_id, user_id=current_user.id).first()
+
+    token = generate_assessment_token(
+        candidate.id, candidate.name, candidate.job_id, current_user.id)
     link = f'{FRONTEND_URL}/online-assess/{token}'
-    
+
     html_content = create_assessment_email_body(candidate.name, link)
-    
-    msg = Message('Assessment Link', sender=EMAIL_USER, recipients=[extracted_info.email_id], cc=[TA_USER], html=html_content)
+
+    msg = Message('Assessment Link', sender=EMAIL_USER, recipients=[
+                  extracted_info.email_id], cc=[TA_USER], html=html_content)
     mail.send(msg)
     print(TA_USER)
-    resume_score = ResumeScore.query.filter_by(resume_id=candidate.resume_id, user_id=current_user.id).first()
+    resume_score = ResumeScore.query.filter_by(
+        resume_id=candidate.resume_id, user_id=current_user.id).first()
 
     if resume_score:
         resume_score.status = 'Assessment link send to candidate'
         db.session.commit()
-    
+
     return jsonify({'message': 'Assessment link has been sent to the candidate.'}), 200
 
-## Assessment sheet send to candidate 
+# Assessment sheet send to candidate
+
 
 @question_management_bp.route('/assessment_sheet', methods=['GET'])
 def assessment_sheet():
     token = request.args.get('token')
-    
+
     if not token:
         return jsonify({'error': 'Token is required.'}), 400
-    
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
     except jwt.ExpiredSignatureError:
@@ -414,18 +427,19 @@ def assessment_sheet():
     job_id = payload['job_id']
     user_id = payload['user_id']
 
-    candidate = Candidate.query.filter_by(id=candidate_id, job_id=job_id, user_id=user_id).first()
-    
+    candidate = Candidate.query.filter_by(
+        id=candidate_id, job_id=job_id, user_id=user_id).first()
+
     if not candidate:
         return jsonify({'error': 'Candidate not found.'}), 404
     # check the assessment link is accessed multiple times
     if candidate.link_used:
         return jsonify({'error': 'This link has already been used.'}), 403
-    
+
     # Mark the link as used
     candidate.link_used = True
     db.session.commit()
-    
+
     technical_questions = []
     for question in candidate.technical_questions:
         technical_questions.append({

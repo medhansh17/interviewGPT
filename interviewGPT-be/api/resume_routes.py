@@ -106,10 +106,9 @@ def chatgpt_message(app, jd, job_role, skill_set, total_experience):
             temperature=0,
             max_tokens=1000
         )
-
         response = dict(response)
         response_data = dict(dict(response['choices'][0])['message'])[
-            'content'].replace("\n", " ")
+            'content'].replace("\n", " ").replace("```json", "").replace("```", "")
         return response_data
 
 
@@ -169,7 +168,7 @@ def extract_details_from_resume(text_resume):
     res = {}
     response = dict(response)
     response_data = dict(dict(response['choices'][0])['message'])[
-        'content'].replace("\n", " ")
+        'content'].replace("\n", " ").replace("```json", "").replace("```", "")
     response_data = ' '.join(response_data.split())
     response_data = response_data.strip().strip('```json').strip().strip('```')
 
@@ -188,13 +187,39 @@ def process_resumes(app, job_id, role, resume_list, user_id):
 
         any_errors = False  # Flag to track if any errors occurred
 
+        status_map = {
+            (0, 50): "Rejected",
+            (50, 75): "On hold",
+            (75, 100): "Selected"
+        }
+
+        def get_status(percentage):
+            for (lower, upper), status in status_map.items():
+                if lower <= percentage < upper:
+                    return status
+            return "Selected"  # Fallback for exactly 100%
+
+        def calculate_match_percentage(resume_info):
+            matching_skills = resume_info.get('matching_skills', [])
+            missing_skills = resume_info.get('missing_skills', [])
+
+            matching_count = len(matching_skills)
+            missing_count = len(missing_skills)
+            print(matching_count, missing_count)
+            total_count = matching_count + missing_count
+
+            jd_match_percentage = (
+                matching_count / total_count) * 100 if total_count > 0 else 0
+            return round(jd_match_percentage, 2)
+
         for resume_id, filename in resume_list:
             try:
                 if filename.endswith(".pdf"):
                     text_resume = extract_text_from_resume(app, role, filename)
                     print(f"Extracted text from resume:")
 
-                    resume_record = Resume.query.filter_by(id=resume_id, user_id=user_id).first()
+                    resume_record = Resume.query.filter_by(
+                        id=resume_id, user_id=user_id).first()
                     if resume_record:
                         resume_id = resume_record.id
 
@@ -223,7 +248,8 @@ def process_resumes(app, job_id, role, resume_list, user_id):
                             print(
                                 f"Saved candidate info to the database for: {candidate_name}")
 
-                            create_extracted_info(extracted_info, resume_id, user_id)
+                            create_extracted_info(
+                                extracted_info, resume_id, user_id)
                             print(
                                 f"Created extracted info for resume ID: {resume_id}")
 
@@ -239,7 +265,7 @@ def process_resumes(app, job_id, role, resume_list, user_id):
                         total_experience = existing_info.total_experience
 
                         print("Skill set -> ", skill_set)
-                        
+
                         AI_score_response = chatgpt_message(
                             app, job.jd, job.role, str(skill_set), str(total_experience))
                         print(
@@ -254,10 +280,14 @@ def process_resumes(app, job_id, role, resume_list, user_id):
                             resume_info = AI_score_response_dict
                             resume_score.resume_filename = filename
                             resume_score.name = existing_info.name
-                            resume_score.jd_match = resume_info.get(
-                                'jd_match', None)
-                            resume_score.match_status = resume_info.get(
-                                'match_status', None)
+
+                            jd_match_percentage = calculate_match_percentage(
+                                resume_info)
+                            resume_score.jd_match = jd_match_percentage
+
+                            resume_score.match_status = get_status(
+                                jd_match_percentage)
+
                             resume_score.matching_skills = resume_info.get(
                                 'matching_skills', None)
                             resume_score.missing_skills = resume_info.get(
@@ -316,7 +346,8 @@ def upload_resume_to_job(current_user):
         if len(uploaded_files) > MAX_FILES:
             return jsonify({'message': f'Exceeded maximum number of files ({MAX_FILES}) allowed for upload.'}), 400
 
-        job = Job.query.filter_by(role=role, id=job_id, user_id=current_user_id).first()
+        job = Job.query.filter_by(
+            role=role, id=job_id, user_id=current_user_id).first()
         if not job:
             return jsonify({'message': 'Specified job role or description does not exist.'}), 400
 
@@ -330,7 +361,8 @@ def upload_resume_to_job(current_user):
             resume_path = os.path.join(folder_path, resume_filename)
             resume_file.save(resume_path)
 
-            new_resume = Resume(filename=resume_filename, job_id=job.id, user_id=current_user_id)
+            new_resume = Resume(filename=resume_filename,
+                                job_id=job.id, user_id=current_user_id)
             db.session.add(new_resume)
             db.session.commit()
 
@@ -421,7 +453,8 @@ def delete_resume(current_user):
     if not resume_id:
         return jsonify({'error': 'Resume ID is a required parameter.'}), 400
 
-    resume = Resume.query.filter_by(id=resume_id, user_id=current_user_id).first()
+    resume = Resume.query.filter_by(
+        id=resume_id, user_id=current_user_id).first()
     if not resume:
         return jsonify({'error': 'No resume found for the provided resume ID.'}), 404
 
@@ -436,7 +469,8 @@ def delete_resume(current_user):
         new_filename = f"{resume.filename}_{timestamp}.pdf"
         file_to_archive_path = os.path.join(archive_role_folder, new_filename)
         try:
-            shutil.move(os.path.join(RESUME_FOLDER, role, resume.filename), file_to_archive_path)
+            shutil.move(os.path.join(RESUME_FOLDER, role,
+                        resume.filename), file_to_archive_path)
         except FileNotFoundError:
             pass  # Ignore the error if the file is not found
         # Delete the resume record
@@ -468,7 +502,8 @@ def update_resume_status(current_user):
 
     status_bool = status.lower() == 'true'
 
-    resume_score = ResumeScore.query.filter_by(resume_id=resume_id, user_id=current_user_id).first()
+    resume_score = ResumeScore.query.filter_by(
+        resume_id=resume_id, user_id=current_user_id).first()
     if resume_score is None:
         return jsonify({'error': 'Resume score record not found.'}), 404
 

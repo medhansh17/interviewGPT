@@ -9,6 +9,7 @@ from . import db
 from .prompts.assessment_prompts import tech_question_mcq_prompt, behaviour_question_prompt, coding_question_prompt
 from .config import MODEL_NAME
 from .auth import token_required
+from api.middleware import retry
 
 assessment_bp = Blueprint('assessment', __name__)
 
@@ -40,7 +41,7 @@ def tech_question_mcq(jd13, no_tech_questions, Tech_skills):
     print("generating tech quest")
     tech_response = dict(tech_response)
     tech_response = dict(dict(tech_response['choices'][0])['message'])[
-        'content'].replace("\n", " ")
+        'content'].replace("\n", " ").replace("```json", "").replace("```", "")
     tech_response = ' '.join(tech_response.split())
     print("done tech quest")
     return tech_response
@@ -49,9 +50,12 @@ def tech_question_mcq(jd13, no_tech_questions, Tech_skills):
 def behaviour_questions(no_behav_questions, behav_skills):
     message = [
         {"role": "system", "content": behaviour_question_prompt},
-        {"role": "user", "content": f"""always mandatory to generate {no_behav_questions} behaviour questions, not more than that, and based on behaviour skills which the candidate has {behav_skills}, if they don't have, give a question by your choice, i.e., soft skill question. 
+        {"role": "user", "content": f"""always mandatory to generate {no_behav_questions} behaviour questions, not more than that, 
+         sand based on behaviour skills which the candidate has {behav_skills}, 
+        if they don't have, give a question by your choice, i.e., soft skill question. 
         Mandatory to follow the same keys used in the above example with all keys in lower case letters. 
-        Please make sure the JSON data provided follows the correct JSON format as illustrated below. This will ensure that the JSON string can be parsed without errors. Pay attention to the following points: 
+        Please make sure the JSON data provided follows the correct JSON format as illustrated below. 
+        This will ensure that the JSON string can be parsed without errors. Pay attention to the following points: 
         Ensure all keys and string values are enclosed in double quotes. 
         Close all braces and brackets properly. 
         Avoid trailing commas after the last element in objects and arrays.
@@ -68,7 +72,7 @@ def behaviour_questions(no_behav_questions, behav_skills):
     print("generating beh quest")
     behav_response = dict(behav_response)
     behav_response = dict(dict(behav_response['choices'][0])['message'])[
-        'content'].replace("\n", " ")
+        'content'].replace("\n", " ").replace("```json", "").replace("```", "")
     behav_response = ' '.join(behav_response.split())
     print("done beh quest")
     return behav_response
@@ -96,7 +100,7 @@ def coding_question_generate(no_code_questions):
     print("generating code quest")
     coding_response = dict(coding_response)
     coding_response = dict(dict(coding_response['choices'][0])['message'])[
-        'content'].replace("\n", " ")
+        'content'].replace("\n", " ").replace("```json", "").replace("```", "")
     coding_response = ' '.join(coding_response.split())
     print("done code quest")
     print("code question which are genrated below:")
@@ -143,6 +147,7 @@ def save_assessment_to_db(job_id, role, candidate_id, tech_questions, behaviour_
     return jsonify({'message': 'Assessment data saved successfully.'}), 200
 
 
+@ retry(max_retries=2, delay=2)
 def generate_and_save_assessment(app, job_id, no_tech_questions, no_behav_questions, no_code_questions, resume_score_id, resume_id, user_id):
     with app.app_context():
         try:
@@ -156,7 +161,8 @@ def generate_and_save_assessment(app, job_id, no_tech_questions, no_behav_questi
             role = job.role
 
             # To fetch candidate id based on resume id
-            candidate = Candidate.query.filter_by(resume_id=resume_id, user_id=user_id).one()
+            candidate = Candidate.query.filter_by(
+                resume_id=resume_id, user_id=user_id).one()
             candidate_id = candidate.id
 
             TechnicalQuestion.query.filter(
@@ -181,23 +187,20 @@ def generate_and_save_assessment(app, job_id, no_tech_questions, no_behav_questi
                     no_behav_questions, behavioral_skills)
                 print("code fucntioni scalled to geerate")
                 question_coding = coding_question_generate(no_code_questions)
-                print("tech_mcqquestion")
                 print(question_tech)
-                print("behavquestion")
                 print(question_behav)
-                print("codingquestion")
                 print(question_coding)
                 print("every type of questio is completed")
                 tech_questions_json = json.loads(
                     question_tech).get('tech_questions', [])
                 print("tech loaded ")
                 behaviour_questions_json = json.loads(
-                    question_behav).get('Behaviour_q', [])
+                    question_behav).get('behaviour_questions', [])
                 coding_question_json = json.loads(
                     question_coding).get('coding_question', [])
-                print("tech_questions_json",tech_questions_json)
-                print("behaviour_questions_json",behaviour_questions_json)
-                print("coding_question_json",coding_question_json)
+                print("tech_questions_json", tech_questions_json)
+                print("behaviour_questions_json", behaviour_questions_json)
+                print("coding_question_json", coding_question_json)
                 save_assessment_to_db(job_id, role, candidate_id, tech_questions_json,
                                       behaviour_questions_json, coding_question_json, user_id)
                 resume_score.status = 'assessment_generated'
@@ -225,13 +228,14 @@ def CHECK_Auto_assessment(current_user):
         no_behav_questions = data.get('no_behav_questions')
         no_code_questions = data.get('no_code_question')
         print("check assesmet started")
-        print('no_tech_questions',no_tech_questions)
-        print('no_behav_questions',no_behav_questions)
-        print('no_code_question',no_code_questions)
+        print('no_tech_questions', no_tech_questions)
+        print('no_behav_questions', no_behav_questions)
+        print('no_code_question', no_code_questions)
         if not job_id or not resume_id:
             return jsonify({'error': 'Job ID and Resume ID are required parameters.'}), 400
 
-        resume_score = ResumeScore.query.filter_by(resume_id=resume_id, user_id=current_user.id).first()
+        resume_score = ResumeScore.query.filter_by(
+            resume_id=resume_id, user_id=current_user.id).first()
 
         if resume_score:
             resume_score.status = 'generating_assessment'
