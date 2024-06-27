@@ -29,7 +29,7 @@ const IntroScreen: React.FC = () => {
   const { token } = useParams<{ token: string }>();
 
   useEffect(() => {
-    localStorage.clear();
+    sessionStorage.clear();
     setIsPhone(isMobile());
 
     const checkMediaAccess = async () => {

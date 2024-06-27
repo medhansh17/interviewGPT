@@ -100,12 +100,12 @@ const InterviewDataDisplay: React.FC<InterviewDataProps> = ({
 
   const renderCodeResponses = (codeResponses?: string) => {
     if (!codeResponses) {
-      return <div>No code responses available</div>;
+      return <div className="mb-2 mt-[-10px]">No code responses!!</div>;
     }
 
     const parsedCodeResponses: CodeResponse | null = parseJSON(codeResponses);
     if (!parsedCodeResponses || !parsedCodeResponses.coding_evaluation) {
-      return <div>Error parsing code responses</div>;
+      return <div>Error Parsing Code Response!</div>;
     }
 
     return parsedCodeResponses.coding_evaluation.map((evaluation, index) => (
