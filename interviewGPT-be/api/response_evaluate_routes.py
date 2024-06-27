@@ -437,7 +437,7 @@ def upload_screenshot():
     image = request.files['image']
     
 
-    if not candidate_id or not image:
+    if not token or not image:
         return jsonify({'error': 'Missing required parameters.'}), 400
 
     try:
