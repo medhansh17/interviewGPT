@@ -45,7 +45,7 @@ export default function GenerateQuestionsPopup({
         no_behav_questions: numBehavioral,
         no_code_question: numCoding,
       });
-      if (resp.statusText === "OK") window.location.reload();
+      if (resp.status === 200) window.location.reload();
       setLoading(false);
     } catch (err: any) {
       setLoading(false);
