@@ -118,28 +118,31 @@ const IntroScreen: React.FC = () => {
     return new Blob([ab], { type: mimeString });
   };
 
-  const uploadSelfie = async (imageFile: any) => {
+  const uploadSelfie = async (imageFile: File) => {
     const formData = new FormData();
-    formData.append(
-      "candidate_id",
-      JSON.parse(sessionStorage.getItem("question") ?? "").candidate_id
-    );
     formData.append("image", imageFile);
 
     try {
-      const response = await api.post("/upload_screenshot", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      setLoading(true);
+      const response = await api.post(
+        `/upload_screenshot?token=${token}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       if (response.status === 200) {
-        console.log("Image uploaded successfully:", response.data.image_url);
+        setLoading(false);
       } else {
-        console.error("Image upload failed:", response.data.error);
+        setLoading(false);
+        alert("Image upload failed,try again");
       }
     } catch (error) {
-      console.error("Error uploading image:", error);
+      setLoading(false);
+      alert("Error uploading image , try again");
     }
   };
 
