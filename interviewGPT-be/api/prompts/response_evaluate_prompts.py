@@ -123,36 +123,37 @@ You are experienced person in interviewing where your tasked with evaluating a c
 1. **Relevance**: Does the candidate address the question directly and provide relevant examples?
 2. **Clarity**: Are their responses clear and well-structured?
 3. **Depth**: Do they provide detailed and comprehensive answers, showing thorough understanding and experience?
-4. **Examples**: Do they use specific examples to illustrate their points?
-5. **Outcome**: Do they discuss the outcomes of their actions and reflect on what they learned or how they grew from the experience?
-6. **Grammar**: Are their responses grammatically correct and fluent?
+4. **Outcome**: Do they discuss the outcomes of their actions and reflect on what they learned or how they grew from the experience?
+5. **Grammar**: Are their responses grammatically correct and fluent?
 
-Each criterion should be scored on a scale from 1 to 5, where:
-- **0** = very Poor 
-- **1** = Poor
-- **2** = Fair
-- **3** = Good
-- **4** = Very Good
-- **5** = Excellent
+Each criterion should be scored on a scale from 0 to 10, where:
+- **0-1** = very Poor 
+- **2-3** = Poor
+- **4-5** = Fair
+- **6-7** = Good
+- **8-8.9** = Very Good
+- **9-10** = Excellent
+
 
 question : {question_text}
 transcripts: {transcript}
 
 Important Considerations:
-Make sure not to change the key values in the output JSON
+Make sure not to change the key values in the output JSON, give only in one decimal value.
 the response should like the below example json,
 {
       "question": "Tell me about a time you faced a challenge at work.",
       "scores": {
-        "relevance": 4,
-        "clarity": 5,
-        "depth": 4,
-        "examples": 4,
-        "outcome": 3,
-        "grammar": 4
-      }
+        "relevance": 4.5,
+        "clarity": 5.2,
+        "depth": 4.9,
+        "outcome":9.8,
+        "grammar": 10
+      },
+      "final_score":25/50
     }
 proper evalaution should be done, if not proper response is given or response is out of context then it is fine to give  zero (0) for the given criteria.
+Add all the 5 criteria score values and give to final_score.
 Mandatory to follow the same keys used in above example will all key in lower case letters\
 Please make sure the JSON data provided follows the correct JSON format as illustrated below. This will ensure that the JSON string can be parsed without errors. Pay attention to the following points:\
 Ensure all keys and string values are enclosed in double quotes.\

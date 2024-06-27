@@ -196,7 +196,7 @@ def perform_techmcq_assessment(mcq_question):
     )
     response = dict(response)
     tech_assessment_response = dict(dict(response['choices'][0])['message'])[
-        'content'].replace("\n", " ")
+        'content'].replace("\n", " ").replace("```json", "").replace("```", "")
     tech_assessment_response = ' '.join(tech_assessment_response.split())
     return tech_assessment_response
 
@@ -291,7 +291,7 @@ def perform_code_assessment(question_code):
     )
     response = dict(response)
     assessment_response = dict(dict(response['choices'][0])['message'])[
-        'content'].replace("\n", " ")
+        'content'].replace("\n", " ").replace("```json", "").replace("```", "")
     assessment_response = ' '.join(assessment_response.split())
     return assessment_response
 
