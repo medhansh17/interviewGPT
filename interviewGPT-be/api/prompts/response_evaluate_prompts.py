@@ -64,6 +64,8 @@ evaluate_code_prompt="""
 
     the problem statement details for the code is {response_data89} given in json format along with sample input nad output and the code snippet of the assessment is given  in this variable {code}
     All these should be JSON formated like below , where code_score , question can be taken from {response_data89} and user_code can be obtained from the variable {code}
+    Ensure that the provided code matches the problem statement and test cases. Only valid code related to the problem statement should be evaluated.
+    I need a correctly formatted JSON response where the code_response field contains nested JSON strings with double quotes that are properly escaped.
     Always the repsone should only be in JSON format like below structure no other string should be added.
     {
   "coding_evaluation": [
@@ -150,7 +152,7 @@ the response should like the below example json,
         "outcome":9.8,
         "grammar": 10
       },
-      "final_score":25/50
+      "final_score":"25/50"
     }
 proper evalaution should be done, if not proper response is given or response is out of context then it is fine to give  zero (0) for the given criteria.
 Add all the 5 criteria score values and give to final_score.
