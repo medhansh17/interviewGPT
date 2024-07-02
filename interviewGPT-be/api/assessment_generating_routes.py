@@ -108,14 +108,19 @@ def coding_question_generate(no_code_questions):
     return coding_response
 
 
-def save_assessment_to_db(job_id, role, candidate_id, tech_questions, behaviour_questions, coding_questions, user_id):
-    job = Job.query.filter_by(id=job_id, user_id=user_id).first()
+def save_assessment_to_db(job_id, role, candidate_id, tech_questions, behaviour_questions, coding_questions, user_id,role_name):
+
+    if role_name == 'product-owner':
+        job = Job.query.filter_by(id=job_id).first()
+    else:
+        job = Job.query.filter_by(id=job_id, user_id=user_id).first()
     if not job:
         return jsonify({'error': 'Invalid job ID.'}), 400
     print("save assesmnet to db fucnstatred")
     candidate = Candidate.query.filter_by(id=candidate_id).first()
 
     for question in tech_questions:
+        print("Adding technical question:")
         tech_question = TechnicalQuestion(question_text=question['question'], options=json.dumps(
             question['options']), correct_answer=question['answer'], candidate_id=candidate_id, user_id=user_id, user_answer="", tech_eval="")
         db.session.add(tech_question)
@@ -125,6 +130,7 @@ def save_assessment_to_db(job_id, role, candidate_id, tech_questions, behaviour_
         db.session.add(candidate_question)
 
     for question in behaviour_questions:
+        print("Adding behaviour_questions :")
         behav_question = BehaviouralQuestion(
             question_text=question['b_question_text'], candidate_id=candidate_id, user_id=user_id, audio_transcript="")
         db.session.add(behav_question)
@@ -134,6 +140,7 @@ def save_assessment_to_db(job_id, role, candidate_id, tech_questions, behaviour_
         db.session.add(candidate_question)
 
     for question in coding_questions:
+        print("Adding  coding_questions:")
         code_question = CodingQuestion(question_text=question['question'], sample_input=question['sample_input'],
                                        sample_output=question['sample_output'], candidate_id=candidate_id, user_id=user_id, user_code="", code_eval="")
         db.session.add(code_question)
@@ -148,34 +155,51 @@ def save_assessment_to_db(job_id, role, candidate_id, tech_questions, behaviour_
 
 
 @ retry(max_retries=2, delay=2)
-def generate_and_save_assessment(app, job_id, no_tech_questions, no_behav_questions, no_code_questions, resume_score_id, resume_id, user_id):
+def generate_and_save_assessment(app, job_id, no_tech_questions, no_behav_questions, no_code_questions, resume_score_id, resume_id, user_id,role_name):
     with app.app_context():
         try:
             print("entered genrate and save assessment")
             resume_score = ResumeScore.query.get(resume_score_id)
             if resume_score is None:
                 raise ValueError("ResumeScore not found")
+            
+            if role_name == 'product-owner':
+                job = Job.query.filter_by(id=job_id).first()
+                candidate = Candidate.query.filter_by(resume_id=resume_id).first()
+                candidate_info = ExtractedInfo.query.filter_by(resume_id=resume_id).first()
+            else:
+                job = Job.query.filter_by(id=job_id, user_id=user_id).first()
+                candidate = Candidate.query.filter_by(resume_id=resume_id, user_id=user_id).first()
+                candidate_info = ExtractedInfo.query.filter_by(resume_id=resume_id, user_id=user_id).first()
+            if not job:
+                print(f"Job with id {job_id} not found.")
+                return
+            
+            if not candidate:
+                print(f"Candidate with resume_id {resume_id} not found.")
+                return
 
-            job = Job.query.filter_by(id=job_id, user_id=user_id).first()
+            if not candidate_info:
+                print(f"ExtractedInfo with resume_id {resume_id} not found.")
+                return    
             jd = job.jd
             role = job.role
 
-            # To fetch candidate id based on resume id
-            candidate = Candidate.query.filter_by(
-                resume_id=resume_id, user_id=user_id).one()
+            
             candidate_id = candidate.id
+            
 
             TechnicalQuestion.query.filter(
-                TechnicalQuestion.candidate_id == candidate_id, TechnicalQuestion.user_id == user_id).delete()
+                TechnicalQuestion.candidate_id == candidate_id).delete()
             BehaviouralQuestion.query.filter(
-                BehaviouralQuestion.candidate_id == candidate_id, BehaviouralQuestion.user_id == user_id).delete()
+                BehaviouralQuestion.candidate_id == candidate_id).delete()
             CodingQuestion.query.filter(
-                CodingQuestion.candidate_id == candidate_id, CodingQuestion.user_id == user_id).delete()
+                CodingQuestion.candidate_id == candidate_id).delete()
 
             db.session.commit()
 
-            candidate_info = ExtractedInfo.query.filter_by(
-                resume_id=resume_id, user_id=user_id).one()
+            
+            
 
             if candidate_info:
                 technical_skills = candidate_info.tech_skill
@@ -202,7 +226,7 @@ def generate_and_save_assessment(app, job_id, no_tech_questions, no_behav_questi
                 print("behaviour_questions_json", behaviour_questions_json)
                 print("coding_question_json", coding_question_json)
                 save_assessment_to_db(job_id, role, candidate_id, tech_questions_json,
-                                      behaviour_questions_json, coding_question_json, user_id)
+                                      behaviour_questions_json, coding_question_json, user_id,role_name)
                 resume_score.status = 'assessment_generated'
                 db.session.commit()
                 print("save to db can check now")
@@ -233,17 +257,19 @@ def CHECK_Auto_assessment(current_user):
         print('no_code_question', no_code_questions)
         if not job_id or not resume_id:
             return jsonify({'error': 'Job ID and Resume ID are required parameters.'}), 400
-
-        resume_score = ResumeScore.query.filter_by(
-            resume_id=resume_id, user_id=current_user.id).first()
-
+        
+        if current_user.role.name == 'product-owner':
+            resume_score = ResumeScore.query.filter_by(resume_id=resume_id).first()
+        else:
+            resume_score = ResumeScore.query.filter_by(resume_id=resume_id, user_id=current_user.id).first()
+        
         if resume_score:
             resume_score.status = 'generating_assessment'
             db.session.commit()
             print("thread fucntionis called")
             app = current_app._get_current_object()
             thread = Thread(target=generate_and_save_assessment, args=(
-                app, job_id, no_tech_questions, no_behav_questions, no_code_questions, resume_score.id, resume_score.resume_id, current_user.id))
+                app, job_id, no_tech_questions, no_behav_questions, no_code_questions, resume_score.id, resume_score.resume_id, current_user.id,current_user.role.name))
 
             thread.start()
 
@@ -264,9 +290,11 @@ def fetch_candidate_questions(current_user):
 
     if not resume_id or not job_id:
         return jsonify({'error': 'Resume ID and job_id are required parameters.'}), 400
-
-    candidate = Candidate.query.filter_by(
-        resume_id=resume_id, job_id=job_id, user_id=current_user.id).first()
+    
+    if current_user.role.name == 'product-owner':
+        candidate = Candidate.query.filter_by(resume_id=resume_id, job_id=job_id).first()
+    else:
+        candidate = Candidate.query.filter_by(resume_id=resume_id, job_id=job_id, user_id=current_user.id).first()
 
     if not candidate:
         return jsonify({'error': 'Candidate not found for the given job_id.'}), 404

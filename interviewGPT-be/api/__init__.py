@@ -62,7 +62,7 @@ def create_app(config_class=Config):
     return app
 def create_initial_roles():
     from .models import Role
-    roles = ['guest', 'bluetick-admin']
+    roles = ['guest', 'bluetick-admin','product-owner']
     for role in roles:
         if not Role.query.filter_by(name=role).first():
             new_role = Role(name=role)

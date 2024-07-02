@@ -166,6 +166,16 @@ def register_admin():
     
     return register_user(role_name='bluetick-admin')
 
+@login_bp.route('/register_owner', methods=['POST'])
+def register_owner():
+    data = request.get_json()
+    email = data.get('email')
+    
+    if not email or '@bluetickconsultants.com' not in email:
+        return jsonify({'error': 'You are not authorized for owner access.'}), 403
+    
+    return register_user(role_name='product-owner')
+
 def register_user(role_name):
     from api import bcrypt, mail
     data = request.get_json()

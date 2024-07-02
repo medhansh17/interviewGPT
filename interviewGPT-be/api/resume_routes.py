@@ -14,7 +14,7 @@ from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
 from flask import Blueprint, request, jsonify, current_app
 from api.middleware import retry
-from .models import Job, Resume, ExtractedInfo, ResumeScore, Candidate
+from .models import Job, Resume, ExtractedInfo, ResumeScore, Candidate, User
 from .config import RESUME_FOLDER, ARCHIVE_FOLDER, MODEL_NAME
 from .prompts.resume_prompts import extract_resume_prompt, evaluate_task_prompt, user_prompt_evaluation
 # from .agents_resume import create_agents
@@ -34,8 +34,12 @@ def get_extracted_info(current_user):
     if not resume_id:
         return jsonify({'error': 'Resume ID are required in the query parameters'}), 400
 
-    # Query to fetch ExtractedInfo based on resume_id and user_id
-    extracted_info = ExtractedInfo.query.filter_by(
+    # Check if the user is a product-owner
+    if current_user.role.name == 'product-owner':
+        extracted_info = ExtractedInfo.query.filter_by(resume_id=resume_id).first()
+    else:
+        # Query to fetch ExtractedInfo based on resume_id and user_id
+        extracted_info = ExtractedInfo.query.filter_by(
         resume_id=resume_id,
         user_id=current_user.id
     ).first()
@@ -64,7 +68,10 @@ def get_extracted_info(current_user):
 def search_jobs(current_user):
     job_id = request.args.get('job_id')
 
-    job = Job.query.filter_by(id=job_id, user_id=current_user.id).first()
+    if current_user.role.name == 'product-owner':
+        job = Job.query.filter_by(id=job_id).first()
+    else:
+        job = Job.query.filter_by(id=job_id, user_id=current_user.id).first()
     if job:
         job_details = {
             'job_id': job.id,
@@ -176,13 +183,15 @@ def extract_details_from_resume(text_resume):
 
 
 @ retry(max_retries=2, delay=2)
-def process_resumes(app, job_id, role, resume_list, user_id):
+def process_resumes(app, job_id, role, resume_list, user_id,role_name):
     """
     Extract information from resumes, save it to the database, and calculate resume scores.
     """
+    print("enter intoprocess ")
     with app.app_context():
-        job = Job.query.filter_by(id=job_id, user_id=user_id).first()
+        job = Job.query.filter_by(id=job_id).first() if role_name == 'product-owner' else Job.query.filter_by(id=job_id, user_id=user_id).first()
         if not job:
+            print("error happende")
             return jsonify({'error': 'Job not found.'}), 404
 
         any_errors = False  # Flag to track if any errors occurred
@@ -346,7 +355,10 @@ def upload_resume_to_job(current_user):
         if len(uploaded_files) > MAX_FILES:
             return jsonify({'message': f'Exceeded maximum number of files ({MAX_FILES}) allowed for upload.'}), 400
 
-        job = Job.query.filter_by(
+        if current_user.role.name == 'product-owner':
+            job = Job.query.filter_by(role=role, id=job_id).first()
+        else:
+            job = Job.query.filter_by(
             role=role, id=job_id, user_id=current_user_id).first()
         if not job:
             return jsonify({'message': 'Specified job role or description does not exist.'}), 400
@@ -375,14 +387,14 @@ def upload_resume_to_job(current_user):
         print("thread is called")
         app = current_app._get_current_object()
         processing_thread = Thread(target=process_resumes, args=(
-            app, job.id, role, resume_list, current_user_id))
+            app, job.id, role, resume_list, current_user_id,current_user.role.name))
         processing_thread.start()
 
         return jsonify({'message': 'Resumes uploaded successfully and processing started.'}), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
+    
 
 @ats_bp.route('/get_resume_scores', methods=['GET'])
 @token_required
@@ -403,8 +415,12 @@ def get_resume_scores(current_user):
         return jsonify({'error': 'Job ID is a required parameter.'}), 400
 
     # Query to fetch ResumeScore based on job_id and user_id
-    query = db.session.query(ResumeScore).join(
-        Resume).filter(Resume.job_id == job_id, Resume.user_id == current_user_id)
+    if current_user.role.name == 'product-owner':
+        # This query fetches all resume scores and joins with the User table to get the email of the user who uploaded the resume
+        query = db.session.query(ResumeScore, User.email).join(Resume, ResumeScore.resume_id == Resume.id).join(User, Resume.user_id == User.id).filter(Resume.job_id == job_id)
+    else:
+        # If the user is not a product-owner, fetch only the resume scores for resumes uploaded by the current user
+        query = db.session.query(ResumeScore).join(Resume).filter(Resume.job_id == job_id, Resume.user_id == current_user_id)
 
     if sort_by in ['status', 'jd_match']:
         if sort_order == 'desc':
@@ -415,21 +431,37 @@ def get_resume_scores(current_user):
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     resume_scores = pagination.items
 
-    scores_list = [{
-        "resume_id": score.resume_id,
-        "resume_filename": score.resume_filename,
-        "candidate_name": score.name,
-        "JD_MATCH": score.jd_match,
-        "MATCH_STATUS": score.match_status,
-        "Matching_Skills": score.matching_skills,
-        "Missing_Skills": score.missing_skills,
-        "selected_status": score.selected_status,
-        "assessment_status": score.assessment_status,
-        "experience_match": score.experience_match,
-        # "candidate_experience": score.candidate_experience,
-        # "required_experience": score.required_experience,
-        "status": score.status
-    } for score in resume_scores]
+    if current_user.role.name == 'product-owner':
+        # Prepare the resume scores list with the email of the user who uploaded the resume
+        scores_list = [{
+            "resume_id": score.ResumeScore.resume_id,
+            "resume_filename": score.ResumeScore.resume_filename,
+            "candidate_name": score.ResumeScore.name,
+            "JD_MATCH": score.ResumeScore.jd_match,
+            "MATCH_STATUS": score.ResumeScore.match_status,
+            "Matching_Skills": score.ResumeScore.matching_skills,
+            "Missing_Skills": score.ResumeScore.missing_skills,
+            "selected_status": score.ResumeScore.selected_status,
+            "assessment_status": score.ResumeScore.assessment_status,
+            "experience_match": score.ResumeScore.experience_match,
+            "status": score.ResumeScore.status,
+            "email": score.email  # Include the email in the response
+        } for score in resume_scores]
+    else:
+        # Prepare the resume scores list without the email
+        scores_list = [{
+            "resume_id": score.resume_id,
+            "resume_filename": score.resume_filename,
+            "candidate_name": score.name,
+            "JD_MATCH": score.jd_match,
+            "MATCH_STATUS": score.match_status,
+            "Matching_Skills": score.matching_skills,
+            "Missing_Skills": score.missing_skills,
+            "selected_status": score.selected_status,
+            "assessment_status": score.assessment_status,
+            "experience_match": score.experience_match,
+            "status": score.status
+        } for score in resume_scores]
 
     return jsonify({
         'resume_scores': scores_list,
@@ -452,8 +484,11 @@ def delete_resume(current_user):
 
     if not resume_id:
         return jsonify({'error': 'Resume ID is a required parameter.'}), 400
-
-    resume = Resume.query.filter_by(
+    
+    if current_user.role.name == 'product-owner':
+        resume = Resume.query.filter_by(id=resume_id).first()
+    else:
+        resume = Resume.query.filter_by(
         id=resume_id, user_id=current_user_id).first()
     if not resume:
         return jsonify({'error': 'No resume found for the provided resume ID.'}), 404
@@ -502,8 +537,12 @@ def update_resume_status(current_user):
 
     status_bool = status.lower() == 'true'
 
-    resume_score = ResumeScore.query.filter_by(
+    if current_user.role.name == 'product-owner':
+        resume_score = ResumeScore.query.filter_by(resume_id=resume_id).first()
+    else:
+        resume_score = ResumeScore.query.filter_by(
         resume_id=resume_id, user_id=current_user_id).first()
+
     if resume_score is None:
         return jsonify({'error': 'Resume score record not found.'}), 404
 

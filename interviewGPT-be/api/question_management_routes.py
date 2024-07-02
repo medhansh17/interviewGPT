@@ -33,12 +33,14 @@ def edit_candidate_question(current_user):
 
     if not question_id or not question_type or not question_data:
         return jsonify({'error': 'question_id, question_type, and question_data are required parameters.'}), 400
-    candidate = Candidate.query.filter_by(
-        resume_id=resume_id, job_id=job_id, user_id=current_user.id).one()
+    if current_user.role.name == 'product-owner':
+        candidate = Candidate.query.filter_by(resume_id=resume_id, job_id=job_id).one()
+    else:
+        candidate = Candidate.query.filter_by(resume_id=resume_id, job_id=job_id, user_id=current_user.id).one()
     try:
         if question_type == 'technical':
             question = TechnicalQuestion.query.filter_by(
-                candidate_id=candidate.id, id=question_id, user_id=current_user.id).first()
+                candidate_id=candidate.id, id=question_id).first()
             if question:
                 question.question_text = question_data['question']
                 question.options = json.dumps(question_data['options'])
@@ -48,7 +50,7 @@ def edit_candidate_question(current_user):
 
         elif question_type == 'behavioural':
             question = BehaviouralQuestion.query.filter_by(
-                candidate_id=candidate.id, id=question_id, user_id=current_user.id).first()
+                candidate_id=candidate.id, id=question_id).first()
             if question:
                 question.question_text = question_data['b_question_text']
             else:
@@ -56,7 +58,7 @@ def edit_candidate_question(current_user):
 
         elif question_type == 'coding':
             question = CodingQuestion.query.filter_by(
-                candidate_id=candidate.id, id=question_id, user_id=current_user.id).first()
+                candidate_id=candidate.id, id=question_id).first()
             if question:
                 question.question_text = question_data['question']
                 question.sample_input = question_data['sample_input']
@@ -90,12 +92,14 @@ def delete_candidate_question(current_user):
     if not question_id or not question_type:
         return jsonify({'error': 'question_id and question_type are required parameters.'}), 400
 
-    candidate = Candidate.query.filter_by(
-        resume_id=resume_id, job_id=job_id, user_id=current_user.id).one()
+    if current_user.role.name == 'product-owner':
+        candidate = Candidate.query.filter_by(resume_id=resume_id, job_id=job_id).one()
+    else:
+        candidate = Candidate.query.filter_by(resume_id=resume_id, job_id=job_id, user_id=current_user.id).one()
     try:
         if question_type == 'technical':
             question = TechnicalQuestion.query.filter_by(
-                candidate_id=candidate.id, id=question_id, user_id=current_user.id).first()
+                candidate_id=candidate.id, id=question_id).first()
             if question:
                 db.session.delete(question)
             else:
@@ -103,7 +107,7 @@ def delete_candidate_question(current_user):
 
         elif question_type == 'behavioral':
             question = BehaviouralQuestion.query.filter_by(
-                candidate_id=candidate.id, id=question_id, user_id=current_user.id).first()
+                candidate_id=candidate.id, id=question_id).first()
             if question:
                 db.session.delete(question)
             else:
@@ -111,7 +115,7 @@ def delete_candidate_question(current_user):
 
         elif question_type == 'coding':
             question = CodingQuestion.query.filter_by(
-                candidate_id=candidate.id, id=question_id, user_id=current_user.id).first()
+                candidate_id=candidate.id, id=question_id).first()
             if question:
                 db.session.delete(question)
             else:
@@ -189,11 +193,13 @@ def update_candidate_question(current_user):
     if question_type not in prompt_generator:
         return jsonify({'error': 'Invalid question_type provided.'}), 400
 
-    candidate = Candidate.query.filter_by(
-        resume_id=resume_id, job_id=job_id, user_id=current_user.id).one()
-
-    old_question = str(fetch_question_details(
-        question_id, question_type, current_user.id))
+    if current_user.role.name == 'product-owner':
+        candidate = Candidate.query.filter_by(resume_id=resume_id, job_id=job_id).one()
+        old_question = fetch_question_details(question_id, question_type)
+    else:
+        candidate = Candidate.query.filter_by(resume_id=resume_id, job_id=job_id, user_id=current_user.id).one()
+        old_question = fetch_question_details(question_id, question_type, current_user.id)
+    
     if not old_question:
         return jsonify({'error': 'Question not found.'}), 404
 
@@ -201,32 +207,39 @@ def update_candidate_question(current_user):
                                          prompt_generator[question_type], topic_prompt)
 
     update_functions[question_type](
-        question_id, new_question, candidate.id, current_user.id)
+        question_id, new_question, candidate.id)
 
     return jsonify({'message': 'Question updated successfully.'}), 200
 
 # For fetching the old question
 
 
-def fetch_question_details(question_id, question_type, user_id):
+def fetch_question_details(question_id, question_type, user_id=None):
     if question_type == 'technical':
-        question = TechnicalQuestion.query.filter_by(
-            id=question_id, user_id=user_id).first()
+        
+        if user_id:
+            question = TechnicalQuestion.query.filter_by(id=question_id, user_id=user_id).first()
+        else:
+            question = TechnicalQuestion.query.filter_by(id=question_id).first()
         if question:
             return {
                 'question_text': question.question_text,
                 'options': question.options
             }
     elif question_type == 'behavioral':
-        question = BehaviouralQuestion.query.filter_by(
-            id=question_id, user_id=user_id).first()
+        if user_id:
+            question = BehaviouralQuestion.query.filter_by(id=question_id, user_id=user_id).first()
+        else:
+            question = BehaviouralQuestion.query.filter_by(id=question_id).first()
         if question:
             return {
                 'question_text': question.question_text,
             }
     elif question_type == 'coding':
-        question = CodingQuestion.query.filter_by(
-            id=question_id, user_id=user_id).first()
+        if user_id:
+            question = CodingQuestion.query.filter_by(id=question_id, user_id=user_id).first()
+        else:
+            question = CodingQuestion.query.filter_by(id=question_id).first()
         if question:
             return {
                 'question_text': question.question_text,
@@ -236,9 +249,9 @@ def fetch_question_details(question_id, question_type, user_id):
     return None
 
 
-def update_technical_question(question_id, new_question, candidate_id, user_id):
+def update_technical_question(question_id, new_question, candidate_id):
     tech_question = TechnicalQuestion.query.filter_by(
-        candidate_id=candidate_id, id=question_id, user_id=user_id).first()
+        candidate_id=candidate_id, id=question_id).first()
 
     if tech_question:
         tech_question.question_text = new_question['question']
@@ -247,18 +260,18 @@ def update_technical_question(question_id, new_question, candidate_id, user_id):
         db.session.commit()
 
 
-def update_behavioural_question(question_id, new_question, candidate_id, user_id):
+def update_behavioural_question(question_id, new_question, candidate_id):
     behav_question = BehaviouralQuestion.query.filter_by(
-        candidate_id=candidate_id, id=question_id, user_id=user_id).first()
+        candidate_id=candidate_id, id=question_id).first()
 
     if behav_question:
         behav_question.question_text = new_question['b_question_text']
         db.session.commit()
 
 
-def update_coding_question(question_id, new_question, candidate_id, user_id):
+def update_coding_question(question_id, new_question, candidate_id):
     coding_question = CodingQuestion.query.filter_by(
-        candidate_id=candidate_id, id=question_id, user_id=user_id).first()
+        candidate_id=candidate_id, id=question_id).first()
 
     if coding_question:
         coding_question.question_text = new_question['question']
@@ -281,7 +294,7 @@ def fetch_behavioural_questions(current_user):
         return jsonify({'error': 'Resume ID and job_id are required parameters.'}), 400
 
     candidate = Candidate.query.filter_by(
-        resume_id=resume_id, job_id=job_id, user_id=current_user.id).first()
+        resume_id=resume_id, job_id=job_id).first()
 
     if not candidate:
         return jsonify({'error': 'Candidate not found for the given job_id.'}), 404
@@ -308,7 +321,7 @@ def fetch_technical_questions(current_user):
         return jsonify({'error': 'Resume ID and job_id are required parameters.'}), 400
 
     candidate = Candidate.query.filter_by(
-        resume_id=resume_id, job_id=job_id, user_id=current_user.id).first()
+        resume_id=resume_id, job_id=job_id).first()
 
     if not candidate:
         return jsonify({'error': 'Candidate not found for the given job_id.'}), 404
@@ -337,7 +350,7 @@ def fetch_coding_question(current_user):
         return jsonify({'error': 'Resume ID and job_id are required parameters.'}), 400
 
     candidate = Candidate.query.filter_by(
-        resume_id=resume_id, job_id=job_id, user_id=current_user.id).first()
+        resume_id=resume_id, job_id=job_id).first()
 
     if not candidate:
         return jsonify({'error': 'Candidate not found for the given job_id.'}), 404
@@ -377,14 +390,19 @@ def generate_assessment_token(candidate_id, candidate_name, job_id, user_id, val
 def approve_candidate(current_user):
     data = request.get_json()
     candidate_id = data.get('candidate_id')
-    candidate = Candidate.query.filter_by(
-        id=candidate_id, user_id=current_user.id).one()
+
+    if current_user.role.name == 'product-owner':
+        candidate = Candidate.query.filter_by(id=candidate_id).one()
+    else:
+        candidate = Candidate.query.filter_by(id=candidate_id, user_id=current_user.id).one()
 
     if not candidate:
         return jsonify({'error': 'Candidate not found.'}), 404
 
-    extracted_info = ExtractedInfo.query.filter_by(
-        resume_id=candidate.resume_id, user_id=current_user.id).first()
+    if current_user.role.name == 'product-owner':
+        extracted_info = ExtractedInfo.query.filter_by(resume_id=candidate.resume_id).first()
+    else:
+        extracted_info = ExtractedInfo.query.filter_by(resume_id=candidate.resume_id, user_id=current_user.id).first()
 
     token = generate_assessment_token(
         candidate.id, candidate.name, candidate.job_id, current_user.id)
@@ -396,8 +414,11 @@ def approve_candidate(current_user):
                   extracted_info.email_id], cc=[TA_USER], html=html_content)
     mail.send(msg)
     print(TA_USER)
-    resume_score = ResumeScore.query.filter_by(
-        resume_id=candidate.resume_id, user_id=current_user.id).first()
+    
+    if current_user.role.name == 'product-owner':
+        resume_score = ResumeScore.query.filter_by(resume_id=candidate.resume_id).first()
+    else:
+        resume_score = ResumeScore.query.filter_by(resume_id=candidate.resume_id, user_id=current_user.id).first()
 
     if resume_score:
         resume_score.status = 'Assessment link send to candidate'
@@ -428,7 +449,7 @@ def assessment_sheet():
     user_id = payload['user_id']
 
     candidate = Candidate.query.filter_by(
-        id=candidate_id, job_id=job_id, user_id=user_id).first()
+        id=candidate_id, job_id=job_id).first()
 
     if not candidate:
         return jsonify({'error': 'Candidate not found.'}), 404

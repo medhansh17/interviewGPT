@@ -102,7 +102,6 @@ def extract_text_from_pdf(file_path):
             jd_content += page.extract_text()
     return jd_content
 
-
 @job_bp.route('/export_jobs_json', methods=['GET'])
 @token_required
 def export_jobs_as_json(current_user):
@@ -113,8 +112,21 @@ def export_jobs_as_json(current_user):
     if not current_user_id:
         return jsonify({'message': 'Unauthorized access'}), 401
     
-    jobs = Job.query.filter_by(user_id=current_user_id).all()
+    if current_user.role.name == 'product-owner':
+        jobs = db.session.query(Job, User.email).join(User, Job.user_id == User.id).all()
+    else:
+        jobs = db.session.query(Job).filter_by(user_id=current_user_id).all()
+
     jobs_list = [
+        {
+            'id': job.id,
+            'role': job.role,
+            'jd': job.jd,
+            'active': job.active,
+            'email': email if current_user.role.name == 'product-owner' else None
+        }
+        for job, email in jobs if current_user.role.name == 'product-owner'
+    ] if current_user.role.name == 'product-owner' else [
         {
             'id': job.id,
             'role': job.role,
@@ -123,6 +135,7 @@ def export_jobs_as_json(current_user):
         }
         for job in jobs
     ]
+    
     return jsonify(jobs_list)
 
 
@@ -135,6 +148,12 @@ def edit_job(current_user, job_id):
     current_user_id = current_user.id
     if not current_user_id:
         return jsonify({'message': 'Unauthorized access'}), 401
+    
+    if current_user.role.name == 'product-owner':
+        job = Job.query.filter_by(id=job_id).first()
+
+    else:
+        job = Job.query.filter_by(id=job_id, user_id=current_user_id).first()
 
     new_role = request.json.get('role')
     new_jd = request.json.get('jd')
@@ -144,7 +163,6 @@ def edit_job(current_user, job_id):
     if new_role is None and new_jd is None and new_status is None:
         return jsonify({'message': 'Role, job description, or status not provided'}), 400
 
-    job = Job.query.filter_by(id=job_id, user_id=current_user_id).first()
     if not job:
         return jsonify({'message': 'Job not found or Unauthorized'}), 404
 
@@ -176,8 +194,12 @@ def delete_job(current_user):
 
     if not role or not job_id:
         return jsonify({'message': 'Role and ID are required fields.'}), 400
+    
+    if current_user.role.name == 'product-owner':
+        job = Job.query.filter_by(id=job_id).first()
+    else:
+        job = Job.query.filter_by(role=role, id=job_id, user_id=current_user_id).first()
 
-    job = Job.query.filter_by(role=role, id=job_id, user_id=current_user_id).first()
     if not job:
         return jsonify({'message': 'Job not found or unauthorized'}), 404
 
@@ -202,7 +224,11 @@ def get_job_details(current_user, job_id):
     if not current_user_id:
         return jsonify({'message': 'Unauthorized access'}), 401
     
-    job = Job.query.filter_by(id=job_id, user_id=current_user_id).first()
+    if current_user.role.name == 'product-owner':
+        job = Job.query.filter_by(id=job_id).first()
+    else:
+        job = Job.query.filter_by(id=job_id, user_id=current_user_id).first()
+
     if not job:
         return jsonify({'error': 'Job not found or Unauthorized '}), 404
 
