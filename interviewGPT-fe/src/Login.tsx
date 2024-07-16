@@ -28,8 +28,8 @@ const Login: React.FC = () => {
         localStorage.setItem("authToken", token);
         localStorage.setItem("user", JSON.stringify(user_id));
         localStorage.setItem("name", `${first_name} ${last_name}`);
-        if (role === "bluetick-admin") {
-          localStorage.setItem("role", "bluetick-admin");
+        if (role === "bluetick-admin" || role === "product-owner") {
+          localStorage.setItem("role", role);
         }
 
         navigate("/app");

@@ -19,6 +19,7 @@ interface DataItem {
   id: number;
   jd: string;
   role: string;
+  email: string;
   active: boolean;
 }
 
@@ -263,10 +264,13 @@ const Dashboard = () => {
                     <th className="p-3 text-left" style={{ width: "300px" }}>
                       Job Title
                     </th>
-                    <th className="p-3 text-left" style={{ width: "500px" }}>
+                    <th className="p-3 text-left" style={{ width: "450px" }}>
                       Job Description
                     </th>
-                    <th className="p-3 text-left w-[250px]">Active</th>
+                    {localStorage.getItem("role") === "product-owner" && (
+                      <th className="p-3 text-left w-[250px]">User Id</th>
+                    )}
+                    <th className="p-3 text-left w-[100px]">Active</th>
                     <th className="p-3 text-left w-[250px]">Action</th>
                   </tr>
                 </thead>
@@ -335,11 +339,13 @@ const Dashboard = () => {
                           </p>
                         )}
                       </td>
-                      {/* <td className="p-3">
-                            <span className="bg-green-200 text-green-700 py-1 px-3 rounded-full text-xs">
-                              Active
-                            </span>
-                          </td> */}
+                      {localStorage.getItem("role") === "product-owner" && (
+                        <td className="p-3">
+                          <span className="py-1 px-3 rounded-full text-xs">
+                            {item.email}
+                          </span>
+                        </td>
+                      )}
                       <td className="p-3">
                         {editableRow === item.id ? (
                           <select
@@ -387,7 +393,7 @@ const Dashboard = () => {
                             </div>
                           </div>
                         ) : (
-                          <div className="flex items-center justify-around text-lg">
+                          <div className="flex items-center justify-around text-lg lg:flex-row flex-col gap-2">
                             <div>
                               <button
                                 onClick={() => toggleEditRow(item.id)}

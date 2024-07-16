@@ -82,6 +82,17 @@ const RespJdDash = () => {
   const [fullDescriptionId, setFullDescriptionId] = useState<number | null>(
     null
   );
+  const fileInputRef = useRef(null);
+
+  /* pagination */
+
+  // const [resumeScores, setResumeScores] = useState([]);
+  // const [total, setTotal] = useState(0);
+  // const [pages, setPages] = useState(0);
+  // const [currentPage, setCurrentPage] = useState(1);
+  // const [perPage, setPerPage] = useState(10);
+  // const [sortBy, setSortBy] = useState("status");
+  // const [sortOrder, setSortOrder] = useState("asc");
 
   const toggleDescription = (id: number) => {
     setFullDescriptionId(id);
@@ -89,6 +100,10 @@ const RespJdDash = () => {
       prevState && fullDescriptionId === id ? false : true
     );
   };
+
+  // const handlePageChange = (page) => {
+  //   setCurrentPage(page);
+  // };
 
   const handleRightArrowClick = (item: any) => {
     setShowPopup(true);
@@ -150,9 +165,6 @@ const RespJdDash = () => {
     setData(state.candidate_list);
   }, [state.candidate_list]);
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10000; // Number of items per page
-  const fileInputRef = useRef(null);
   const handleBrowseClick = () => {
     if (fileInputRef.current !== null && fileInputRef.current !== undefined) {
       (fileInputRef.current as HTMLInputElement).click();
@@ -191,21 +203,11 @@ const RespJdDash = () => {
         i--;
         setTimeout(updateCountdown, 1000);
       } else {
-        countdownElement
-          ? (countdownElement.textContent = "Bulk Upload")
-          : null;
+        countdownElement ? (countdownElement.textContent = "Refresh") : null;
         handleRefresh();
       }
     };
     updateCountdown();
-  };
-
-  // Calculate total number of pages
-  const totalPages = Math.ceil(Data.length / itemsPerPage);
-  // Pagination logic
-
-  const handlePageChange = (page: any) => {
-    setCurrentPage(page);
   };
 
   const addResume = async () => {
@@ -334,9 +336,7 @@ const RespJdDash = () => {
     setshow_Result(!show_Result);
   };
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentJobs = Data.slice(indexOfFirstItem, indexOfLastItem);
+  const currentJobs = Data;
   return (
     <div
       className="bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white"
@@ -452,259 +452,279 @@ const RespJdDash = () => {
         </div>
 
         {currentJobs.length > 0 ? (
-          <div className="max-w-[1400px] min-w-fit mx-auto shadow">
-            <ConfirmDialog />
-            <table className="w-full">
-              <thead className="bg-zinc-200 dark:bg-zinc-600">
-                <tr>
-                  <th className="p-3 text-left">Candidates</th>
-                  <th className="p-3  text-left">Skills Matching</th>
-                  <th className="p-3 text-left">Skills Missing</th>
-                  <th className="p-3 text-left">Experience Match</th>
-                  <th className="p-3 text-left">Score</th>
-                  <th className="p-3 text-left">Status</th>
-                  <th className="p-3 w-[150px] text-left">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentJobs.map((item: any, index: number) => {
-                  return (
-                    <tr className="border-b dark:border-zinc-600" key={index}>
-                      <td
-                        className="p-2  underline"
-                        onClick={() => showCandDetails(item.resume_id)}
-                      >
-                        {item.candidate_name}
-                      </td>
-                      <td className="p-2 w-[300px]">
-                        {item.Matching_Skills &&
-                          ((fullDescription &&
-                            fullDescriptionId == item.resume_id) ||
-                          item.Matching_Skills.length <= 8 ? (
-                            <p className="">
-                              {item.Matching_Skills.map(
-                                (skill: any, index: any) => (
-                                  <span key={index}>
-                                    {skill}
-                                    {index !==
-                                      item.Matching_Skills.length - 1 && ", "}
-                                  </span>
-                                )
-                              )}
-                              {fullDescription &&
-                                fullDescriptionId == item.resume_id && (
-                                  <FontAwesomeIcon
-                                    icon={faChevronUp}
-                                    className="ml-1"
-                                    onClick={() =>
-                                      toggleDescription(item.resume_id)
-                                    }
-                                  />
-                                )}
-                            </p>
-                          ) : (
-                            <p className="">
-                              {item.Matching_Skills.slice(0, 5).map(
-                                (skill: any, index: any) => (
-                                  <span key={index}>
-                                    {skill}
-                                    {index !== 4 && ", "}
-                                  </span>
-                                )
-                              )}
-                              ...
-                              <span
-                                onClick={() =>
-                                  toggleDescription(item.resume_id)
-                                }
-                              >
-                                {fullDescription &&
-                                fullDescriptionId == item.resume_id ? (
-                                  <FontAwesomeIcon
-                                    icon={faChevronUp}
-                                    className="ml-1"
-                                  />
-                                ) : (
-                                  <FontAwesomeIcon
-                                    icon={faChevronDown}
-                                    className="ml-1"
-                                  />
-                                )}
-                              </span>
-                            </p>
-                          ))}
-                      </td>
+          <div>
+            <div className="max-w-[1400px] min-w-fit mx-auto shadow">
+              <ConfirmDialog />
+              <table className="w-full">
+                <thead className="bg-zinc-200 dark:bg-zinc-600">
+                  <tr>
+                    {localStorage.getItem("role") === "product-owner" && (
+                      <th className="p-3 text-left">User Id</th>
+                    )}
+                    <th className="p-3 text-left">Candidates</th>
+                    <th className="p-3  text-left">Skills Matching</th>
+                    <th className="p-3 text-left">Skills Missing</th>
+                    <th className="p-3 text-left">Experience Match</th>
+                    <th className="p-3 text-left">Score</th>
+                    <th className="p-3 text-left">Status</th>
 
-                      <td className="p-2 w-[300px]">
-                        {item.Missing_Skills &&
-                          ((fullDescription &&
-                            fullDescriptionId == item.resume_id) ||
-                          item.Missing_Skills.length <= 8 ? (
-                            <p className="">
-                              {item.Missing_Skills.map(
-                                (skill: any, index: any) => (
-                                  <span key={index}>
-                                    {skill}
-                                    {index !== item.Missing_Skills.length - 1 &&
-                                      ", "}
-                                  </span>
-                                )
-                              )}
-                              {fullDescription &&
-                                fullDescriptionId == item.resume_id && (
-                                  <FontAwesomeIcon
-                                    icon={faChevronUp}
-                                    className="ml-1"
-                                    onClick={() =>
-                                      toggleDescription(item.resume_id)
-                                    }
-                                  />
-                                )}
-                            </p>
-                          ) : (
-                            <p className="">
-                              {item.Missing_Skills.slice(0, 5).map(
-                                (skill: any, index: any) => (
-                                  <span key={index}>
-                                    {skill}
-                                    {index !== 4 && ", "}
-                                  </span>
-                                )
-                              )}
-                              ...
-                              <span
-                                onClick={() =>
-                                  toggleDescription(item.resume_id)
-                                }
-                              >
-                                {fullDescription &&
-                                fullDescriptionId == item.resume_id ? (
-                                  <FontAwesomeIcon
-                                    icon={faChevronUp}
-                                    className="ml-1"
-                                  />
-                                ) : (
-                                  <FontAwesomeIcon
-                                    icon={faChevronDown}
-                                    className="ml-1"
-                                  />
-                                )}
-                              </span>
-                            </p>
-                          ))}
-                      </td>
-
-                      <td className="text-center">
-                        <span
-                          className={`text-green-700 py-1 px-3 rounded-full text-md ${
-                            item.experience_match === 1
-                              ? "bg-green-200"
-                              : item.MATCH_STATUS === 0
-                              ? "bg-yellow-200"
-                              : "bg-red-200"
-                          }`}
+                    <th className="p-3 w-[150px] text-left">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentJobs.map((item: any, index: number) => {
+                    return (
+                      <tr className="border-b dark:border-zinc-600" key={index}>
+                        {localStorage.getItem("role") === "product-owner" && (
+                          <td className="text-center h-[100px] w-[70px] text-[13px]">{`${item.email}`}</td>
+                        )}
+                        <td
+                          className="p-2  underline"
+                          onClick={() => showCandDetails(item.resume_id)}
                         >
-                          {item.experience_match == 1 ? "Match" : "Mismatch"}
-                        </span>
-                      </td>
-                      <td className=" text-center">
-                        <p>{item.JD_MATCH}</p>
-                        <span
-                          className={`text-green-700 py-1 px-3 rounded-full text-xs ${
-                            item.MATCH_STATUS === "Selected"
-                              ? "bg-green-200"
+                          {item.candidate_name}
+                        </td>
+                        <td className="p-2 w-[300px]">
+                          {item.Matching_Skills &&
+                            ((fullDescription &&
+                              fullDescriptionId == item.resume_id) ||
+                            item.Matching_Skills.length <= 8 ? (
+                              <p className="">
+                                {item.Matching_Skills.map(
+                                  (skill: any, index: any) => (
+                                    <span key={index}>
+                                      {skill}
+                                      {index !==
+                                        item.Matching_Skills.length - 1 && ", "}
+                                    </span>
+                                  )
+                                )}
+                                {fullDescription &&
+                                  fullDescriptionId == item.resume_id && (
+                                    <FontAwesomeIcon
+                                      icon={faChevronUp}
+                                      className="ml-1"
+                                      onClick={() =>
+                                        toggleDescription(item.resume_id)
+                                      }
+                                    />
+                                  )}
+                              </p>
+                            ) : (
+                              <p className="text-[14px]">
+                                {item.Matching_Skills.slice(0, 5).map(
+                                  (skill: any, index: any) => (
+                                    <span key={index}>
+                                      {skill}
+                                      {index !== 4 && ", "}
+                                    </span>
+                                  )
+                                )}
+                                ...
+                                <span
+                                  onClick={() =>
+                                    toggleDescription(item.resume_id)
+                                  }
+                                >
+                                  {fullDescription &&
+                                  fullDescriptionId == item.resume_id ? (
+                                    <FontAwesomeIcon
+                                      icon={faChevronUp}
+                                      className="ml-1"
+                                    />
+                                  ) : (
+                                    <FontAwesomeIcon
+                                      icon={faChevronDown}
+                                      className="ml-1"
+                                    />
+                                  )}
+                                </span>
+                              </p>
+                            ))}
+                        </td>
+
+                        <td className="p-2 w-[300px]">
+                          {item.Missing_Skills &&
+                            ((fullDescription &&
+                              fullDescriptionId == item.resume_id) ||
+                            item.Missing_Skills.length <= 8 ? (
+                              <p className="text-[14px]">
+                                {item.Missing_Skills.map(
+                                  (skill: any, index: any) => (
+                                    <span key={index}>
+                                      {skill}
+                                      {index !==
+                                        item.Missing_Skills.length - 1 && ", "}
+                                    </span>
+                                  )
+                                )}
+                                {fullDescription &&
+                                  fullDescriptionId == item.resume_id && (
+                                    <FontAwesomeIcon
+                                      icon={faChevronUp}
+                                      className="ml-1"
+                                      onClick={() =>
+                                        toggleDescription(item.resume_id)
+                                      }
+                                    />
+                                  )}
+                              </p>
+                            ) : (
+                              <p className="text-[14px]">
+                                {item.Missing_Skills.slice(0, 5).map(
+                                  (skill: any, index: any) => (
+                                    <span key={index}>
+                                      {skill}
+                                      {index !== 4 && ", "}
+                                    </span>
+                                  )
+                                )}
+                                ...
+                                <span
+                                  onClick={() =>
+                                    toggleDescription(item.resume_id)
+                                  }
+                                >
+                                  {fullDescription &&
+                                  fullDescriptionId == item.resume_id ? (
+                                    <FontAwesomeIcon
+                                      icon={faChevronUp}
+                                      className="ml-1"
+                                    />
+                                  ) : (
+                                    <FontAwesomeIcon
+                                      icon={faChevronDown}
+                                      className="ml-1"
+                                    />
+                                  )}
+                                </span>
+                              </p>
+                            ))}
+                        </td>
+
+                        <td className="text-center">
+                          <span
+                            className={`text-green-700 py-1 px-3 rounded-full text-md ${
+                              item.experience_match === 1
+                                ? "bg-green-200"
+                                : item.MATCH_STATUS === 0
+                                ? "bg-yellow-200"
+                                : "bg-red-200"
+                            }`}
+                          >
+                            {item.experience_match == 1 ? "Match" : "Mismatch"}
+                          </span>
+                        </td>
+                        <td className=" text-center">
+                          <p>{item.JD_MATCH}</p>
+                          <span
+                            className={`text-green-700 py-1 px-3 rounded-full text-xs ${
+                              item.MATCH_STATUS === "Selected"
+                                ? "bg-green-200"
+                                : item.MATCH_STATUS === "On hold"
+                                ? "bg-yellow-200"
+                                : "bg-red-200"
+                            }`}
+                          >
+                            {item.MATCH_STATUS == "Selected"
+                              ? "Selected"
                               : item.MATCH_STATUS === "On hold"
-                              ? "bg-yellow-200"
-                              : "bg-red-200"
-                          }`}
-                        >
-                          {item.MATCH_STATUS == "Selected"
-                            ? "Selected"
-                            : item.MATCH_STATUS === "On hold"
-                            ? "On Hold"
-                            : "Rejected"}
-                        </span>
-                      </td>
+                              ? "On Hold"
+                              : "Rejected"}
+                          </span>
+                        </td>
 
-                      <td className="text-center h-[100px] w-[70px]">{`${item.status}`}</td>
-                      <td className="p-2 text-zinc-500 dark:text-zinc-400 relative">
-                        <div
-                          className="flex flex-col items-center justify-around text-lg"
-                          style={{ gap: "4px" }}
-                        >
-                          <ConfirmButton
-                            label="Delete"
-                            message="Do you want to delete this record?"
-                            header="Delete Confirmation"
-                            icon="pi pi-times"
-                            acceptClassName="p-button-danger"
-                            onConfirm={() => deleteCandHandler(item)}
-                          />
+                        <td className="text-center h-[100px] w-[70px]">{`${item.status}`}</td>
 
-                          {gen == "" && pop == false && item.status == null && (
-                            <button
-                              className="resp-btn text-black"
-                              onClick={() => handleRightArrowClick(item)}
-                            >
-                              Generate
-                            </button>
-                          )}
-                          {item.selected_status &&
-                            item.assessment_status == 0 &&
-                            gen && (
-                              <button className="resp-btn">Generating </button>
+                        <td className="p-2 text-zinc-500 dark:text-zinc-400 relative">
+                          <div
+                            className="flex flex-col items-center justify-around text-lg"
+                            style={{ gap: "4px" }}
+                          >
+                            <ConfirmButton
+                              label="Delete"
+                              message="Do you want to delete this record?"
+                              header="Delete Confirmation"
+                              icon="pi pi-times"
+                              acceptClassName="p-button-danger"
+                              onConfirm={() => deleteCandHandler(item)}
+                            />
+
+                            {gen == "" &&
+                              pop == false &&
+                              item.status == null && (
+                                <button
+                                  className="resp-btn text-black"
+                                  onClick={() => handleRightArrowClick(item)}
+                                >
+                                  Generate
+                                </button>
+                              )}
+                            {item.selected_status &&
+                              item.assessment_status == 0 &&
+                              gen && (
+                                <button className="resp-btn">
+                                  Generating{" "}
+                                </button>
+                              )}
+                            {/* {item.selected_status && */}
+                            {
+                              // item.assessment_status == 1 &&
+                              item.status == "assessment_generated" && (
+                                <>
+                                  <button
+                                    className="resp-btn bg-green-200 text-green-900"
+                                    onClick={() => popHandle(item)}
+                                  >
+                                    Generated
+                                  </button>
+                                  <button
+                                    className="resp-btn text-black"
+                                    onClick={() => handleRightArrowClick(item)}
+                                  >
+                                    ReGenerate
+                                  </button>
+                                </>
+                              )
+                            }
+                            {item.assessment_status == 1 && (
+                              <>
+                                <button
+                                  className="resp-btn bg-green-200 text-green-900"
+                                  onClick={() => showResult(item.resume_id)}
+                                >
+                                  Result
+                                </button>
+                                <button
+                                  className="resp-btn "
+                                  onClick={() => {
+                                    popHandle(item);
+                                  }}
+                                >
+                                  Questions
+                                </button>
+                              </>
                             )}
-                          {/* {item.selected_status && */}
-                          {
-                            // item.assessment_status == 1 &&
-                            item.status == "assessment_generated" && (
-                              <button
-                                className="resp-btn bg-green-200 text-green-900"
-                                onClick={() => popHandle(item)}
-                              >
-                                Generated
-                              </button>
-                            )
-                          }
-                          {item.assessment_status == 1 && (
-                            <button
-                              className="resp-btn bg-green-200 text-green-900"
-                              onClick={() => showResult(item.resume_id)}
-                            >
-                              Result
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-            {/* Pagination */}
-            {currentJobs.length > 10 ? (
-              <div className="flex justify-center mt-4">
-                <nav>
-                  <ul className="pagination">
-                    {Array.from({ length: totalPages }, (_, i) => (
-                      <li
-                        key={i}
-                        className={`page-item ${
-                          currentPage === i + 1 ? "active" : ""
-                        }`}
-                      >
-                        <button
-                          className="page-link"
-                          onClick={() => handlePageChange(i + 1)}
-                        >
-                          {i + 1}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </nav>
-              </div>
-            ) : null}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              {/* <div>
+                {Array.from({ length: pages }, (_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handlePageChange(index + 1)}
+                    disabled={currentPage === index + 1}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+              </div> */}
+              {/* Pagination */}
+            </div>
           </div>
         ) : (
           <div className="no-data">No Candidate</div>

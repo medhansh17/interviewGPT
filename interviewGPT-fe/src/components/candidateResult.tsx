@@ -53,6 +53,7 @@ const InterviewDataDisplay: React.FC<InterviewDataProps> = ({
 }) => {
   const { setLoading } = useLoader();
   const [resultData, setResultData] = useState<any>(null);
+  const [activeSection, setActiveSection] = useState("behavioral");
   const toast = useToast();
 
   const showResultHandler = async () => {
@@ -281,20 +282,62 @@ const InterviewDataDisplay: React.FC<InterviewDataProps> = ({
           width={200}
           className="absolute right-[10%] top-0"
         />
-        <section>
-          <h2 className="text-lg font-bold mb-4">Audio Transcript</h2>
-          {renderAudioTranscripts(audio_transcript)}
-        </section>
 
-        <section>
-          <h2 className="text-lg font-bold mb-4">Code Responses</h2>
-          {renderCodeResponses(code_response)}
-        </section>
+        {/* Navbar */}
+        <div className="flex justify-center mb-6">
+          <button
+            className={`mx-2 px-4 py-2 rounded ${
+              activeSection === "behavioral"
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 dark:bg-gray-600"
+            }`}
+            onClick={() => setActiveSection("behavioral")}
+          >
+            Behavioral
+          </button>
+          <button
+            className={`mx-2 px-4 py-2 rounded ${
+              activeSection === "technical"
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 dark:bg-gray-600"
+            }`}
+            onClick={() => setActiveSection("technical")}
+          >
+            Technical
+          </button>
+          <button
+            className={`mx-2 px-4 py-2 rounded ${
+              activeSection === "coding"
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 dark:bg-gray-600"
+            }`}
+            onClick={() => setActiveSection("coding")}
+          >
+            Coding
+          </button>
+        </div>
 
-        <section>
-          <h2 className="text-lg font-bold mb-4">Technical Response</h2>
-          {renderTechResponses(tech_response)}
-        </section>
+        {/* Sections */}
+        {activeSection === "behavioral" && (
+          <section>
+            <h2 className="text-lg font-bold mb-4">Audio Transcript</h2>
+            {renderAudioTranscripts(audio_transcript)}
+          </section>
+        )}
+
+        {activeSection === "technical" && (
+          <section>
+            <h2 className="text-lg font-bold mb-4">Technical Response</h2>
+            {renderTechResponses(tech_response)}
+          </section>
+        )}
+
+        {activeSection === "coding" && (
+          <section>
+            <h2 className="text-lg font-bold mb-4">Code Responses</h2>
+            {renderCodeResponses(code_response)}
+          </section>
+        )}
       </div>
     </div>
   );
